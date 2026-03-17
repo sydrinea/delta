@@ -7,7 +7,7 @@ const COLORS = {
   activeFontColor: "#eff1f5", // ctp-base
   default: "#4c4f69", // ctp-text
   defaultFontColor: "#4c4f69", // ctp-text
-  edge: "#9ca0b0", // ctp-overlay0
+  edge: "#4c4f69", // ctp-text
   background: "#e6e9ef", // ctp-mantle
 } as const;
 
