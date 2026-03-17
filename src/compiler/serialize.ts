@@ -1,4 +1,5 @@
 import type { NFA } from "./nfa.js";
+import nfa from "./nfa.js";
 import { EPSILON } from "./constants.js";
 
 const SEP = "|";
@@ -39,17 +40,14 @@ export function deserialize(input: string): NFA {
   ] = input.split(SEP);
 
   if (!name || !statesStr || !alphabetStr || !startState || !acceptStatesStr) {
-    throw new Error(`Invalid serialized NFA: "${input}"`);
+    throw new Error(`Invalid ANF: "${input}"`);
   }
 
-  const states = new Set(statesStr.split(LIST));
-  const alphabet = new Set(alphabetStr.split(LIST));
-  const acceptStates = new Set(acceptStatesStr.split(LIST));
-
-  const transitions = new Map<string, Map<string, Set<string>>>();
-  for (const state of states) {
-    transitions.set(state, new Map());
-  }
+  const builder = nfa(name)
+    .alphabet(...alphabetStr.split(LIST))
+    .states(...statesStr.split(LIST))
+    .start(startState)
+    .accept(...acceptStatesStr.split(LIST));
 
   if (transitionsStr) {
     for (const t of transitionsStr.split(LIST)) {
@@ -57,27 +55,9 @@ export function deserialize(input: string): NFA {
       if (!from || !symbol || !to) {
         throw new Error(`Invalid transition: "${t}"`);
       }
-
-      const canonicalSymbol = symbol === EPS_TOKEN ? EPSILON : symbol;
-      const fromMap = transitions.get(from);
-      if (!fromMap) {
-        throw new Error(`Transition references undeclared state: "${from}"`);
-      }
-
-      if (!fromMap.has(canonicalSymbol)) {
-        fromMap.set(canonicalSymbol, new Set());
-      }
-      fromMap.get(canonicalSymbol)!.add(to);
+      builder.transition(from, symbol === EPS_TOKEN ? EPSILON : symbol, to);
     }
   }
 
-  return {
-    name,
-    alphabet,
-    states,
-    startState,
-    acceptStates,
-    transitions,
-    messages: [],
-  };
+  return builder.build();
 }
