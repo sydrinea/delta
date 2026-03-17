@@ -32,13 +32,13 @@ export function AutomataViewer({ nfa, activeStates }: AutomataViewerProps) {
   }, [nfa, activeStates]);
 
   if (error) {
-    return <div className="text-red-500 text-sm font-mono p-4">{error}</div>;
+    return <div className="text-ctp-red text-sm font-mono p-4">{error}</div>;
   }
 
   return (
     <div
       ref={containerRef}
-      className="bg-white rounded-2xl p-6 border border-zinc-200 flex items-center justify-center min-h-48"
+      className="bg-ctp-mantle rounded-2xl p-6 border border-ctp-surface0 flex items-center justify-center min-h-48"
     />
   );
 }

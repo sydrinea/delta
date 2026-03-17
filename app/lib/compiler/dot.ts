@@ -1,12 +1,14 @@
 import type { NFA } from "./nfa";
 import { EPSILON } from "./constants";
 
+// Catppuccin Latte
 const COLORS = {
-  active: "#ff2056", // rose-500
-  default: "#18181b", // zinc-900
-  edge: "#71717b", // zinc-500
-  background: "white",
-  activeFontColor: "white",
+  active: "#8839ef", // ctp-mauve
+  activeFontColor: "#eff1f5", // ctp-base
+  default: "#4c4f69", // ctp-text
+  defaultFontColor: "#4c4f69", // ctp-text
+  edge: "#9ca0b0", // ctp-overlay0
+  background: "#e6e9ef", // ctp-mantle
 } as const;
 
 function dotStateStyle(
@@ -22,7 +24,7 @@ function dotStateStyle(
     return `"${state}" [shape=${shape} style=filled fillcolor="${COLORS.active}" fontcolor="${COLORS.activeFontColor}" color="${COLORS.active}"]`;
   }
 
-  return `"${state}" [shape=${shape} style=filled fillcolor="${COLORS.background}" fontcolor="${COLORS.default}" color="${COLORS.default}"]`;
+  return `"${state}" [shape=${shape} style=filled fillcolor="${COLORS.background}" fontcolor="${COLORS.defaultFontColor}" color="${COLORS.default}"]`;
 }
 
 function dotTransitions(nfa: NFA): string {
@@ -46,7 +48,7 @@ export function toDot(nfa: NFA, activeStates?: Set<string>): string {
   const start = `  __start__ [shape=point fillcolor="${COLORS.default}" color="${COLORS.default}"]
   __start__ -> "${nfa.startState}" [color="${COLORS.edge}"]`;
 
-  return `digraph ${nfa.name} {
+  return `digraph "${nfa.name}" {
   rankdir=LR
   bgcolor="${COLORS.background}"
   node [fontname="Helvetica" fontsize=12]
