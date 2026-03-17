@@ -98,7 +98,7 @@ function App({ machine, input, trace }: AppProps) {
 const [, , anf, inputArg] = process.argv;
 
 if (!anf) {
-  console.error("Usage: tsx app.tsx <afs> <input>");
+  console.error("Usage: tsx app.tsx <anf> <input>");
   process.exit(1);
 }
 
