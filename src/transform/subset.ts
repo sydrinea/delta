@@ -1,5 +1,5 @@
-import type { NFA, Message } from "../compiler/nfa";
-import { epsilonClosure } from "./utils";
+import type { NFA, Message } from "../compiler/nfa.js";
+import { epsilonClosure } from "./utils.js";
 
 function stateName(states: Set<string>): string {
   const sorted = [...states].sort();

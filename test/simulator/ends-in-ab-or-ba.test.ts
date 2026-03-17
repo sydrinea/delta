@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import nfa from "../../src/compiler/nfa";
-import { EPS } from "../../src/compiler/constants";
-import { simulate } from "../../src/simulator/nfa";
+import nfa from "../../src/compiler/nfa.js";
+import { EPS } from "../../src/compiler/constants.js";
+import { simulate } from "../../src/simulator/nfa.js";
 
 describe("simulate endsInABOrBA (NFA)", () => {
   const endsInABOrBA = nfa("endsInABOrBA")

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import dfa, { DFAMessages } from "../../src/compiler/dfa";
+import dfa, { DFAMessages } from "../../src/compiler/dfa.js";
 
 describe("DFABuilder", () => {
   describe("nondeterministic transitions", () => {

@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import nfa from "../../src/compiler/nfa";
-import { subset } from "../../src/transform/subset";
-import { simulate } from "../../src/simulator/nfa";
+import nfa from "../../src/compiler/nfa.js";
+import { subset } from "../../src/transform/subset.js";
+import { simulate } from "../../src/simulator/nfa.js";
 
 describe("subset construction (endsInAB)", () => {
   const endsInAB = nfa("endsInAB")

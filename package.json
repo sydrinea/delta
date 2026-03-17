@@ -1,12 +1,20 @@
 {
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "visual": "npx tsx src/visualize/app.tsx"
   },
+  "type": "module",
   "dependencies": {
+    "@fastify/websocket": "^11.2.0",
+    "fastify": "^5.8.2",
+    "ink": "^6.8.0",
+    "react": "^19.2.4",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
     "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/ws": "^8.18.1",
     "vitest": "^4.1.0"
   }
 }

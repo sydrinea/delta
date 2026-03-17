@@ -1,5 +1,5 @@
-import { EPSILON } from "../compiler/constants";
-import { NFA } from "../compiler/nfa";
+import { EPSILON } from "../compiler/constants.js";
+import { NFA } from "../compiler/nfa.js";
 
 export function epsilonClosure(nfa: NFA, states: Set<string>): Set<string> {
   const closure = new Set(states);

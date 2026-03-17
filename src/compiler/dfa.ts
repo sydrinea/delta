@@ -1,5 +1,5 @@
-import { EPSILON } from "./constants";
-import { NFABuilder, NFA, NFAMessages } from "./nfa";
+import { EPSILON } from "./constants.js";
+import { NFABuilder, NFA, NFAMessages } from "./nfa.js";
 
 export const DFAMessages = {
   ...NFAMessages,

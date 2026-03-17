@@ -1,4 +1,4 @@
-import { EPSILON } from "./constants";
+import { EPSILON } from "./constants.js";
 
 export interface NFA {
   name: string;
