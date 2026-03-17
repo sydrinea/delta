@@ -1,15 +1,12 @@
-import type { NFA } from "../compiler/nfa.js";
-import { EPSILON } from "../compiler/constants.js";
+import type { NFA } from "./nfa";
+import { EPSILON } from "./constants";
 
 const COLORS = {
-  active: "#f43f5e",
+  active: "#ff2056", // rose-500
+  default: "#18181b", // zinc-900
+  edge: "#71717b", // zinc-500
+  background: "white",
   activeFontColor: "white",
-  accept: "#18181b",
-  acceptFontColor: "white",
-  default: "#18181b",
-  defaultFontColor: "white",
-  edge: "#71717a", // zinc-500
-  background: "#ffffff",
 } as const;
 
 function dotStateStyle(

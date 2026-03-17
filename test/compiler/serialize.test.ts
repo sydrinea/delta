@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import dfa from "../../src/compiler/dfa.js";
-import { serialize, deserialize } from "../../src/compiler/serialize.js";
-import { simulate } from "../../src/simulator/nfa.js";
-import { NFAMessages } from "../../src/compiler/nfa.js";
+import dfa from "@/lib/compiler/dfa";
+import { serialize, deserialize } from "@/lib/compiler/serialize";
+import { simulate } from "@/lib/simulator/nfa";
+import { NFAMessages } from "@/lib/compiler/nfa";
 
 describe("serialize/deserialize (onlyAs)", () => {
   const onlyAs = dfa("onlyAs")

@@ -1,6 +1,6 @@
-import type { NFA } from "./nfa.js";
-import nfa from "./nfa.js";
-import { EPSILON } from "./constants.js";
+import type { NFA } from "./nfa";
+import nfa from "./nfa";
+import { EPSILON } from "./constants";
 
 const SEP = "|";
 const LIST = ",";

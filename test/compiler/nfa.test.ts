@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import nfa, { NFAMessages } from "../../src/compiler/nfa.js";
+import nfa, { NFAMessages } from "@/lib/compiler/nfa";
 
 describe("NFABuilder", () => {
   describe("valid construction", () => {

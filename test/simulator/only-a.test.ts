@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import dfa from "../../src/compiler/dfa.js";
-import { simulate } from "../../src/simulator/nfa.js";
+import dfa from "@/lib/compiler/dfa";
+import { simulate } from "@/lib/simulator/nfa";
 
 describe("onlyAs (DFA)", () => {
   const onlyAs = dfa("onlyAs")

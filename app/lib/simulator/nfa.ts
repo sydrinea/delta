@@ -1,5 +1,5 @@
-import { NFA } from "../compiler/nfa.js";
-import { epsilonClosure } from "../transform/utils.js";
+import { NFA } from "../compiler/nfa";
+import { epsilonClosure } from "../transform/utils";
 
 export interface SimulationStep {
   symbol: string | null;
