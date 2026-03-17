@@ -1,64 +1,44 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { DeltaEditor } from "@/components/DeltaEditor";
 import { AutomataViewer } from "@/components/AutomataViewer";
-import { deserialize } from "@/lib/compiler/serialize";
-import { simulate } from "@/lib/simulator/nfa";
+import { TestSuite } from "@/components/TestSuite";
+import { deserialize, serialize } from "@/lib/compiler/serialize";
 import type { NFA } from "@/lib/compiler/nfa";
-import type { SimulationResult } from "@/lib/simulator/nfa";
 
 const DEFAULT_ANF =
   "endsInAB|q0,q1,q2|a,b|q0|q2|q0>a>q0,q0>b>q0,q0>a>q1,q1>b>q2";
-const DEFAULT_INPUT = "aabab";
+
+const DEFAULT_TESTS = [
+  { id: crypto.randomUUID(), input: "ab", expected: true },
+  { id: crypto.randomUUID(), input: "ababab", expected: true },
+  { id: crypto.randomUUID(), input: "ba", expected: false },
+  { id: crypto.randomUUID(), input: "", expected: false },
+];
 
 export default function Home() {
   const [anf, setAnf] = useState(DEFAULT_ANF);
-  const [input, setInput] = useState(DEFAULT_INPUT);
   const [machine, setMachine] = useState<NFA | null>(null);
-  const [trace, setTrace] = useState<SimulationResult["trace"] | null>(null);
-  const [step, setStep] = useState(0);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     try {
       const m = deserialize(anf);
-      const { trace } = simulate(m, input);
       setMachine(m);
-      setTrace(trace);
-      setStep(0);
       setError(null);
     } catch (e) {
       setError(`✗ ${String(e).substring(0, 70)}...`);
     }
-  }, [anf, input]);
+  }, [anf]);
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!trace) return;
-      if (e.key === "ArrowRight") {
-        e.preventDefault();
-        setStep((s) => Math.min(s + 1, trace.length - 1));
-      }
-      if (e.key === "ArrowLeft") {
-        setStep((s) => Math.max(s - 1, 0));
-      }
-    },
-    [trace],
-  );
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleKeyDown]);
-
-  const current = trace?.[step];
-  const isLast = trace ? step === trace.length - 1 : false;
-  const accepted =
-    isLast && current
-      ? [...current.states].some((s) => machine?.acceptStates.has(s))
-      : null;
+  const handleCopyANF = () => {
+    navigator.clipboard.writeText(anf);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <main className="min-h-screen bg-ctp-base flex flex-col items-center justify-center gap-6 p-8 font-mono">
@@ -69,7 +49,8 @@ export default function Home() {
         <p className="text-ctp-subtext1 text-sm">{machine?.name ?? "—"}</p>
       </div>
 
-      <div className="flex flex-row gap-8">
+      <div className="flex flex-row gap-8 items-start">
+        {/* left — editor */}
         <div className="flex flex-col gap-2">
           <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
           <div
@@ -86,89 +67,64 @@ export default function Home() {
             </p>
           </div>
           <p className="text-ctp-subtext0 text-xs text-center">
-            press ⌘ + enter to run
+            press cmd+enter to recompile
           </p>
         </div>
 
-        <section className="flex flex-col gap-3">
-          <div className="flex flex-col gap-2 w-full max-w-2xl">
+        {/* right — preview + tests */}
+        <section className="flex flex-col gap-4 w-96">
+          {/* ANF field + copy button */}
+          <div className="relative">
             <input
               type="text"
               value={anf}
-              onChange={(e) => setAnf(e.target.value)}
+              readOnly={true}
               placeholder="ANF string"
-              className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-2 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
+              className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-2 pr-10 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
             />
-            <input
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="input string"
-              className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-2 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
-            />
-            {error && (
-              <div className="bg-ctp-red/20 border border-ctp-red rounded-lg px-3 py-2">
-                <p className="text-ctp-red text-xs">{error}</p>
-              </div>
-            )}
+            <button
+              onClick={handleCopyANF}
+              title="copy ANF"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
+            >
+              {copied ? (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              ) : (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                </svg>
+              )}
+            </button>
           </div>
 
-          {machine && current && (
-            <AutomataViewer nfa={machine} activeStates={current.states} />
-          )}
-
-          {current && (
-            <div className="flex flex-col items-center gap-2">
-              <div className="flex gap-2 text-lg tracking-widest">
-                {input.split("").map((symbol, i) => {
-                  const isActive = !isLast && i === step;
-                  const isPast = isLast || i < step;
-                  return (
-                    <span
-                      key={i}
-                      className={
-                        isActive
-                          ? "text-ctp-mauve font-bold underline underline-offset-4"
-                          : isPast
-                            ? "text-ctp-surface2 line-through"
-                            : "text-ctp-subtext1"
-                      }
-                    >
-                      {symbol}
-                    </span>
-                  );
-                })}
-              </div>
-
-              <div className="flex items-center gap-4 text-sm text-ctp-subtext0">
-                <span>
-                  step <span className="text-ctp-text font-bold">{step}</span> /{" "}
-                  {trace!.length - 1}
-                </span>
-                <span>·</span>
-                <span>
-                  active:{" "}
-                  <span className="text-ctp-mauve font-bold">
-                    {`{${[...current.states].join(", ")}}`}
-                  </span>
-                </span>
-              </div>
-
-              {accepted !== null ? (
-                <p
-                  className={`text-sm font-bold ${accepted ? "text-ctp-green" : "text-ctp-red"}`}
-                >
-                  {accepted ? "✓ accepted" : "✗ rejected"}
-                </p>
-              ) : (
-                <p className="text-sm text-ctp-surface2">...</p>
-              )}
+          {error && (
+            <div className="bg-ctp-red/20 border border-ctp-red rounded-lg px-3 py-2">
+              <p className="text-ctp-red text-xs">{error}</p>
             </div>
           )}
 
-          <p className="text-ctp-subtext0 text-xs text-center pt-3">
-            use arrow keys to step
-          </p>
+          {/* NFA preview */}
+          {machine && <AutomataViewer nfa={machine} />}
+
+          {/* test suite */}
+          <TestSuite machine={machine} defaultTests={DEFAULT_TESTS} />
         </section>
       </div>
     </main>
