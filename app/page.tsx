@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { AutomataViewer } from "@/app/components/AutomataViewer";
+import { AutomataViewer } from "@/components/AutomataViewer";
 import { deserialize } from "@/lib/compiler/serialize";
 import { simulate } from "@/lib/simulator/nfa";
 import type { NFA } from "@/lib/compiler/nfa";
