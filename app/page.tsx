@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { DeltaEditor } from "@/components/DeltaEditor";
 import { AutomataViewer } from "@/components/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
-import { deserialize, serialize } from "@/lib/compiler/serialize";
+import { deserialize } from "@/lib/compiler/serialize";
 import type { NFA } from "@/lib/compiler/nfa";
 
 const DEFAULT_ANF =
