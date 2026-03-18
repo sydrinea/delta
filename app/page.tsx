@@ -1,43 +1,37 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { DeltaEditor } from "@/components/DeltaEditor";
+import { DeltaProvider, useDelta } from "@/context/DeltaContext";
 import { AutomataViewer } from "@/components/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
-import { deserialize } from "@/lib/compiler/serialize";
-import type { NFA } from "@/lib/compiler/nfa";
-
-const DEFAULT_ANF =
-  "endsInAB|q0,q1,q2|a,b|q0|q2|q0>a>q0,q0>b>q0,q0>a>q1,q1>b>q2";
-
-const DEFAULT_TESTS = [
-  { id: crypto.randomUUID(), input: "ab", expected: true },
-  { id: crypto.randomUUID(), input: "ababab", expected: true },
-  { id: crypto.randomUUID(), input: "ba", expected: false },
-  { id: crypto.randomUUID(), input: "", expected: false },
-];
 
 export default function Home() {
-  const [anf, setAnf] = useState(DEFAULT_ANF);
-  const [machine, setMachine] = useState<NFA | null>(null);
-  const [editorError, setEditorError] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  return (
+    <DeltaProvider label="nfa">
+      <NFAPage />
+    </DeltaProvider>
+  );
+}
+
+function NFAPage() {
+  const {
+    anf,
+    machine,
+    machineError,
+    editorError,
+    setEditorError,
+    setAnf,
+    tests,
+  } = useDelta();
   const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    try {
-      const m = deserialize(anf);
-      setMachine(m);
-      setError(null);
-    } catch (e) {
-      setError(`✗ ${String(e).substring(0, 70)}...`);
-    }
-  }, [anf]);
-
   const handleCopyANF = () => {
-    navigator.clipboard.writeText(anf);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (anf) {
+      navigator.clipboard.writeText(anf);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   return (
@@ -52,8 +46,8 @@ export default function Home() {
 
       {/* right — preview + tests */}
       <div className="flex flex-col overflow-y-auto" style={{ width: "50%" }}>
-        <div className="flex flex-col gap-4 p-6">
-          <div className="flex items-center gap-4">
+        <div className="flex flex-col gap-3 p-6">
+          <div className="flex items-center gap-3">
             <div
               className={`rounded-lg px-3 py-1.5 transition-colors ${
                 editorError
@@ -70,13 +64,13 @@ export default function Home() {
             <p className="text-ctp-subtext0 text-xs">cmd+S to compile</p>
           </div>
           {/* ANF field + copy button */}
-          <div className="relative space-y-3">
+          <div className="relative space-y-2">
             <h1 className="text-ctp-subtext1 text-lg font-bold text-center">
               {machine?.name ?? "—"}
             </h1>
             <input
               type="text"
-              value={anf}
+              value={anf ?? ""}
               readOnly
               placeholder="ANF string"
               className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-2 pr-10 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none"
@@ -84,7 +78,7 @@ export default function Home() {
             <button
               onClick={handleCopyANF}
               title="copy ANF"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
+              className="absolute right-2 bottom-1/6 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
             >
               {copied ? (
                 <svg
@@ -113,15 +107,15 @@ export default function Home() {
             </button>
           </div>
 
-          {error && (
+          {machineError && (
             <div className="bg-ctp-red/20 border border-ctp-red rounded-lg px-3 py-2">
-              <p className="text-ctp-red text-xs">{error}</p>
+              <p className="text-ctp-red text-xs">{machineError}</p>
             </div>
           )}
 
           {machine && <AutomataViewer nfa={machine} />}
 
-          <TestSuite machine={machine} defaultTests={DEFAULT_TESTS} />
+          <TestSuite machine={machine} defaultTests={tests} />
         </div>
       </div>
     </div>

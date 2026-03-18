@@ -9,6 +9,7 @@ import dfa from "@/lib/compiler/dfa";
 import { serialize } from "@/lib/compiler/serialize";
 import { EPS } from "@/lib/compiler/constants";
 import defineTheme from "./defineTheme";
+import { useDelta } from "@/context/DeltaContext";
 
 const MessageSchema = z.object({
   content: z.string(),
@@ -62,17 +63,6 @@ declare namespace Delta {
 }
 `;
 
-const DEFAULT_VALUE = `const machine = Delta.nfa("endsInAB")
-    .alphabet("a", "b")
-    .states("q0", "q1", "q2")
-    .start("q0")
-    .accept("q2")
-    .transition("q0", "a", "q0")
-    .transition("q0", "b", "q0")
-    .transition("q0", "a", "q1")
-    .transition("q1", "b", "q2")
-    .build();`;
-
 interface DeltaEditorProps {
   onValidMachine: (anf: string) => void;
   onError: (error: string | null) => void;
@@ -82,6 +72,7 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
   const editorRef = useRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(
     null,
   );
+  const { editorValue, setEditorValue } = useDelta();
 
   const runCode = (value: string) => {
     const Delta = { nfa, dfa, EPS };
@@ -119,9 +110,10 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
       );
     }
 
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () =>
-      runCode(editor.getValue()),
-    );
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
+      runCode(editor.getValue());
+      setEditorValue(editor.getValue());
+    });
   };
 
   return (
@@ -131,7 +123,7 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
       height="100%"
       width="100%"
       defaultLanguage="typescript"
-      defaultValue={DEFAULT_VALUE}
+      defaultValue={editorValue}
       onMount={handleMount}
       options={{
         minimap: { enabled: false },

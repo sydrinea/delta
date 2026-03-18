@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { simulate } from "@/lib/simulator/nfa";
 import type { NFA } from "@/lib/compiler/nfa";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { useDelta } from "@/context/DeltaContext";
 
 interface TestCase {
   id: string;
@@ -17,17 +18,17 @@ interface TestResult {
   actual: boolean;
 }
 
-const TESTS_PER_PAGE = 5;
+const TESTS_PER_PAGE = 4;
 
 interface TestSuiteProps {
   machine: NFA | null;
   defaultTests?: TestCase[];
 }
 
-export function TestSuite({ machine, defaultTests = [] }: TestSuiteProps) {
-  const [tests, setTests] = useState<TestCase[]>(defaultTests);
-  const [results, setResults] = useState<Record<string, TestResult>>({});
+export function TestSuite({ machine }: TestSuiteProps) {
   const [page, setPage] = useState(0);
+  const [results, setResults] = useState<Record<string, TestResult>>({});
+  const { tests, setTests } = useDelta();
   const [newInput, setNewInput] = useState("");
   const [newExpected, setNewExpected] = useState(true);
 
@@ -59,10 +60,7 @@ export function TestSuite({ machine, defaultTests = [] }: TestSuiteProps) {
   const addTest = () => {
     if (!newInput) return;
     const id = crypto.randomUUID();
-    setTests((prev) => [
-      ...prev,
-      { id, input: newInput, expected: newExpected },
-    ]);
+    setTests([...tests, { id, input: newInput, expected: newExpected }]);
     setResults((prev) => {
       const next = { ...prev };
       delete next[id];
@@ -74,7 +72,7 @@ export function TestSuite({ machine, defaultTests = [] }: TestSuiteProps) {
   };
 
   const removeTest = (id: string) => {
-    setTests((prev) => prev.filter((t) => t.id !== id));
+    setTests(tests.filter((t) => t.id !== id));
     setResults((prev) => {
       const next = { ...prev };
       delete next[id];
