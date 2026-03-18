@@ -111,7 +111,7 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
       DELTA_TYPES,
       "ts:delta/lib.d.ts",
     );
-    if (monaco.editor.getModel(monaco.Uri.parse("ts:delta/lib.d.ts"))) {
+    if (!monaco.editor.getModel(monaco.Uri.parse("ts:delta/lib.d.ts"))) {
       monaco.editor.createModel(
         DELTA_TYPES,
         "typescript",
