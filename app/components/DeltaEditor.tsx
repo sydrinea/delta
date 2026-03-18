@@ -111,13 +111,15 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
       DELTA_TYPES,
       "ts:delta/lib.d.ts",
     );
-    monaco.editor.createModel(
-      DELTA_TYPES,
-      "typescript",
-      monaco.Uri.parse("ts:delta/lib.d.ts"),
-    );
+    if (monaco.editor.getModel(monaco.Uri.parse("ts:delta/lib.d.ts"))) {
+      monaco.editor.createModel(
+        DELTA_TYPES,
+        "typescript",
+        monaco.Uri.parse("ts:delta/lib.d.ts"),
+      );
+    }
 
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () =>
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () =>
       runCode(editor.getValue()),
     );
   };
@@ -126,8 +128,8 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
     <Editor
       theme="catppuccin-latte"
       path="file:///main.ts"
-      height="50vh"
-      width="70vh"
+      height="100%"
+      width="100%"
       defaultLanguage="typescript"
       defaultValue={DEFAULT_VALUE}
       onMount={handleMount}

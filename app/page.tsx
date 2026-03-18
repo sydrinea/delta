@@ -41,46 +41,45 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-ctp-base flex flex-col items-center justify-center gap-6 p-8 font-mono">
-      <div className="flex flex-col items-center gap-1">
-        <h1 className="text-ctp-text text-xl font-bold tracking-widest uppercase">
-          delta
-        </h1>
-        <p className="text-ctp-subtext1 text-sm">{machine?.name ?? "—"}</p>
+    <div className="flex">
+      {/* left — editor */}
+      <div
+        className="flex flex-col border-r border-ctp-surface0 "
+        style={{ width: "50%" }}
+      >
+        <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
       </div>
 
-      <div className="flex flex-row gap-8 items-start">
-        {/* left — editor */}
-        <div className="flex flex-col gap-2">
-          <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
-          <div
-            className={`rounded-lg px-3 py-2 min-h-8 transition-colors ${
-              editorError
-                ? "bg-ctp-red/20 border border-ctp-red"
-                : "bg-ctp-green/20 border border-ctp-green"
-            }`}
-          >
-            <p
-              className={`text-xs ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
+      {/* right — preview + tests */}
+      <div className="flex flex-col overflow-y-auto" style={{ width: "50%" }}>
+        <div className="flex flex-col gap-4 p-6">
+          <div className="flex items-center gap-4">
+            <div
+              className={`rounded-lg px-3 py-1.5 transition-colors ${
+                editorError
+                  ? "bg-ctp-red/20 border border-ctp-red"
+                  : "bg-ctp-green/20 border border-ctp-green"
+              }`}
             >
-              {editorError ?? "✓ looks good"}
-            </p>
+              <p
+                className={`text-xs ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
+              >
+                {editorError ?? "✓ looks good"}
+              </p>
+            </div>
+            <p className="text-ctp-subtext0 text-xs">cmd+S to compile</p>
           </div>
-          <p className="text-ctp-subtext0 text-xs text-center">
-            press cmd+enter to recompile
-          </p>
-        </div>
-
-        {/* right — preview + tests */}
-        <section className="flex flex-col gap-4 w-96">
           {/* ANF field + copy button */}
-          <div className="relative">
+          <div className="relative space-y-3">
+            <h1 className="text-ctp-subtext1 text-lg font-bold text-center">
+              {machine?.name ?? "—"}
+            </h1>
             <input
               type="text"
               value={anf}
-              readOnly={true}
+              readOnly
               placeholder="ANF string"
-              className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-2 pr-10 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
+              className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-2 pr-10 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none"
             />
             <button
               onClick={handleCopyANF}
@@ -120,13 +119,11 @@ export default function Home() {
             </div>
           )}
 
-          {/* NFA preview */}
           {machine && <AutomataViewer nfa={machine} />}
 
-          {/* test suite */}
           <TestSuite machine={machine} defaultTests={DEFAULT_TESTS} />
-        </section>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

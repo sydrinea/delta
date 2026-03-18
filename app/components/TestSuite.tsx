@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { simulate } from "@/lib/simulator/nfa";
 import type { NFA } from "@/lib/compiler/nfa";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
 interface TestCase {
   id: string;
@@ -29,6 +30,13 @@ export function TestSuite({ machine, defaultTests = [] }: TestSuiteProps) {
   const [page, setPage] = useState(0);
   const [newInput, setNewInput] = useState("");
   const [newExpected, setNewExpected] = useState(true);
+
+  useKeyboardShortcut({
+    shift: true,
+    meta: true,
+    key: "t",
+    handler: () => runTests(),
+  });
 
   const totalPages = Math.ceil(tests.length / TESTS_PER_PAGE);
   const visibleTests = tests.slice(
