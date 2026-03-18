@@ -137,6 +137,7 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
       options={{
         minimap: { enabled: false },
         padding: { top: 12, bottom: 12 },
+        fixedOverflowWidgets: true,
       }}
     />
   );

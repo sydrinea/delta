@@ -62,10 +62,10 @@ function NFAPage() {
             <p className="text-ctp-subtext0 text-xs">cmd+s to compile</p>
           </div>
           {/* ANF field + copy button */}
+          <h1 className="text-ctp-subtext1 text-lg font-bold text-center">
+            {machine?.name ?? "—"}
+          </h1>
           <div className="relative space-y-2">
-            <h1 className="text-ctp-subtext1 text-lg font-bold text-center">
-              {machine?.name ?? "—"}
-            </h1>
             <input
               type="text"
               value={anf ?? ""}
@@ -76,7 +76,7 @@ function NFAPage() {
             <button
               onClick={handleCopyANF}
               title="Copy ANF"
-              className="absolute right-2 bottom-1/6 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
+              className="absolute right-2 bottom-1/4 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
             >
               {copied ? (
                 <svg
