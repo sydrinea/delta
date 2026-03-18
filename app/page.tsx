@@ -37,15 +37,12 @@ function NFAPage() {
   return (
     <div className="flex">
       {/* left — editor */}
-      <div
-        className="flex flex-col border-r border-ctp-surface0 "
-        style={{ width: "50%" }}
-      >
+      <div className="flex flex-col border-r border-ctp-surface0 w-1/2">
         <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
       </div>
 
       {/* right — preview + tests */}
-      <div className="flex flex-col overflow-y-auto" style={{ width: "50%" }}>
+      <div className="flex flex-col overflow-y-auto w-1/2">
         <div className="flex flex-col gap-3 p-6">
           <div className="flex items-center gap-3">
             <div
@@ -61,7 +58,7 @@ function NFAPage() {
                 {editorError ?? "✓ looks good"}
               </p>
             </div>
-            <p className="text-ctp-subtext0 text-xs">cmd+S to compile</p>
+            <p className="text-ctp-subtext0 text-xs">cmd+s to compile</p>
           </div>
           {/* ANF field + copy button */}
           <div className="relative space-y-2">
@@ -77,7 +74,7 @@ function NFAPage() {
             />
             <button
               onClick={handleCopyANF}
-              title="copy ANF"
+              title="Copy ANF"
               className="absolute right-2 bottom-1/6 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
             >
               {copied ? (

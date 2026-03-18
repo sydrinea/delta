@@ -5,6 +5,7 @@ import { simulate } from "@/lib/simulator/nfa";
 import type { NFA } from "@/lib/compiler/nfa";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { useDelta } from "@/context/DeltaContext";
+import { Tooltip } from "./Tooltip";
 
 interface TestCase {
   id: string;
@@ -26,11 +27,8 @@ interface TestSuiteProps {
 }
 
 export function TestSuite({ machine }: TestSuiteProps) {
-  const [page, setPage] = useState(0);
   const [results, setResults] = useState<Record<string, TestResult>>({});
   const { tests, setTests } = useDelta();
-  const [newInput, setNewInput] = useState("");
-  const [newExpected, setNewExpected] = useState(true);
 
   useKeyboardShortcut([
     {
@@ -47,41 +45,9 @@ export function TestSuite({ machine }: TestSuiteProps) {
     },
   ]);
 
-  const totalPages = Math.ceil(tests.length / TESTS_PER_PAGE);
-  const visibleTests = tests.slice(
-    page * TESTS_PER_PAGE,
-    (page + 1) * TESTS_PER_PAGE,
-  );
-
   useEffect(() => {
     setResults({});
   }, [machine]);
-
-  const addTest = () => {
-    if (!newInput) return;
-    const id = crypto.randomUUID();
-    setTests([...tests, { id, input: newInput, expected: newExpected }]);
-    setResults((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-    setNewInput("");
-    // advance to last page to show new test
-    setPage(Math.floor(tests.length / TESTS_PER_PAGE));
-  };
-
-  const removeTest = (id: string) => {
-    setTests(tests.filter((t) => t.id !== id));
-    setResults((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-    setPage((p) =>
-      Math.min(p, Math.ceil((tests.length - 1) / TESTS_PER_PAGE) - 1),
-    );
-  };
 
   const runTests = () => {
     if (!machine) return;
@@ -115,55 +81,160 @@ export function TestSuite({ machine }: TestSuiteProps) {
               {passCount}/{tests.length}
             </span>
           )}
-          <button
-            onClick={runTests}
-            disabled={!machine || tests.length === 0}
-            className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          >
-            run tests
-          </button>
+          <Tooltip label="shift+cmd+t">
+            <button
+              onClick={runTests}
+              disabled={!machine || tests.length === 0}
+              className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              run tests
+            </button>
+          </Tooltip>
         </div>
       </div>
 
-      <div className="flex flex-col gap-1">
-        {visibleTests.map((test) => {
-          const result = results[test.id];
-          return (
-            <div
-              key={test.id}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
-                result
-                  ? result.passed
-                    ? "bg-ctp-green/10 border-ctp-green/30"
-                    : "bg-ctp-red/10 border-ctp-red/30"
-                  : "bg-ctp-mantle border-ctp-surface1"
-              }`}
-            >
-              <span className="flex-1 font-mono text-ctp-text truncate">
-                {test.input || <span className="text-ctp-text">ε</span>}
-              </span>
-              <span
-                className={`text-xs ${test.expected ? "text-ctp-green" : "text-ctp-red"}`}
-              >
-                {test.expected ? "accept" : "reject"}
-              </span>
-              {result && (
-                <span
-                  className={`text-xs font-bold ${result.passed ? "text-ctp-green" : "text-ctp-red"}`}
-                >
-                  {result.passed ? "✓" : "✗"}
-                </span>
-              )}
-              <button
-                onClick={() => removeTest(test.id)}
-                className="text-ctp-overlay0 hover:text-ctp-red transition-colors text-xs ml-1"
-              >
-                ×
-              </button>
-            </div>
-          );
-        })}
+      <TestCaseList
+        tests={tests}
+        results={results}
+        onRemove={(id) => {
+          const updated = tests.filter((t) => t.id !== id);
+          setTests(updated);
+          setResults((prev) => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+        }}
+      />
 
+      <NewTestForm
+        onSubmit={(input, expected) => {
+          const id = crypto.randomUUID();
+          setTests([...tests, { id, input, expected }]);
+        }}
+      />
+    </div>
+  );
+}
+
+interface TestProps {
+  result: TestResult;
+  test: TestCase;
+  onRemove: (id: string) => void;
+}
+
+function Test({ result, test, onRemove }: TestProps) {
+  return (
+    <div
+      key={test.id}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
+        result
+          ? result.passed
+            ? "bg-ctp-green/10 border-ctp-green/30"
+            : "bg-ctp-red/10 border-ctp-red/30"
+          : "bg-ctp-mantle border-ctp-surface1"
+      }`}
+    >
+      <span className="flex-1 font-mono text-ctp-text truncate">
+        {test.input || <span className="text-ctp-text">ε</span>}
+      </span>
+      <span
+        className={`text-xs ${test.expected ? "text-ctp-green" : "text-ctp-red"}`}
+      >
+        {test.expected ? "accept" : "reject"}
+      </span>
+      {result && (
+        <span
+          className={`text-xs font-bold ${result.passed ? "text-ctp-green" : "text-ctp-red"}`}
+        >
+          {result.passed ? "✓" : "✗"}
+        </span>
+      )}
+      <button
+        onClick={() => onRemove(test.id)}
+        className="text-ctp-overlay0 hover:text-ctp-red transition-colors text-xs ml-1"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
+interface NewTestFormProps {
+  onSubmit: (input: string, expected: boolean) => void;
+}
+
+function NewTestForm({ onSubmit }: NewTestFormProps) {
+  const [input, setInput] = useState("");
+  const [expected, setExpected] = useState(true);
+
+  const handleSubmit = () => {
+    if (!input) return;
+    onSubmit(input, expected);
+    setInput("");
+  };
+
+  return (
+    <div className="flex items-center gap-2 border-t border-ctp-surface0 pt-3">
+      <input
+        type="text"
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+        placeholder="input string"
+        className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
+      />
+      <button
+        onClick={() => setExpected((e) => !e)}
+        className={`text-xs px-3 py-1.5 rounded-lg border font-bold transition-colors ${
+          expected
+            ? "bg-ctp-green/20 border-ctp-green text-ctp-green"
+            : "bg-ctp-red/20 border-ctp-red text-ctp-red"
+        }`}
+      >
+        {expected ? "accept" : "reject"}
+      </button>
+      <button
+        onClick={handleSubmit}
+        disabled={!input}
+        className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+      >
+        +
+      </button>
+    </div>
+  );
+}
+
+interface TestCaseListProps {
+  tests: TestCase[];
+  results: Record<string, TestResult>;
+  onRemove: (id: string) => void;
+}
+
+function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
+  const [page, setPage] = useState(0);
+  const totalPages = Math.ceil(tests.length / TESTS_PER_PAGE);
+  const visibleTests = tests.slice(
+    page * TESTS_PER_PAGE,
+    (page + 1) * TESTS_PER_PAGE,
+  );
+
+  // keep page in bounds when tests are removed
+  useEffect(() => {
+    setPage((p) => Math.min(p, Math.max(0, totalPages - 1)));
+  }, [totalPages]);
+
+  return (
+    <>
+      <div className="flex flex-col gap-1">
+        {visibleTests.map((test) => (
+          <Test
+            key={test.id}
+            test={test}
+            result={results[test.id]}
+            onRemove={onRemove}
+          />
+        ))}
         {tests.length === 0 && (
           <p className="text-ctp-overlay0 text-xs text-center py-4">
             no test cases yet
@@ -192,34 +263,6 @@ export function TestSuite({ machine }: TestSuiteProps) {
           </button>
         </div>
       )}
-
-      <div className="flex items-center gap-2 border-t border-ctp-surface0 pt-3">
-        <input
-          type="text"
-          value={newInput}
-          onChange={(e) => setNewInput(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addTest()}
-          placeholder="input string"
-          className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
-        />
-        <button
-          onClick={() => setNewExpected((e) => !e)}
-          className={`text-xs px-3 py-1.5 rounded-lg border font-bold transition-colors ${
-            newExpected
-              ? "bg-ctp-green/20 border-ctp-green text-ctp-green"
-              : "bg-ctp-red/20 border-ctp-red text-ctp-red"
-          }`}
-        >
-          {newExpected ? "accept" : "reject"}
-        </button>
-        <button
-          onClick={addTest}
-          disabled={!newInput}
-          className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-        >
-          +
-        </button>
-      </div>
-    </div>
+    </>
   );
 }
