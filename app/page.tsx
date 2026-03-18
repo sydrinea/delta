@@ -5,6 +5,7 @@ import { DeltaEditor } from "@/components/DeltaEditor";
 import { DeltaProvider, useDelta } from "@/context/DeltaContext";
 import { AutomataViewer } from "@/components/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
+import { Visualizer } from "./components/Visualizer";
 
 export default function Home() {
   return (
@@ -38,7 +39,7 @@ function NFAPage() {
     <div className="flex">
       {/* left — editor */}
       <div className="flex flex-col border-r border-ctp-surface0 w-1/2">
-        <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
+        <LeftPanel setAnf={setAnf} setEditorError={setEditorError} />
       </div>
 
       {/* right — preview + tests */}
@@ -114,6 +115,47 @@ function NFAPage() {
 
           <TestSuite machine={machine} defaultTests={tests} />
         </div>
+      </div>
+    </div>
+  );
+}
+
+type LeftTab = "editor" | "visualizer";
+
+interface LeftPanelProps {
+  setAnf: (anf: string) => void;
+  setEditorError: (error: string | null) => void;
+}
+
+function LeftPanel({ setAnf, setEditorError }: LeftPanelProps) {
+  const [activeTab, setActiveTab] = useState<LeftTab>("editor");
+
+  return (
+    <div className="flex flex-col h-full border-r border-ctp-surface0">
+      {/* tab bar */}
+      <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0">
+        {(["editor", "visualizer"] as LeftTab[]).map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`pb-2 text-xs transition-colors border-b-2 ${
+              activeTab === tab
+                ? "text-ctp-text border-ctp-mauve"
+                : "text-ctp-subtext0 border-transparent hover:text-ctp-text"
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* content */}
+      <div className="flex-1 overflow-hidden">
+        {activeTab === "editor" ? (
+          <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
+        ) : (
+          <Visualizer />
+        )}
       </div>
     </div>
   );
