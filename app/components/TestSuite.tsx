@@ -31,12 +31,20 @@ export function TestSuite({ machine, defaultTests = [] }: TestSuiteProps) {
   const [newInput, setNewInput] = useState("");
   const [newExpected, setNewExpected] = useState(true);
 
-  useKeyboardShortcut({
-    shift: true,
-    meta: true,
-    key: "t",
-    handler: () => runTests(),
-  });
+  useKeyboardShortcut([
+    {
+      shift: true,
+      meta: true,
+      key: "t",
+      handler: () => runTests(),
+    },
+    {
+      meta: true,
+      shift: true,
+      key: "r",
+      handler: () => setResults({}),
+    },
+  ]);
 
   const totalPages = Math.ceil(tests.length / TESTS_PER_PAGE);
   const visibleTests = tests.slice(
