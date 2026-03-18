@@ -234,6 +234,14 @@ export class NFABuilder {
   }
 
   /**
+   * Retrieve the current alphabet
+   * @return the alphabet
+   */
+  public get alpha(): readonly string[] {
+    return [...this._alphabet];
+  }
+
+  /**
    * Build the {@link NFA} and perform validation for missing definitions
    * @returns the corresponding {@link NFA}
    * @throws if any {@link Message}s are errors
@@ -313,7 +321,8 @@ class StateProxy {
    * @returns a {@link StateProxy} with the modified {@link NFABuilder}
    */
   public loop(...symbols: string[]): this {
-    symbols.forEach((symbol) =>
+    const toLoop = symbols.length > 0 ? symbols : this.builder.alpha;
+    toLoop.forEach((symbol) =>
       this.builder.transition(this.state, symbol, this.state),
     );
     return this;
