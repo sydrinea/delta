@@ -56,8 +56,8 @@ declare namespace Delta {
     accept(...states: string[]): this;
     transition(from: string, symbol: string, to: string): this;
     state(state: string): StateProxy;
-    batch(filter: (state: string) => boolean, apply: (state: StateProxy) => this): this;
-    all(apply: (state: StateProxy) => this): this;
+    batch(filter: (state: string) => boolean, apply: (state: StateProxy) => NFABuilder): this;
+    all(apply: (state: StateProxy) => NFABuilder): this;
     build(): NFA;
     get messages(): readonly Message[];
     get repr(): string;
