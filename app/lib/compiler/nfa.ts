@@ -190,6 +190,42 @@ export class NFABuilder {
   }
 
   /**
+   * Apply a transition to a single state
+   * @param state the state
+   * @returns a {@link StateProxy} with its operations
+   */
+  public state(state: string): StateProxy {
+    return new StateProxy(state, this);
+  }
+
+  /**
+   * Apply a transition to all states matching a filter
+   * @param filter the filter condition
+   * @param apply the transition
+   * @returns a modified {@link NFABuilder} object
+   */
+  public batch(
+    filter: (state: string) => boolean,
+    apply: (builder: StateProxy) => void,
+  ): this {
+    for (const state of this._states) {
+      if (filter(state)) {
+        apply(new StateProxy(state, this));
+      }
+    }
+    return this;
+  }
+
+  /**
+   * Apply a transition to all states
+   * @param apply the transition
+   * @returns a modified {@link NFABuilder} object
+   */
+  public all(apply: (builder: StateProxy) => void): this {
+    return this.batch((_) => true, apply);
+  }
+
+  /**
    * Retrieve all messages
    * @return a list of messages
    */
@@ -259,6 +295,47 @@ nfa ${this._name} {
 ${transitions.join("\n")}
 }
     `;
+  }
+}
+
+/**
+ * A bound builder proxy that scopes transition operations to a specific state
+ */
+class StateProxy {
+  constructor(
+    private readonly state: string,
+    private readonly builder: NFABuilder,
+  ) {}
+
+  /**
+   * Loop on one or more symbols (self-transition)
+   * @param symbols the symbol the loop is for
+   * @returns a {@link StateProxy} with the modified {@link NFABuilder}
+   */
+  public loop(...symbols: string[]): this {
+    symbols.forEach((symbol) =>
+      this.builder.transition(this.state, symbol, this.state),
+    );
+    return this;
+  }
+
+  /**
+   * Transition to a target state on one or more symbols
+   * @param symbols the symbol the transition is for
+   * @returns a {@link StateProxy} with the modified {@link NFABuilder}
+   */
+  public to(target: string, ...symbols: string[]): this {
+    symbols.forEach((symbol) =>
+      this.builder.transition(this.state, symbol, target),
+    );
+    return this;
+  }
+
+  /**
+   * Return to the {@link NFABuilder} associated with this proxy
+   */
+  public done(): NFABuilder {
+    return this.builder;
   }
 }
 

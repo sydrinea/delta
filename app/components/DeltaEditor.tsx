@@ -43,12 +43,21 @@ declare namespace Delta {
     messages: Message[];
   }
 
+  class StateProxy {
+    loop(...symbols: string[]): this;
+    to(target: string, ...symbols: string[]): this;
+    done(): NFABuilder;
+  }
+
   class NFABuilder {
     alphabet(...symbols: string[]): this;
     states(...states: string[]): this;
     start(state: string): this;
     accept(...states: string[]): this;
     transition(from: string, symbol: string, to: string): this;
+    state(state: string): StateProxy;
+    batch(filter: (state: string) => boolean, apply: (state: StateProxy) => this): this;
+    all(apply: (state: StateProxy) => this): this;
     build(): NFA;
     get messages(): readonly Message[];
     get repr(): string;
