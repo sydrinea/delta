@@ -10,7 +10,17 @@ import { Visualizer } from "./components/Visualizer";
 export default function Home() {
   return (
     <DeltaProvider label="nfa">
-      <NFAPage />
+      <section className="md:hidden h-screen bg-ctp-base flex flex-col overflow-hidden font-mono m-5 text-center">
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-ctp-subtext0 text-sm">
+            Delta isn't available for windows this narrow. Please resize your
+            web browser or try a larger device.
+          </p>
+        </div>
+      </section>
+      <section className="hidden md:block">
+        <NFAPage />
+      </section>
     </DeltaProvider>
   );
 }
