@@ -67,15 +67,15 @@ interface DeltaProviderProps {
 
 export function DeltaProvider({ label, children }: DeltaProviderProps) {
   const [tests, setTests] = useLocalStorage<TestCase[]>(
-    "delta:nfa:tests",
+    `delta:${label}:tests`,
     DEFAULT_TESTS,
   );
   const [anf, setAnf] = useLocalStorage<string | null>(
-    "delta:nfa:anf",
+    `delta:${label}:anf`,
     DEFAULT_ANF,
   );
   const [editorValue, setEditorValue] = useLocalStorage(
-    "delta:nfa:editor",
+    `delta:${label}:editor`,
     DEFAULT_VALUE,
   );
 
