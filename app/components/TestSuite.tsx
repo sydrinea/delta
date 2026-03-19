@@ -19,11 +19,11 @@ interface TestResult {
   actual: boolean;
 }
 
-const TESTS_PER_PAGE = 4;
+const TESTS_PER_PAGE = 6;
+const ROW_HEIGHT = 36;
 
 interface TestSuiteProps {
   machine: NFA | null;
-  defaultTests?: TestCase[];
 }
 
 export function TestSuite({ machine }: TestSuiteProps) {
@@ -126,8 +126,8 @@ interface TestProps {
 function Test({ result, test, onRemove }: TestProps) {
   return (
     <div
-      key={test.id}
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-sm transition-colors ${
+      style={{ height: ROW_HEIGHT }}
+      className={`flex items-center gap-2 px-3 rounded-lg border text-sm transition-colors ${
         result
           ? result.passed
             ? "bg-ctp-green/10 border-ctp-green/30"
@@ -136,7 +136,7 @@ function Test({ result, test, onRemove }: TestProps) {
       }`}
     >
       <span className="flex-1 font-mono text-ctp-text truncate">
-        {test.input || <span className="text-ctp-text">ε</span>}
+        {test.input || <span className="text-ctp-overlay0">ε</span>}
       </span>
       <span
         className={`text-xs ${test.expected ? "text-ctp-green" : "text-ctp-red"}`}
@@ -195,7 +195,7 @@ function NewTestForm({ onSubmit }: NewTestFormProps) {
       </button>
       <button
         onClick={handleSubmit}
-        className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust transition-colors"
       >
         +
       </button>
@@ -216,15 +216,20 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
     page * TESTS_PER_PAGE,
     (page + 1) * TESTS_PER_PAGE,
   );
+  const emptyRows = TESTS_PER_PAGE - visibleTests.length;
 
-  // keep page in bounds when tests are removed
   useEffect(() => {
     setPage((p) => Math.min(p, Math.max(0, totalPages - 1)));
   }, [totalPages]);
 
   return (
     <>
-      <div className="flex flex-col gap-1">
+      <div
+        className="flex flex-col gap-1"
+        style={{
+          height: TESTS_PER_PAGE * ROW_HEIGHT + (TESTS_PER_PAGE - 1) * 4,
+        }}
+      >
         {visibleTests.map((test) => (
           <Test
             key={test.id}
@@ -233,34 +238,39 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
             onRemove={onRemove}
           />
         ))}
-        {tests.length === 0 && (
-          <p className="text-ctp-overlay0 text-xs text-center py-4">
-            no test cases yet
-          </p>
-        )}
+
+        {Array.from({ length: emptyRows }).map((_, i) => (
+          <div
+            key={`empty-${i}`}
+            style={{ height: ROW_HEIGHT }}
+            className="rounded-lg border border-dashed border-ctp-surface0"
+          />
+        ))}
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            onClick={() => setPage((p) => Math.max(p - 1, 0))}
-            disabled={page === 0}
-            className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
-          >
-            ←
-          </button>
-          <span className="text-ctp-overlay0 text-xs">
-            {page + 1} / {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
-            disabled={page === totalPages - 1}
-            className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
-          >
-            →
-          </button>
-        </div>
-      )}
+      <div className="flex items-center justify-center gap-2 h-4">
+        {totalPages > 1 && (
+          <>
+            <button
+              onClick={() => setPage((p) => Math.max(p - 1, 0))}
+              disabled={page === 0}
+              className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
+            >
+              ←
+            </button>
+            <span className="text-ctp-overlay0 text-xs">
+              {page + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
+              disabled={page === totalPages - 1}
+              className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
+            >
+              →
+            </button>
+          </>
+        )}
+      </div>
     </>
   );
 }
