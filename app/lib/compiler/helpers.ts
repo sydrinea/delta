@@ -5,4 +5,4 @@
  * @returns an array from [q0, ..., q15]
  */
 export const q = (lower: number, upper: number) =>
-  Array.from({ length: upper - lower + 1 }, (_, i) => `q${i}`);
+  Array.from({ length: upper - lower + 1 }, (_, i) => `q${i + lower}`);
