@@ -24,11 +24,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="latte">
+    <html lang="en" className="latte overscroll-none">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main className="h-dvh bg-ctp-base flex flex-col overflow-hidden overscroll-none font-mono">
+        <main className="h-dvh bg-ctp-base flex flex-col overflow-hidden font-mono">
           <Navbar />
           {children}
         </main>
