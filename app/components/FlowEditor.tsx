@@ -23,6 +23,7 @@ import ReactFlow, {
   MarkerType,
   Node,
   Edge,
+  ConnectionMode,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useDelta } from "@/context/DeltaContext";
@@ -222,15 +223,25 @@ export function FlowEditor() {
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      const newEdge = {
+      const { source, target } = connection;
+      if (!source || !target) return;
+      const newEdge: Edge = {
         ...connection,
+        source,
+        target,
         type: "automata",
         data: {
           label: "a",
         },
+        id: `edge-${connection.sourceHandle}-${connection.targetHandle}-${Date.now()}`,
         markerEnd: { type: MarkerType.ArrowClosed, color: "#4c4f69" },
       };
-      setEdges((eds) => addEdge(newEdge, eds));
+      setEdges((eds) => [
+        ...eds,
+        {
+          ...newEdge,
+        },
+      ]);
     },
     [setEdges],
   );
@@ -306,7 +317,8 @@ export function FlowEditor() {
             onConnect={onConnect}
             nodeTypes={nodeTypes}
             edgeTypes={edgeTypes}
-            connectionRadius={30}
+            connectionRadius={20}
+            connectionMode={ConnectionMode.Loose}
             proOptions={{ hideAttribution: true }}
             fitView
           >
