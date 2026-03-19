@@ -135,7 +135,7 @@ function NFAPage() {
 
           {machine && <AutomataViewer nfa={machine} />}
 
-          <TestSuite machine={machine} defaultTests={tests} />
+          <TestSuite machine={machine} />
         </div>
       </div>
     </div>
