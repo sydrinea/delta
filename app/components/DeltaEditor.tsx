@@ -104,6 +104,7 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
         minimap: { enabled: false },
         padding: { top: 12, bottom: 12 },
         fixedOverflowWidgets: true,
+        fontSize: 15,
       }}
     />
   );
