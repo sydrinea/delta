@@ -153,28 +153,9 @@ interface LeftPanelProps {
 
 function LeftPanel({ setAnf, setEditorError }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<LeftTab>("editor");
-  const {
-    nodes,
-    edges,
-    startId,
-    machine,
-    setNodes,
-    setEdges,
-    setStartId,
-    setEditorValue,
-    editorValue,
-  } = useDelta();
+  const { machine, setNodes, setEdges, setStartId } = useDelta();
 
   const handleTabChange = (tab: LeftTab) => {
-    // canvas → editor: generate code from graph
-    if (activeTab === "canvas" && tab === "editor") {
-      if (nodes.length > 0 && startId) {
-        const code = flowToCode(nodes, edges, startId);
-        setEditorValue(code);
-        runCode(code, setAnf, setEditorError);
-      }
-    }
-
     // editor → canvas: populate graph from compiled machine
     if (activeTab === "editor" && tab === "canvas") {
       if (machine) {
