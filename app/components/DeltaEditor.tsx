@@ -39,6 +39,7 @@ declare namespace Delta {
     state(state: string): StateProxy;
     batch(filter: (state: string) => boolean, apply: (state: StateProxy) => NFABuilder): this;
     all(apply: (state: StateProxy) => NFABuilder): this;
+    increment(...symbols: string[]): this;
     build(): NFA;
     get messages(): readonly Message[];
     get repr(): string;
@@ -48,6 +49,8 @@ declare namespace Delta {
 
   function nfa(name: string): NFABuilder;
   function dfa(name: string): DFABuilder;
+  
+  function q(lower: number, upper: number): string[];
 
   const EPS: string;
 }

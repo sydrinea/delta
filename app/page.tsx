@@ -8,6 +8,7 @@ import { TestSuite } from "@/components/TestSuite";
 import { Visualizer } from "./components/Visualizer";
 import { Tooltip } from "./components/Tooltip";
 import { runCode } from "./runCode";
+import { toDot } from "@/lib/compiler/dot";
 
 export default function Home() {
   return (
@@ -45,6 +46,12 @@ function NFAPage() {
       navigator.clipboard.writeText(anf);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  const handleCopyDot = () => {
+    if (machine) {
+      navigator.clipboard.writeText(toDot(machine));
     }
   };
 

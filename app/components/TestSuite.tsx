@@ -169,7 +169,6 @@ function NewTestForm({ onSubmit }: NewTestFormProps) {
   const [expected, setExpected] = useState(true);
 
   const handleSubmit = () => {
-    if (!input) return;
     onSubmit(input, expected);
     setInput("");
   };
@@ -196,7 +195,6 @@ function NewTestForm({ onSubmit }: NewTestFormProps) {
       </button>
       <button
         onClick={handleSubmit}
-        disabled={!input}
         className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
       >
         +

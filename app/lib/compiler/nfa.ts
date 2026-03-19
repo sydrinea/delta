@@ -226,6 +226,21 @@ export class NFABuilder {
   }
 
   /**
+   * Advance through all states in declaration order on the given symbols
+   * @param symbols the symbols that trigger advancement
+   * @returns a modified {@link NFABuilder} object
+   */
+  public increment(...symbols: string[]): this {
+    const states = [...this._states];
+    for (const symbol of symbols) {
+      for (let i = 0; i < states.length; i++) {
+        this.transition(states[i], symbol, states[(i + 1) % states.length]);
+      }
+    }
+    return this;
+  }
+
+  /**
    * Retrieve all messages
    * @return a list of messages
    */
