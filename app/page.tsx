@@ -62,19 +62,6 @@ function NFAPage() {
       <div className="flex flex-col w-1/2 overflow-y-auto">
         <div className="flex flex-col gap-3 p-6">
           <div className="flex items-center gap-3">
-            <div
-              className={`rounded-lg px-3 py-1.5 transition-colors ${
-                editorError
-                  ? "bg-ctp-red/20 border border-ctp-red"
-                  : "bg-ctp-green/20 border border-ctp-green"
-              }`}
-            >
-              <p
-                className={`text-xs ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
-              >
-                {editorError ?? "✓ looks good"}
-              </p>
-            </div>
             <Tooltip label="cmd+s">
               <button
                 onClick={() => runCode(editorValue, setAnf, setEditorError)}
@@ -84,6 +71,13 @@ function NFAPage() {
                 compile
               </button>
             </Tooltip>
+            <div className={`rounded-lg py-1.5 transition-colors`}>
+              <p
+                className={`text-xs ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
+              >
+                {editorError ?? "✓ looks good"}
+              </p>
+            </div>
           </div>
 
           <h1 className="text-ctp-subtext1 text-lg font-bold text-center">

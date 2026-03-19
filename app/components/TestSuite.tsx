@@ -6,6 +6,14 @@ import type { NFA } from "@/lib/compiler/nfa";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { useDelta } from "@/context/DeltaContext";
 import { Tooltip } from "./Tooltip";
+import z from "zod";
+
+const TestCaseSchema = z.array(
+  z.object({
+    input: z.string(),
+    expected: z.boolean(),
+  }),
+);
 
 interface TestCase {
   id: string;
@@ -63,6 +71,34 @@ export function TestSuite({ machine }: TestSuiteProps) {
     setResults(newResults);
   };
 
+  const handleTestImport = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target?.result as string);
+          const result = TestCaseSchema.safeParse(parsed);
+          if (!result.success) {
+            alert(
+              `Invalid test format. Expected an array of { input: string, expected: boolean }.\n\n${result.error.issues.map((i) => i.message).join("\n")}`,
+            );
+            return;
+          }
+          setTests(result.data.map((t) => ({ ...t, id: crypto.randomUUID() })));
+        } catch {
+          alert("Invalid JSON file.");
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
   const hasResults = Object.keys(results).length > 0;
   const allPassed = hasResults && tests.every((t) => results[t.id]?.passed);
   const passCount = tests.filter((t) => results[t.id]?.passed).length;
@@ -74,22 +110,32 @@ export function TestSuite({ machine }: TestSuiteProps) {
           test suite
         </span>
         <div className="flex items-center gap-2">
-          {hasResults && (
-            <span
-              className={`text-xs font-bold ${allPassed ? "text-ctp-green" : "text-ctp-red"}`}
-            >
-              {passCount}/{tests.length}
-            </span>
-          )}
-          <Tooltip label="shift+cmd+t">
-            <button
-              onClick={runTests}
-              disabled={!machine || tests.length === 0}
-              className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              run tests
-            </button>
-          </Tooltip>
+          <div className="flex items-center gap-2">
+            {hasResults && (
+              <span
+                className={`text-xs font-bold ${allPassed ? "text-ctp-green" : "text-ctp-red"}`}
+              >
+                {passCount}/{tests.length}
+              </span>
+            )}
+            <Tooltip label="Import tests from JSON">
+              <button
+                onClick={handleTestImport}
+                className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors"
+              >
+                import
+              </button>
+            </Tooltip>
+            <Tooltip label="shift+cmd+t">
+              <button
+                onClick={runTests}
+                disabled={!machine || tests.length === 0}
+                className="text-xs px-3 py-1 rounded-lg bg-ctp-green/20 border border-ctp-green text-ctp-green hover:bg-ctp-green/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                run tests
+              </button>
+            </Tooltip>
+          </div>
         </div>
       </div>
 
