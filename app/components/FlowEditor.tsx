@@ -9,7 +9,6 @@ import {
 } from "react";
 import ReactFlow, {
   Background,
-  addEdge,
   useNodesState,
   useEdgesState,
   Connection,
@@ -147,13 +146,13 @@ function StateNode({ data, selected }: NodeProps) {
     >
       <Handle
         id="target-top"
-        type="target"
+        type="source"
         position={Position.Top}
         className="bg-ctp-mauve/45! border-0! w-1! h-1!"
       />
       <Handle
         id="target-left"
-        type="target"
+        type="source"
         position={Position.Left}
         className="bg-ctp-mauve/45! border-0! w-1! h-1!"
       />
@@ -209,6 +208,10 @@ export function FlowEditor() {
 
   const handleNodesChange = useCallback(
     (changes: any) => {
+      const removals = changes.filter((c: any) => c.type === "remove");
+      if (removals.length > 0) {
+        setStateCount((c) => c - removals.length);
+      }
       onNodesChange(changes);
     },
     [onNodesChange],
@@ -251,7 +254,7 @@ export function FlowEditor() {
     const newNode: Node = {
       id,
       type: "state",
-      position: { x: 100 + stateCount * 150, y: 200 },
+      position: { x: 100, y: 200 },
       data: { label: id, isAccept: false },
     };
     setNodes((nds) => [...nds, newNode]);
