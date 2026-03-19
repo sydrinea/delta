@@ -1,3 +1,31 @@
 @import "tailwindcss";
 
 @import "@catppuccin/tailwindcss/mocha.css";
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  accent-color: #8839ef;
+  background: #ccd0da;
+  border-radius: 9999px;
+  height: 4px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: #8839ef;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+  background: #8839ef;
+  border: none;
+  cursor: pointer;
+}

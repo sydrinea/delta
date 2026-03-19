@@ -7,6 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import type { Node, Edge } from "reactflow";
 import type { NFA } from "@/lib/compiler/nfa";
 import { deserialize } from "@/lib/compiler/serialize";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -35,6 +36,12 @@ interface DeltaContextValue {
   setTests: (tests: TestCase[]) => void;
   editorError: string | null;
   setEditorError: (error: string | null) => void;
+  nodes: Node[];
+  setNodes: (nodes: Node[]) => void;
+  edges: Edge[];
+  setEdges: (edges: Edge[]) => void;
+  startId: string | null;
+  setStartId: (id: string | null) => void;
 }
 
 const DeltaContext = createContext<DeltaContextValue | null>(null);
@@ -81,6 +88,12 @@ export function DeltaProvider({ label, children }: DeltaProviderProps) {
     `delta:${label}:editor`,
     DEFAULT_VALUE,
   );
+  const [nodes, setNodes] = useLocalStorage<Node[]>(`delta:${label}:nodes`, []);
+  const [edges, setEdges] = useLocalStorage<Edge[]>(`delta:${label}:edges`, []);
+  const [startId, setStartId] = useLocalStorage<string | null>(
+    `delta:${label}:startId`,
+    null,
+  );
 
   const [editorError, setEditorError] = useState<string | null>(null);
   const [machine, setMachine] = useState<NFA | null>(null);
@@ -112,6 +125,12 @@ export function DeltaProvider({ label, children }: DeltaProviderProps) {
         setTests,
         editorError,
         setEditorError,
+        nodes,
+        setNodes,
+        edges,
+        setEdges,
+        startId,
+        setStartId,
       }}
     >
       {children}

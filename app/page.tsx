@@ -5,9 +5,12 @@ import { DeltaEditor } from "@/components/DeltaEditor";
 import { DeltaProvider, useDelta } from "@/context/DeltaContext";
 import { AutomataViewer } from "@/components/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
-import { Visualizer } from "./components/Visualizer";
-import { Tooltip } from "./components/Tooltip";
+import { Visualizer } from "@/components/Visualizer";
+import { Tooltip } from "@/components/Tooltip";
 import { runCode } from "./runCode";
+import { FlowEditor } from "@/components/FlowEditor";
+import { flowToCode } from "@/lib/compiler/fromFlow";
+import { nfaToFlow } from "@/lib/compiler/toFlow";
 
 export default function Home() {
   return (
@@ -141,8 +144,7 @@ function NFAPage() {
     </div>
   );
 }
-
-type LeftTab = "editor" | "visualizer";
+type LeftTab = "editor" | "canvas" | "visualizer";
 
 interface LeftPanelProps {
   setAnf: (anf: string) => void;
@@ -151,15 +153,48 @@ interface LeftPanelProps {
 
 function LeftPanel({ setAnf, setEditorError }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<LeftTab>("editor");
+  const {
+    nodes,
+    edges,
+    startId,
+    machine,
+    setNodes,
+    setEdges,
+    setStartId,
+    setEditorValue,
+    editorValue,
+  } = useDelta();
+
+  const handleTabChange = (tab: LeftTab) => {
+    // canvas → editor: generate code from graph
+    if (activeTab === "canvas" && tab === "editor") {
+      if (nodes.length > 0 && startId) {
+        const code = flowToCode(nodes, edges, startId);
+        setEditorValue(code);
+        runCode(code, setAnf, setEditorError);
+      }
+    }
+
+    // editor → canvas: populate graph from compiled machine
+    if (activeTab === "editor" && tab === "canvas") {
+      if (machine) {
+        const { nodes: newNodes, edges: newEdges } = nfaToFlow(machine);
+        setNodes(newNodes);
+        setEdges(newEdges);
+        setStartId(machine.startState);
+      }
+    }
+
+    setActiveTab(tab);
+  };
 
   return (
     <div className="flex flex-col h-full">
-      {/* tab bar */}
       <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0">
-        {(["editor", "visualizer"] as LeftTab[]).map((tab) => (
+        {(["editor", "canvas", "visualizer"] as LeftTab[]).map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
+            onClick={() => handleTabChange(tab)}
             className={`pb-2 text-xs transition-colors border-b-2 ${
               activeTab === tab
                 ? "text-ctp-text border-ctp-mauve"
@@ -171,12 +206,13 @@ function LeftPanel({ setAnf, setEditorError }: LeftPanelProps) {
         ))}
       </div>
 
-      {/* content */}
       <div className="flex-1 overflow-hidden">
         {activeTab === "editor" ? (
           <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
-        ) : (
+        ) : activeTab === "visualizer" ? (
           <Visualizer />
+        ) : (
+          <FlowEditor />
         )}
       </div>
     </div>
