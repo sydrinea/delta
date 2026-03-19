@@ -9,7 +9,6 @@ import { Visualizer } from "@/components/Visualizer";
 import { Tooltip } from "@/components/Tooltip";
 import { runCode } from "./runCode";
 import { FlowEditor } from "@/components/FlowEditor";
-import { flowToCode } from "@/lib/compiler/fromFlow";
 import { nfaToFlow } from "@/lib/compiler/toFlow";
 
 export default function Home() {

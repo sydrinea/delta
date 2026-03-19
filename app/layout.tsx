@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -14,8 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Delta",
-  description: "Formal language theory visualizer and autograder",
+  title: "Delta — theory of computation tools",
+  description: "Create, test, and visualize DFAs and NFAs, with more to come!",
+  creator: "Sydney Newmark",
+  openGraph: {
+    type: "website",
+    url: "https://comptheory.tools",
+    title: "Delta — theory of computation tools",
+    description:
+      "Create, test, and visualize DFAs and NFAs, with more to come!",
+    siteName: "Delta — theory of computation tools",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8839ef",
+  initialScale: 1,
+  width: "device-width",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
