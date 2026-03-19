@@ -6,55 +6,7 @@ import * as MonacoEditor from "monaco-editor";
 import defineTheme from "./defineTheme";
 import { useDelta } from "@/context/DeltaContext";
 import { runCode } from "../runCode";
-
-const DELTA_TYPES = `
-declare namespace Delta {
-  interface Message {
-    content: string;
-    severity: "warning" | "error";
-  }
-
-  interface NFA {
-    name: string;
-    alphabet: Set<string>;
-    states: Set<string>;
-    startState: string;
-    acceptStates: Set<string>;
-    transitions: Map<string, Map<string, Set<string>>>;
-    messages: Message[];
-  }
-
-  class StateProxy {
-    loop(...symbols: string[]): this;
-    to(target: string, ...symbols: string[]): this;
-    done(): NFABuilder;
-  }
-
-  class NFABuilder {
-    alphabet(...symbols: string[]): this;
-    states(...states: string[]): this;
-    start(state: string): this;
-    accept(...states: string[]): this;
-    transition(from: string, symbol: string, to: string): this;
-    state(state: string): StateProxy;
-    batch(filter: (state: string) => boolean, apply: (state: StateProxy) => NFABuilder): this;
-    all(apply: (state: StateProxy) => NFABuilder): this;
-    increment(...symbols: string[]): this;
-    build(): NFA;
-    get messages(): readonly Message[];
-    get repr(): string;
-  }
-
-  class DFABuilder extends NFABuilder {}
-
-  function nfa(name: string): NFABuilder;
-  function dfa(name: string): DFABuilder;
-  
-  function q(lower: number, upper: number): string[];
-
-  const EPS: string;
-}
-`;
+import DELTA_D_TS from "@/lib/delta-runtime";
 
 interface DeltaEditorProps {
   onValidMachine: (anf: string) => void;
@@ -74,12 +26,12 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
     monaco.editor.setTheme("catppuccin-latte");
 
     monaco.typescript.typescriptDefaults.addExtraLib(
-      DELTA_TYPES,
+      DELTA_D_TS,
       "ts:delta/lib.d.ts",
     );
     if (!monaco.editor.getModel(monaco.Uri.parse("ts:delta/lib.d.ts"))) {
       monaco.editor.createModel(
-        DELTA_TYPES,
+        DELTA_D_TS,
         "typescript",
         monaco.Uri.parse("ts:delta/lib.d.ts"),
       );

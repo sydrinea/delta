@@ -33,6 +33,10 @@ const SetEdgesContext = createContext<
   ((updater: (eds: Edge[]) => Edge[]) => void) | null
 >(null);
 
+const SyncToEditorContext = createContext<((newEdges: Edge[]) => void) | null>(
+  null,
+);
+
 function AutomataEdge({
   id,
   sourceX,
@@ -49,6 +53,7 @@ function AutomataEdge({
   const [label, setLabel] = useState(data?.label ?? "a");
   const containerRef = useRef<HTMLDivElement>(null);
   const setEdges = useContext(SetEdgesContext);
+  const syncEdges = useContext(SyncToEditorContext);
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -68,11 +73,13 @@ function AutomataEdge({
 
   const handleLabelChange = (value: string) => {
     setLabel(value);
-    setEdges?.((eds) =>
-      eds.map((e) =>
+    setEdges?.((eds) => {
+      const newEdges = eds.map((e) =>
         e.id === id ? { ...e, data: { ...e.data, label: value } } : e,
-      ),
-    );
+      );
+      syncEdges?.(newEdges);
+      return newEdges;
+    });
   };
 
   return (
@@ -192,19 +199,28 @@ export function FlowEditor() {
   const [nodes, setNodes, onNodesChange] = useNodesState(ctxNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(ctxEdges);
   const [stateCount, setStateCount] = useState(ctxNodes.length);
-  const [synced, setSynced] = useState(false);
 
-  const syncToEditor = useCallback(() => {
-    if (nodes.length > 0 && startId) {
-      const code = flowToCode(nodes, edges, startId);
-      setEditorValue(code);
-      setCtxNodes(nodes);
-      setCtxEdges(edges);
-      setSynced(true);
-      runCode(code, setAnf, setEditorError);
-      setTimeout(() => setSynced(false), 2000);
-    }
-  }, [nodes, edges, startId, setEditorValue, setCtxNodes, setCtxEdges]);
+  const syncToEditor = useCallback(
+    (newNodes: Node[], newEdges: Edge[], newStartId: string | null) => {
+      if (newNodes.length > 0 && newStartId) {
+        const code = flowToCode(newNodes, newEdges, newStartId);
+        setTimeout(() => {
+          setEditorValue(code);
+          setCtxNodes(newNodes);
+          setCtxEdges(newEdges);
+          runCode(code, setAnf, setEditorError);
+        }, 0);
+      }
+    },
+    [setEditorValue, setCtxNodes, setCtxEdges, setAnf, setEditorError],
+  );
+
+  const syncEdges = useCallback(
+    (newEdges: Edge[]) => {
+      syncToEditor(nodes, newEdges, startId);
+    },
+    [nodes, startId, syncToEditor],
+  );
 
   const handleNodesChange = useCallback(
     (changes: any) => {
@@ -233,20 +249,15 @@ export function FlowEditor() {
         source,
         target,
         type: "automata",
-        data: {
-          label: "a",
-        },
+        data: { label: "a" },
         id: `edge-${connection.sourceHandle}-${connection.targetHandle}-${Date.now()}`,
         markerEnd: { type: MarkerType.ArrowClosed, color: "#4c4f69" },
       };
-      setEdges((eds) => [
-        ...eds,
-        {
-          ...newEdge,
-        },
-      ]);
+      const newEdges = [...edges, newEdge];
+      setEdges(newEdges);
+      syncToEditor(nodes, newEdges, startId);
     },
-    [setEdges],
+    [nodes, edges, startId, setEdges, syncToEditor],
   );
 
   const addState = useCallback(() => {
@@ -257,78 +268,100 @@ export function FlowEditor() {
       position: { x: 100, y: 200 },
       data: { label: id, isAccept: false },
     };
-    setNodes((nds) => [...nds, newNode]);
+    const newNodes = [...nodes, newNode];
+    const newStartId = startId ?? id;
+    setNodes(newNodes);
     if (!startId) setStartId(id);
     setStateCount((c) => c + 1);
-  }, [stateCount, setNodes, startId, setStartId]);
+    syncToEditor(newNodes, edges, newStartId);
+  }, [stateCount, nodes, edges, startId, setNodes, setStartId, syncToEditor]);
 
   const toggleAccept = useCallback(() => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.selected
-          ? { ...n, data: { ...n.data, isAccept: !n.data.isAccept } }
-          : n,
-      ),
+    const newNodes = nodes.map((n) =>
+      n.selected
+        ? { ...n, data: { ...n.data, isAccept: !n.data.isAccept } }
+        : n,
     );
-  }, [setNodes]);
+    setNodes(newNodes);
+    syncToEditor(newNodes, edges, startId);
+  }, [nodes, edges, startId, setNodes, syncToEditor]);
 
   const setStart = useCallback(() => {
     const selected = nodes.find((n) => n.selected);
-    if (selected) setStartId(selected.id);
-  }, [nodes, setStartId]);
+    if (!selected) return;
+    setStartId(selected.id);
+    syncToEditor(nodes, edges, selected.id);
+  }, [nodes, edges, setStartId, syncToEditor]);
+
+  const clearGraph = useCallback(() => {
+    setNodes([]);
+    setEdges([]);
+    setStateCount(0);
+    setStartId(null);
+    setCtxNodes([]);
+    setCtxEdges([]);
+    setEditorValue("");
+  }, [
+    setNodes,
+    setEdges,
+    setStartId,
+    setCtxNodes,
+    setCtxEdges,
+    setEditorValue,
+  ]);
 
   return (
     <SetEdgesContext.Provider value={setEdges}>
-      <div className="flex flex-col h-full">
-        <div className="flex items-center gap-2 px-4 py-2 border-b border-ctp-surface0 shrink-0">
-          <button
-            onClick={addState}
-            className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
-          >
-            + state
-          </button>
-          <button
-            onClick={toggleAccept}
-            className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
-          >
-            toggle accept
-          </button>
-          <button
-            onClick={setStart}
-            className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
-          >
-            set start
-          </button>
-
-          <div className="flex items-center gap-2 ml-auto">
+      <SyncToEditorContext.Provider value={syncEdges}>
+        <div className="flex flex-col h-full">
+          <div className="flex items-center gap-2 px-4 py-2 border-b border-ctp-surface0 shrink-0">
             <button
-              onClick={syncToEditor}
-              disabled={nodes.length === 0 || !startId}
-              className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              onClick={addState}
+              className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
             >
-              {synced ? "✓ synced" : "sync to editor"}
+              + state
             </button>
+            <button
+              onClick={toggleAccept}
+              className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
+            >
+              toggle accept
+            </button>
+            <button
+              onClick={setStart}
+              className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
+            >
+              set start
+            </button>
+            <div className="flex items-center gap-2 ml-auto">
+              <button
+                onClick={clearGraph}
+                className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-red hover:bg-ctp-surface0 transition-colors"
+              >
+                clear
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1">
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={handleNodesChange}
+              onEdgesChange={handleEdgesChange}
+              onConnect={onConnect}
+              nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              connectionRadius={20}
+              connectionMode={ConnectionMode.Loose}
+              proOptions={{ hideAttribution: true }}
+              fitView
+            >
+              <Background color="#acb0be" gap={16} size={1} />
+            </ReactFlow>
           </div>
         </div>
-
-        <div className="flex-1">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={handleNodesChange}
-            onEdgesChange={handleEdgesChange}
-            onConnect={onConnect}
-            nodeTypes={nodeTypes}
-            edgeTypes={edgeTypes}
-            connectionRadius={20}
-            connectionMode={ConnectionMode.Loose}
-            proOptions={{ hideAttribution: true }}
-            fitView
-          >
-            <Background color="#acb0be" gap={16} size={1} />
-          </ReactFlow>
-        </div>
-      </div>
+      </SyncToEditorContext.Provider>
     </SetEdgesContext.Provider>
   );
 }

@@ -241,6 +241,47 @@ export class NFABuilder {
   }
 
   /**
+   * Create a two-way transition between two states
+   * @param a the first state
+   * @param there the symbol to transition from a to b
+   * @param b the second state
+   * @param back the symbol to transition from b to a (defaults to {@link there})
+   * @returns a modified {@link NFABuilder} object
+   */
+  public bounce(
+    a: string,
+    there: string,
+    b: string,
+    back: string = there,
+  ): this {
+    return this.transition(a, there, b).transition(b, back, a);
+  }
+
+  /**
+   * Create a "one or more" chain — transition from {@link from} to a new state
+   * on {@link symbol}, with a self-loop on {@link to}
+   * @param from the source state
+   * @param symbol the symbol to consume
+   * @param to the destination state (loop target)
+   * @returns a modified {@link NFABuilder} object
+   */
+  public plus(from: string, symbol: string, to: string): this {
+    return this.transition(from, symbol, to).transition(to, symbol, to);
+  }
+
+  /**
+   * Create a "zero or more" chain — self-loop on {@link from}, transition to {@link to}
+   * on {@link symbol}, with a self-loop on {@link to}
+   * @param from the source state
+   * @param symbol the symbol to consume
+   * @param to the destination state
+   * @returns a modified {@link NFABuilder} object
+   */
+  public star(from: string, symbol: string, to: string): this {
+    return this.transition(from, symbol, from).plus(from, symbol, to);
+  }
+
+  /**
    * Retrieve all messages
    * @return a list of messages
    */
