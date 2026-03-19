@@ -3,28 +3,9 @@
 import { useRef } from "react";
 import Editor, { OnMount } from "@monaco-editor/react";
 import * as MonacoEditor from "monaco-editor";
-import { z } from "zod";
-import nfa from "@/lib/compiler/nfa";
-import dfa from "@/lib/compiler/dfa";
-import { serialize } from "@/lib/compiler/serialize";
-import { EPS } from "@/lib/compiler/constants";
 import defineTheme from "./defineTheme";
 import { useDelta } from "@/context/DeltaContext";
-
-const MessageSchema = z.object({
-  content: z.string(),
-  severity: z.enum(["warning", "error"]),
-});
-
-export const NFASchema = z.object({
-  name: z.string(),
-  alphabet: z.instanceof(Set),
-  states: z.instanceof(Set),
-  startState: z.string(),
-  acceptStates: z.instanceof(Set),
-  transitions: z.instanceof(Map),
-  messages: z.array(MessageSchema),
-});
+import { runCode } from "../runCode";
 
 const DELTA_TYPES = `
 declare namespace Delta {
@@ -83,24 +64,6 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
   );
   const { editorValue, setEditorValue } = useDelta();
 
-  const runCode = (value: string) => {
-    const Delta = { nfa, dfa, EPS };
-    try {
-      const result = new Function("Delta", value + "\n; return machine;")(
-        Delta,
-      );
-      const { success } = NFASchema.safeParse(result);
-      if (!success) {
-        onError("✗ did you forget to call .build()?");
-        return;
-      }
-      onError(null);
-      onValidMachine(serialize(result));
-    } catch (e) {
-      onError(`✗ ${String(e).substring(0, 70)}...`);
-    }
-  };
-
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor;
 
@@ -119,10 +82,9 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
       );
     }
 
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      runCode(editor.getValue());
-      setEditorValue(editor.getValue());
-    });
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () =>
+      runCode(editor.getValue(), onValidMachine, onError),
+    );
   };
 
   return (
@@ -134,6 +96,7 @@ export function DeltaEditor({ onValidMachine, onError }: DeltaEditorProps) {
       defaultLanguage="typescript"
       defaultValue={editorValue}
       onMount={handleMount}
+      onChange={(value) => setEditorValue(value ?? "")}
       options={{
         minimap: { enabled: false },
         padding: { top: 12, bottom: 12 },

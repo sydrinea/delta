@@ -6,6 +6,8 @@ import { DeltaProvider, useDelta } from "@/context/DeltaContext";
 import { AutomataViewer } from "@/components/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
 import { Visualizer } from "./components/Visualizer";
+import { Tooltip } from "./components/Tooltip";
+import { runCode } from "./runCode";
 
 export default function Home() {
   return (
@@ -31,6 +33,7 @@ function NFAPage() {
     machine,
     machineError,
     editorError,
+    editorValue,
     setEditorError,
     setAnf,
     tests,
@@ -69,7 +72,15 @@ function NFAPage() {
                 {editorError ?? "✓ looks good"}
               </p>
             </div>
-            <p className="text-ctp-subtext0 text-xs">cmd+s to compile</p>
+            <Tooltip label="cmd+s">
+              <button
+                onClick={() => runCode(editorValue, setAnf, setEditorError)}
+                disabled={!machine || tests.length === 0}
+                className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                compile
+              </button>
+            </Tooltip>
           </div>
           {/* ANF field + copy button */}
           <h1 className="text-ctp-subtext1 text-lg font-bold text-center">
