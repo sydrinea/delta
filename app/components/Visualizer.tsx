@@ -12,6 +12,7 @@ export function Visualizer() {
   const [step, setStep] = useState(0);
   const [trace, setTrace] = useState<ReturnType<typeof simulate>["trace"]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
   const [focused, setFocused] = useState(false);
   const [selectedTest, setSelectedTest] = useState("");
 
@@ -66,12 +67,28 @@ export function Visualizer() {
     setSelectedTest(match?.id ?? "");
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchStartX.current;
+    touchStartX.current = null;
+    if (Math.abs(delta) < 40) return; // ignore small nudges
+    if (delta < 0)
+      setStep((s) => Math.min(s + 1, trace.length - 1)); // swipe left → forward
+    else setStep((s) => Math.max(s - 1, 0)); // swipe right → back
+  };
+
   return (
     <div
       ref={containerRef}
       tabIndex={0}
       onFocus={() => setFocused(true)}
       onBlur={() => setFocused(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       className="flex flex-col gap-4 p-4 h-full overflow-y-auto focus:outline-none"
     >
       {/* input + test picker */}
