@@ -8,7 +8,6 @@ import { TestSuite } from "@/components/TestSuite";
 import { Visualizer } from "./components/Visualizer";
 import { Tooltip } from "./components/Tooltip";
 import { runCode } from "./runCode";
-import { toDot } from "@/lib/compiler/dot";
 
 export default function Home() {
   return (
@@ -21,7 +20,7 @@ export default function Home() {
           </p>
         </div>
       </section>
-      <section className="hidden md:block">
+      <section className="hidden md:flex md:flex-col md:h-screen md:overflow-hidden">
         <NFAPage />
       </section>
     </DeltaProvider>
@@ -49,21 +48,15 @@ function NFAPage() {
     }
   };
 
-  const handleCopyDot = () => {
-    if (machine) {
-      navigator.clipboard.writeText(toDot(machine));
-    }
-  };
-
   return (
-    <div className="flex">
+    <div className="flex flex-1 overflow-hidden">
       {/* left — editor */}
-      <div className="flex flex-col border-r border-ctp-surface0 w-1/2">
+      <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
         <LeftPanel setAnf={setAnf} setEditorError={setEditorError} />
       </div>
 
       {/* right — preview + tests */}
-      <div className="flex flex-col overflow-y-auto w-1/2">
+      <div className="flex flex-col w-1/2 overflow-y-auto">
         <div className="flex flex-col gap-3 p-6">
           <div className="flex items-center gap-3">
             <div
@@ -89,11 +82,12 @@ function NFAPage() {
               </button>
             </Tooltip>
           </div>
-          {/* ANF field + copy button */}
+
           <h1 className="text-ctp-subtext1 text-lg font-bold text-center">
             {machine?.name ?? "—"}
           </h1>
-          <div className="relative space-y-2">
+
+          <div className="relative">
             <input
               type="text"
               value={anf ?? ""}
@@ -104,7 +98,7 @@ function NFAPage() {
             <button
               onClick={handleCopyANF}
               title="Copy ANF"
-              className="absolute right-2 bottom-1/4 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
             >
               {copied ? (
                 <svg
@@ -159,7 +153,7 @@ function LeftPanel({ setAnf, setEditorError }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<LeftTab>("editor");
 
   return (
-    <div className="flex flex-col h-full border-r border-ctp-surface0">
+    <div className="flex flex-col h-full">
       {/* tab bar */}
       <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0">
         {(["editor", "visualizer"] as LeftTab[]).map((tab) => (
