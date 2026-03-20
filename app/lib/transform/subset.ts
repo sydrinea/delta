@@ -15,15 +15,8 @@ interface ConvertOptions {
   preserveNames?: boolean;
 }
 
-const DEFAULT_OPTIONS: (nfa: NFA) => ConvertOptions = (nfa: NFA) => ({
-  name: nfa.name,
-  preserveNames: true,
-});
-
-export function convertToDFA(
-  nfa: NFA,
-  options: ConvertOptions = DEFAULT_OPTIONS(nfa),
-): NFA {
+export function convertToDFA(nfa: NFA, options: ConvertOptions = {}): NFA {
+  const { name = `${nfa.name}__dfa`, preserveNames = true } = options;
   const subsetToName = new Map<string, string>();
 
   const getDfaName = (states: Set<string>) => {
@@ -35,9 +28,7 @@ export function convertToDFA(
   };
 
   const initialStates = epsilonClosure(nfa, new Set([nfa.startState]));
-  const nextStateName = stateName(
-    options?.preserveNames !== undefined ? options?.preserveNames : false,
-  );
+  const nextStateName = stateName(preserveNames);
   const initialName = getDfaName(initialStates);
 
   const dfaStates = new Map<string, Set<string>>();
@@ -84,7 +75,7 @@ export function convertToDFA(
   const messages: Message[] = [];
 
   return {
-    name: options?.name || `${nfa.name}__dfa`,
+    name,
     alphabet: nfa.alphabet,
     states: new Set(dfaStates.keys()),
     startState: initialName,
