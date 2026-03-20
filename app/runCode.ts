@@ -5,6 +5,7 @@ import { serialize } from "@/lib/compiler/serialize";
 import { EPS } from "@/lib/compiler/constants";
 import { q, union, concat, star, char, epsilon } from "@/lib/compiler/helpers";
 import { thompson } from "@/lib/compiler/thompson";
+import { convertToDFA } from "@/lib/transform/subset";
 
 const MessageSchema = z.object({
   content: z.string(),
@@ -29,6 +30,7 @@ export const runCode = (
   const Delta = {
     nfa,
     dfa,
+    convertToDFA,
     thompson,
     EPS,
     q,

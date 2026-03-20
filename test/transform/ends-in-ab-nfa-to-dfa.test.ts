@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import nfa from "@/lib/compiler/nfa";
-import { subset } from "@/lib/transform/subset";
+import { convertToDFA } from "@/lib/transform/subset";
 import { simulate } from "@/lib/simulator/nfa";
 
 describe("subset construction (endsInAB)", () => {
@@ -15,7 +15,7 @@ describe("subset construction (endsInAB)", () => {
     .transition("q1", "b", "q2")
     .build();
 
-  const dfa = subset(endsInAB);
+  const dfa = convertToDFA(endsInAB);
 
   describe("structure", () => {
     it("produces exactly three DFA states", () => {

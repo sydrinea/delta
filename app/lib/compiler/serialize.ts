@@ -3,7 +3,7 @@ import nfa from "./nfa";
 import { EPSILON } from "./constants";
 
 const SEP = "|";
-const LIST = ",";
+const LIST = ";";
 const ARROW = ">";
 const EPS_TOKEN = "eps";
 

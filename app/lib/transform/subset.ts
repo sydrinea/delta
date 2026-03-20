@@ -6,7 +6,7 @@ function stateName(states: Set<string>): string {
   return `{${sorted.join(",")}}`;
 }
 
-export function subset(nfa: NFA): NFA {
+export function convertToDFA(nfa: NFA, name: string = ""): NFA {
   const initialStates = epsilonClosure(nfa, new Set([nfa.startState]));
   const initialName = stateName(initialStates);
 
@@ -54,7 +54,7 @@ export function subset(nfa: NFA): NFA {
   const messages: Message[] = [];
 
   return {
-    name: `${nfa.name}__dfa`,
+    name: name || `${nfa.name}__dfa`,
     alphabet: nfa.alphabet,
     states: new Set(dfaStates.keys()),
     startState: initialName,

@@ -177,6 +177,8 @@ declare namespace Delta {
    */
   function epsilon(): NFA;
 
+  function convertToDFA(nfa: NFA, name?: string): NFA;
+
   /** The epsilon symbol for epsilon transitions.
    * @example .transition("q0", Delta.EPS, "q1")
    */
