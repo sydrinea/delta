@@ -36,6 +36,6 @@ export const runCode = (
     onError(null);
     onValidMachine(serialize(result));
   } catch (e) {
-    onError(`✗ ${String(e).substring(0, 70)}...`);
+    onError(`✗ ${String(e).split("\n").join("; ")}`);
   }
 };

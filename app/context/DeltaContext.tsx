@@ -109,7 +109,7 @@ export function DeltaProvider({ label, children }: DeltaProviderProps) {
       setMachine(m);
       setMachineError(null);
     } catch (e) {
-      setMachineError(`✗ ${String(e).substring(0, 70)}...`);
+      setMachineError(`✗ ${String(e).split("\n").join("; ")}`);
       setMachine(null);
     }
   }, [anf]);
