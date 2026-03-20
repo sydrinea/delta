@@ -71,32 +71,28 @@ export function TestSuite({ machine }: TestSuiteProps) {
     setResults(newResults);
   };
 
-  const handleTestImport = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const parsed = JSON.parse(e.target?.result as string);
-          const result = TestCaseSchema.safeParse(parsed);
-          if (!result.success) {
-            alert(
-              `Invalid test format. Expected an array of { input: string, expected: boolean }.\n\n${result.error.issues.map((i) => i.message).join("\n")}`,
-            );
-            return;
-          }
-          setTests(result.data.map((t) => ({ ...t, id: crypto.randomUUID() })));
-        } catch {
-          alert("Invalid JSON file.");
+  const handleTestImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        const result = TestCaseSchema.safeParse(parsed);
+        if (!result.success) {
+          alert(
+            `Invalid test format. Expected an array of { input: string, expected: boolean }.\n\n${result.error.issues.map((i) => i.message).join("\n")}`,
+          );
+          return;
         }
-      };
-      reader.readAsText(file);
+        setTests(result.data.map((t) => ({ ...t, id: crypto.randomUUID() })));
+      } catch {
+        alert("Invalid JSON file.");
+      }
     };
-    input.click();
+    reader.readAsText(file);
+    e.target.value = "";
   };
 
   const hasResults = Object.keys(results).length > 0;
@@ -119,18 +115,21 @@ export function TestSuite({ machine }: TestSuiteProps) {
               </span>
             )}
             <Tooltip label="Import tests from JSON">
-              <button
-                onClick={handleTestImport}
-                className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors"
-              >
+              <label className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors cursor-pointer flex items-center justify-center">
                 import
-              </button>
+                <input
+                  type="file"
+                  accept=".json"
+                  className="hidden"
+                  onChange={handleTestImport}
+                />
+              </label>
             </Tooltip>
             <Tooltip label="shift+cmd+t">
               <button
                 onClick={runTests}
                 disabled={!machine || tests.length === 0}
-                className="text-xs px-3 py-1 rounded-lg bg-ctp-green/20 border border-ctp-green text-ctp-green hover:bg-ctp-green/30 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                className="text-xs px-3 py-1 rounded-lg bg-ctp-green/20 border border-ctp-green text-ctp-green hover:bg-ctp-green/30 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
               >
                 run tests
               </button>

@@ -5,6 +5,8 @@ import { instance } from "@viz-js/viz";
 import type { NFA } from "@/lib/compiler/nfa";
 import { toDot } from "@/lib/compiler/dot";
 import { Tooltip } from "./Tooltip";
+import { Check } from "./icons/Check";
+import { Graph } from "./icons/Graph";
 
 interface AutomataViewerProps {
   nfa: NFA;
@@ -55,37 +57,7 @@ export function AutomataViewer({ nfa, activeStates }: AutomataViewerProps) {
             onClick={handleCopyDot}
             className="text-ctp-overlay0 hover:text-ctp-text transition-colors"
           >
-            {copied ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-4 h-4"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <circle cx="12" cy="12" r="3" />
-                <circle cx="19" cy="5" r="2" />
-                <circle cx="5" cy="5" r="2" />
-                <circle cx="5" cy="19" r="2" />
-                <circle cx="19" cy="19" r="2" />
-                <line x1="12" y1="9" x2="5" y2="6" />
-                <line x1="12" y1="9" x2="19" y2="6" />
-                <line x1="12" y1="15" x2="5" y2="18" />
-                <line x1="12" y1="15" x2="19" y2="18" />
-              </svg>
-            )}
+            {copied ? <Check /> : <Graph />}
           </button>
         </Tooltip>
       </div>
