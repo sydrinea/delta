@@ -177,10 +177,24 @@ declare module "delta:lib" {
    */
   function epsilon(): NFA;
 
-  /** Convert an NFA into an equivalent DFA using subset construction.
-   * @example const dfa = Delta.convertToDFA(myNfa, "myEquivalentDfa")
+  /**
+   * Customization for the result of NFA-to-DFA conversion.
    */
-  function convertToDFA(nfa: NFA, name?: string): NFA;
+  interface ConvertOptions {
+    /**
+     * A UI name for the DFA
+     */
+    name?: string;
+    /**
+     * Whether to preserve meaning of states (i.e. {q0, q2} vs. {qN})
+     */
+    preserveNames?: boolean;
+  }
+
+  /** Convert an NFA into an equivalent DFA using subset construction.
+   * @example const dfa = Delta.convertToDFA(myNfa, { name: "myEquivalentDfa" })
+   */
+  function convertToDFA(nfa: NFA, options?: ConvertOptions): NFA;
 
   /** The epsilon symbol for epsilon transitions.
    * @example .transition("q0", Delta.EPS, "q1")

@@ -1,14 +1,44 @@
 import type { NFA, Message } from "../compiler/nfa";
 import { epsilonClosure } from "./utils";
 
-function stateName(states: Set<string>): string {
-  const sorted = [...states].sort();
-  return `{${sorted.join(",")}}`;
+function stateName(preserve: boolean): (states: Set<string>) => string {
+  let stateNum = 0;
+  return (states: Set<string>) => {
+    if (!preserve) return `q${stateNum++}`;
+    const sorted = [...states].sort();
+    return `{${sorted.join(",")}}`;
+  };
 }
 
-export function convertToDFA(nfa: NFA, name: string = ""): NFA {
+interface ConvertOptions {
+  name?: string;
+  preserveNames?: boolean;
+}
+
+const DEFAULT_OPTIONS: (nfa: NFA) => ConvertOptions = (nfa: NFA) => ({
+  name: nfa.name,
+  preserveNames: true,
+});
+
+export function convertToDFA(
+  nfa: NFA,
+  options: ConvertOptions = DEFAULT_OPTIONS(nfa),
+): NFA {
+  const subsetToName = new Map<string, string>();
+
+  const getDfaName = (states: Set<string>) => {
+    const key = [...states].sort().join(",");
+    if (!subsetToName.has(key)) {
+      subsetToName.set(key, nextStateName(states));
+    }
+    return subsetToName.get(key)!;
+  };
+
   const initialStates = epsilonClosure(nfa, new Set([nfa.startState]));
-  const initialName = stateName(initialStates);
+  const nextStateName = stateName(
+    options?.preserveNames !== undefined ? options?.preserveNames : false,
+  );
+  const initialName = getDfaName(initialStates);
 
   const dfaStates = new Map<string, Set<string>>();
   const dfaTransitions = new Map<string, Map<string, Set<string>>>();
@@ -18,7 +48,7 @@ export function convertToDFA(nfa: NFA, name: string = ""): NFA {
 
   while (worklist.length > 0) {
     const current = worklist.pop()!;
-    const currentName = stateName(current);
+    const currentName = getDfaName(current);
 
     if (!dfaTransitions.has(currentName)) {
       dfaTransitions.set(currentName, new Map());
@@ -33,7 +63,7 @@ export function convertToDFA(nfa: NFA, name: string = ""): NFA {
       }
 
       const closed = epsilonClosure(nfa, next);
-      const nextName = stateName(closed);
+      const nextName = getDfaName(closed);
 
       dfaTransitions.get(currentName)!.set(symbol, new Set([nextName]));
 
@@ -54,7 +84,7 @@ export function convertToDFA(nfa: NFA, name: string = ""): NFA {
   const messages: Message[] = [];
 
   return {
-    name: name || `${nfa.name}__dfa`,
+    name: options?.name || `${nfa.name}__dfa`,
     alphabet: nfa.alphabet,
     states: new Set(dfaStates.keys()),
     startState: initialName,
