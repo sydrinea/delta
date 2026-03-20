@@ -7,7 +7,7 @@ import { AutomataViewer } from "@/components/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
 import { Visualizer } from "@/components/Visualizer";
 import { Tooltip } from "@/components/Tooltip";
-import { runCode } from "./runCode";
+import { ExecutionError, runCode } from "./runCode";
 import { FlowEditor } from "@/components/FlowEditor";
 import { nfaToFlow } from "@/lib/compiler/toFlow";
 import { Check, Copy } from "@/components/icons";
@@ -55,7 +55,11 @@ function NFAPage() {
     <div className="flex flex-1 overflow-hidden">
       {/* left — editor */}
       <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
-        <LeftPanel setAnf={setAnf} setEditorError={setEditorError} />
+        <LeftPanel
+          setAnf={setAnf}
+          setEditorError={setEditorError}
+          editorError={editorError}
+        />
       </div>
 
       {/* right — preview + tests */}
@@ -75,7 +79,7 @@ function NFAPage() {
               <p
                 className={`text-xs ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
               >
-                {editorError ?? "✓ looks good"}
+                {editorError ? "✗ failed to compile; check errors" : "✓ valid"}
               </p>
             </div>
           </div>
@@ -119,10 +123,11 @@ type LeftTab = "editor" | "canvas" | "visualizer";
 
 interface LeftPanelProps {
   setAnf: (anf: string) => void;
-  setEditorError: (error: string | null) => void;
+  setEditorError: (error: ExecutionError | null) => void;
+  editorError: ExecutionError | null;
 }
 
-function LeftPanel({ setAnf, setEditorError }: LeftPanelProps) {
+function LeftPanel({ setAnf, setEditorError, editorError }: LeftPanelProps) {
   const [activeTab, setActiveTab] = useState<LeftTab>("editor");
   const { machine, setNodes, setEdges, setStartId } = useDelta();
 
@@ -160,7 +165,11 @@ function LeftPanel({ setAnf, setEditorError }: LeftPanelProps) {
 
       <div className="flex-1 overflow-hidden">
         {activeTab === "editor" ? (
-          <DeltaEditor onValidMachine={setAnf} onError={setEditorError} />
+          <DeltaEditor
+            onValidMachine={setAnf}
+            onError={setEditorError}
+            editorError={editorError}
+          />
         ) : activeTab === "visualizer" ? (
           <Visualizer />
         ) : (

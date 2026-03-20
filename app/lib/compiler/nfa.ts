@@ -62,6 +62,20 @@ export const NFAMessages = {
   alreadyBuilt: "build() already called",
 } as const;
 
+export interface Message {
+  content: string;
+  severity: "warning" | "error";
+  stack?: string;
+}
+
+export class NFABuildError extends Error {
+  constructor(public messages: Message[]) {
+    super("NFA Build Failed");
+    this.name = "NFABuildError";
+    Object.setPrototypeOf(this, NFABuildError.prototype);
+  }
+}
+
 /**
  * Constructs a new NFA with validation
  */
@@ -89,7 +103,8 @@ export class NFABuilder {
    * @param content
    */
   protected message(severity: Message["severity"], content: string): void {
-    this._messages.push({ severity, content });
+    const stack = new Error().stack;
+    this._messages.push({ severity, content, stack });
   }
 
   /**
@@ -320,7 +335,7 @@ export class NFABuilder {
 
     const errors = this._messages.filter((m) => m.severity === "error");
     if (errors.length > 0) {
-      throw new Error(errors.map((m) => m.content).join("\n"));
+      throw new NFABuildError(this._messages);
     }
 
     return {

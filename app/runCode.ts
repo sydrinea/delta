@@ -1,11 +1,5 @@
 import { z } from "zod";
-import nfa from "@/lib/compiler/nfa";
-import dfa from "@/lib/compiler/dfa";
 import { serialize } from "@/lib/compiler/serialize";
-import { EPS } from "@/lib/compiler/constants";
-import { q, union, concat, star, char, epsilon } from "@/lib/compiler/helpers";
-import { thompson } from "@/lib/compiler/thompson";
-import { convertToDFA } from "@/lib/transform/subset";
 
 const MessageSchema = z.object({
   content: z.string(),
@@ -22,34 +16,66 @@ export const NFASchema = z.object({
   messages: z.array(MessageSchema),
 });
 
-export const runCode = (
+export interface ExecutionError {
+  message: string;
+  line: number;
+  column: number;
+}
+
+export const runCode = async (
   value: string,
   onValidMachine: (anf: string) => void,
-  onError: (error: string | null) => void,
+  onError: (error: ExecutionError | null) => void,
 ) => {
-  const Delta = {
-    nfa,
-    dfa,
-    convertToDFA,
-    thompson,
-    EPS,
-    q,
-    union,
-    concat,
-    star,
-    char,
-    epsilon,
-  };
-  try {
-    const result = new Function("Delta", value + "\n; return machine;")(Delta);
-    const { success } = NFASchema.safeParse(result);
+  const worker = new Worker(new URL("./lib/worker.ts", import.meta.url), {
+    type: "module",
+  });
+
+  const timeout = setTimeout(() => {
+    worker.terminate();
+    onError({
+      message: "Execution timed out (Possible infinite loop)",
+      line: 0,
+      column: 0,
+    });
+  }, 5000);
+
+  worker.onmessage = (e) => {
+    clearTimeout(timeout);
+    const { type, payload } = e.data;
+
+    if (type === "ERROR") {
+      for (const error of payload) {
+        onError({
+          message: error.message.split("\n").join("; "),
+          line: error.line,
+          column: error.column,
+        });
+      }
+      worker.terminate();
+      return;
+    }
+
+    const { success } = NFASchema.safeParse(payload);
     if (!success) {
-      onError("✗ did you forget to call .build()?");
+      onError({
+        message: "Invalid export. Did you forget to call .build()?",
+        line: 0,
+        column: 0,
+      });
+      worker.terminate();
       return;
     }
     onError(null);
-    onValidMachine(serialize(result));
-  } catch (e) {
-    onError(`✗ ${String(e).split("\n").join("; ")}`);
-  }
+    onValidMachine(serialize(payload));
+    worker.terminate();
+  };
+
+  worker.onerror = (err) => {
+    clearTimeout(timeout);
+    onError({ message: `Worker error: ${err.message}`, line: 1, column: 1 });
+    worker.terminate();
+  };
+
+  worker.postMessage({ code: value });
 };

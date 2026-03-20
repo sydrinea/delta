@@ -11,6 +11,7 @@ import type { Node, Edge } from "reactflow";
 import type { NFA } from "@/lib/compiler/nfa";
 import { deserialize } from "@/lib/compiler/serialize";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { ExecutionError } from "../runCode";
 
 export interface TestCase {
   id: string;
@@ -34,8 +35,8 @@ interface DeltaContextValue {
   machineError: string | null;
   tests: TestCase[];
   setTests: (tests: TestCase[]) => void;
-  editorError: string | null;
-  setEditorError: (error: string | null) => void;
+  editorError: ExecutionError | null;
+  setEditorError: (error: ExecutionError | null) => void;
   nodes: Node[];
   setNodes: (nodes: Node[]) => void;
   edges: Edge[];
@@ -98,7 +99,7 @@ export function DeltaProvider({ label, children }: DeltaProviderProps) {
     null,
   );
 
-  const [editorError, setEditorError] = useState<string | null>(null);
+  const [editorError, setEditorError] = useState<ExecutionError | null>(null);
   const [machine, setMachine] = useState<NFA | null>(null);
   const [machineError, setMachineError] = useState<string | null>(null);
 

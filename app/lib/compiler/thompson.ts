@@ -58,6 +58,6 @@ class ThompsonBuilder {
   }
 }
 
-export function thompson(name: string): ThompsonBuilder {
+export default function thompson(name: string): ThompsonBuilder {
   return new ThompsonBuilder(name);
 }

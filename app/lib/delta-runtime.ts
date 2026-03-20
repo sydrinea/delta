@@ -1,5 +1,5 @@
 const DELTA_D_TS = `
-declare namespace Delta {
+declare module "delta:lib" {
   interface NFA {
     name: string;
     alphabet: Set<string>;
@@ -186,6 +186,38 @@ declare namespace Delta {
    * @example .transition("q0", Delta.EPS, "q1")
    */
   const EPS: string;
-}`;
+
+  interface Delta {
+    nfa: typeof nfa;
+    dfa: typeof dfa;
+    thompson: typeof thompson;
+    convertToDFA: typeof convertToDFA;
+    q: typeof q;
+    union: typeof union;
+    concat: typeof concat;
+    star: typeof star;
+    char: typeof char;
+    epsilon: typeof epsilon;
+    empty: typeof empty;
+    EPS: typeof EPS;
+  }
+
+  export const nfa: typeof nfa;
+  export const dfa: typeof dfa;
+  export const thompson: typeof thompson;
+  export const convertToDFA: typeof convertToDFA;
+  export const q: typeof q;
+  export const union: typeof union;
+  export const concat: typeof concat;
+  export const star: typeof star;
+  export const char: typeof char;
+  export const epsilon: typeof epsilon;
+  export const empty: typeof empty;
+  export const EPS: typeof EPS;
+  
+  const api: Delta;
+  export default api;
+}
+`;
 
 export default DELTA_D_TS;
