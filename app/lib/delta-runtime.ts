@@ -177,6 +177,9 @@ declare namespace Delta {
    */
   function epsilon(): NFA;
 
+  /** Convert an NFA into an equivalent DFA using subset construction.
+   * @example const dfa = Delta.convertToDFA(myNfa, "myEquivalentDfa")
+   */
   function convertToDFA(nfa: NFA, name?: string): NFA;
 
   /** The epsilon symbol for epsilon transitions.
