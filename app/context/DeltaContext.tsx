@@ -56,6 +56,9 @@ const DEFAULT_VALUE = `//---
 // use the "clear" button to get started building your own
 // DFA or NFA!
 // ---
+import * as Delta from "delta:lib";
+// import { dfa, q } from "delta:lib";
+
 const machine = Delta.dfa("# of a's divisible by 2 or 3")
   .alphabet("a", "b")
   .states(...Delta.q(0, 5))
@@ -63,7 +66,9 @@ const machine = Delta.dfa("# of a's divisible by 2 or 3")
   .accept("q0", "q2", "q3", "q4")
   .increment("a")
   .all((s) => s.loop("b").done())
-  .build();`;
+  .build();
+
+export default machine;`;
 
 const DEFAULT_TESTS = [
   { id: crypto.randomUUID(), input: "", expected: true },
