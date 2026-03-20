@@ -3,7 +3,8 @@ import nfa from "@/lib/compiler/nfa";
 import dfa from "@/lib/compiler/dfa";
 import { serialize } from "@/lib/compiler/serialize";
 import { EPS } from "@/lib/compiler/constants";
-import { q } from "@/lib/compiler/helpers";
+import { q, union, concat, star, char, epsilon } from "@/lib/compiler/helpers";
+import { thompson } from "@/lib/compiler/thompson";
 
 const MessageSchema = z.object({
   content: z.string(),
@@ -25,7 +26,18 @@ export const runCode = (
   onValidMachine: (anf: string) => void,
   onError: (error: string | null) => void,
 ) => {
-  const Delta = { nfa, dfa, EPS, q };
+  const Delta = {
+    nfa,
+    dfa,
+    thompson,
+    EPS,
+    q,
+    union,
+    concat,
+    star,
+    char,
+    epsilon,
+  };
   try {
     const result = new Function("Delta", value + "\n; return machine;")(Delta);
     const { success } = NFASchema.safeParse(result);

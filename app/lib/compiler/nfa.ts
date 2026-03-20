@@ -60,7 +60,7 @@ export const NFAMessages = {
     `State '${state}' has no transition for symbol '${symbol}'`,
   noStartState: "No start state defined",
   alreadyBuilt: "build() already called",
-} as const; // prevent modification
+} as const;
 
 /**
  * Constructs a new NFA with validation

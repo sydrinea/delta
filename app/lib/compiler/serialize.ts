@@ -19,6 +19,15 @@ export function serialize(nfa: NFA): string {
     )
     .join(LIST);
 
+  // In order for a ANF to be valid, we need something for the alphabet
+  const containsEpsilon = [...nfa.transitions.entries()]
+    .flatMap(([_, symbolMap]) => [...symbolMap.keys()])
+    .find((symbol) => symbol === EPSILON);
+
+  if (containsEpsilon) {
+    nfa.alphabet.add(EPSILON);
+  }
+
   return [
     nfa.name,
     [...nfa.states].join(LIST),
@@ -43,8 +52,13 @@ export function deserialize(input: string): NFA {
     throw new Error(`Invalid ANF: "${input}"`);
   }
 
+  // Our NFAs do not have epsilon as part of the alphabet
+  const alphabet = alphabetStr
+    .split(LIST)
+    .filter((symbol) => symbol !== EPSILON);
+
   const builder = nfa(name)
-    .alphabet(...alphabetStr.split(LIST))
+    .alphabet(...alphabet)
     .states(...statesStr.split(LIST))
     .start(startState)
     .accept(...acceptStatesStr.split(LIST));

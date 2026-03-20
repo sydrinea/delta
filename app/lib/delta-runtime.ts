@@ -112,16 +112,75 @@ declare namespace Delta {
   /** Build a DFA. @example const machine = Delta.dfa("myDFA").alphabet(...).build() */
   function dfa(name: string): DFABuilder;
 
+  /** Build an NFA using Thompson's construction (RPN stack-based builder). 
+   * @example const machine = Delta.thompson("myNFA").char("a").star().build() 
+   */
+  function thompson(name: string): ThompsonBuilder;
+
+  class ThompsonBuilder {
+    /** Push an NFA accepting a single character onto the stack. 
+     * @example .char("a") 
+     */
+    char(s: string): this;
+
+    /** Push an NFA accepting only the epsilon (empty string) onto the stack. 
+     * @example .eps() 
+     */
+    eps(): this;
+
+    /** Pop two NFAs off the stack, union them (a | b), and push the result. 
+     * @example .char("a").char("b").union() 
+     */
+    union(): this;
+
+    /** Pop two NFAs off the stack, concatenate them (ab), and push the result. 
+     * @example .char("a").char("b").concat() 
+     */
+    concat(): this;
+
+    /** Pop one NFA off the stack, apply the Kleene star (a*), and push the result. 
+     * @example .char("a").star() 
+     */
+    star(): this;
+
+    /** Validate the stack has exactly one NFA and return it. Must be called last. */
+    build(): NFA;
+  }
+
   /** Generate numbered state names q{lower} through q{upper}.
    * @example Delta.q(0, 4) // ["q0", "q1", "q2", "q3", "q4"]
    */
   const q: (lower: number, upper: number) => string[];
 
+  /** Construct an NFA representing the union of two NFAs (a | b). 
+   * @example Delta.union(nfaA, nfaB) 
+   */
+  function union(a: NFA, b: NFA): NFA;
+
+  /** Construct an NFA representing the concatenation of two NFAs (ab). 
+   * @example Delta.concat(nfaA, nfaB) 
+   */
+  function concat(a: NFA, b: NFA): NFA;
+
+  /** Construct an NFA representing the Kleene star of an NFA (a*). 
+   * @example Delta.star(nfaA) 
+   */
+  function star(a: NFA): NFA;
+
+  /** Construct an NFA that accepts a single character. 
+   * @example Delta.char("a") 
+   */
+  function char(s: string): NFA;
+
+  /** Construct an NFA that accepts only the empty string (epsilon). 
+   * @example Delta.epsilon() 
+   */
+  function epsilon(): NFA;
+
   /** The epsilon symbol for epsilon transitions.
    * @example .transition("q0", Delta.EPS, "q1")
    */
   const EPS: string;
-}
-`;
+}`;
 
 export default DELTA_D_TS;
