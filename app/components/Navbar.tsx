@@ -13,7 +13,7 @@ const TABS = [
 
 const MadeBy = () => (
   <a
-    href="https://sydneyn.dev"
+    href="https://github.com/sydrinea"
     target="_blank"
     rel="noopener noreferrer"
     className="flex items-center gap-1.5 text-ctp-overlay0 hover:text-ctp-text transition-colors text-xs"
