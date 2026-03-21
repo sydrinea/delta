@@ -24,6 +24,13 @@ export const metadata: Metadata = {
     description:
       "Create, test, and visualize DFAs and NFAs, with more to come!",
     siteName: "Delta — theory of computation tools",
+    images: [
+      {
+        url: "/android-chrome-192x192.png",
+        width: 192,
+        height: 192,
+      },
+    ],
   },
 };
 
