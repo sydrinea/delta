@@ -81,13 +81,21 @@ export function DeltaEditor({
   };
 
   useEffect(() => {
+    if (editorRef.current && editorValue) {
+      const current = editorRef.current.getValue();
+      if (current !== editorValue) {
+        editorRef.current.setValue(editorValue);
+      }
+    }
+  }, [editorValue, editorRef.current]);
+
+  useEffect(() => {
     if (!editorRef.current) return;
 
     const model = editorRef.current.getModel();
 
     if (!model || !monaco) return;
 
-    console.log(editorError);
     if (editorError) {
       if (editorError && editorError.line > 0) {
         monaco.editor.setModelMarkers(model, "delta-runtime", [
