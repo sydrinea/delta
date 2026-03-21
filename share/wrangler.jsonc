@@ -1,0 +1,30 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "share",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-03-10",
+  "observability": {
+    "enabled": true,
+  },
+  "compatibility_flags": ["nodejs_compat"],
+  "kv_namespaces": [
+    {
+      "binding": "DELTA_SHARE",
+      "id": "b59b6c0ccb70430680abaef751c3a7be",
+    },
+  ],
+  "routes": [
+    {
+      "pattern": "share.delta.sydneyn.dev",
+      "custom_domain": true,
+    },
+    {
+      "pattern": "share.comptheory.tools",
+      "custom_domain": true,
+    },
+  ],
+}
