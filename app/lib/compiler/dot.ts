@@ -28,15 +28,23 @@ function dotStateStyle(
 }
 
 function dotTransitions(nfa: NFA): string {
-  return [...nfa.transitions.entries()]
-    .flatMap(([from, symbolMap]) =>
-      [...symbolMap.entries()].flatMap(([symbol, toSet]) =>
-        [...toSet].map(
-          (to) =>
-            `  "${from}" -> "${to}" [label="${symbol === EPSILON ? "ε" : symbol}"]`,
-        ),
-      ),
-    )
+  const edgeMap = new Map<string, string[]>();
+
+  for (const [from, symbolMap] of nfa.transitions) {
+    for (const [symbol, toSet] of symbolMap) {
+      for (const to of toSet) {
+        const key = `${from}→${to}`;
+        if (!edgeMap.has(key)) edgeMap.set(key, []);
+        edgeMap.get(key)!.push(symbol === EPSILON ? "ε" : symbol);
+      }
+    }
+  }
+
+  return [...edgeMap.entries()]
+    .map(([key, symbols]) => {
+      const [from, to] = key.split("→");
+      return `  "${from}" -> "${to}" [label="${symbols.join(", ")}"]`;
+    })
     .join("\n");
 }
 
