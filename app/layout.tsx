@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   title: "Delta — theory of computation tools",
   description: "Create, test, and visualize DFAs and NFAs, with more to come!",
   creator: "Sydney Newmark",
+  metadataBase: new URL("https://comptheory.tools"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
     url: "https://comptheory.tools",
