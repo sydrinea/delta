@@ -7,7 +7,7 @@ import defineTheme from "./defineTheme";
 import { useDelta } from "@/context/DeltaContext";
 import { ExecutionError, runCode } from "../runCode";
 import DELTA_D_TS from "@/lib/delta-runtime";
-import { Caution } from "./icons";
+import { Caution } from "@/icons/Caution";
 
 interface DeltaEditorProps {
   onValidMachine: (anf: string) => void;

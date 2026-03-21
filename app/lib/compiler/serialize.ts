@@ -7,14 +7,17 @@ const LIST = ";";
 const ARROW = ">";
 const EPS_TOKEN = "eps";
 
+const enc = encodeURIComponent;
+const dec = decodeURIComponent;
+
 export function serialize(nfa: NFA): string {
   const transitions = [...nfa.transitions.entries()]
     .flatMap(([from, symbolMap]) =>
       [...symbolMap.entries()].flatMap(([symbol, toSet]) =>
-        [...toSet].map(
-          (to) =>
-            `${from}${ARROW}${symbol === EPSILON ? EPS_TOKEN : symbol}${ARROW}${to}`,
-        ),
+        [...toSet].map((to) => {
+          const safeSymbol = symbol === EPSILON ? EPS_TOKEN : enc(symbol);
+          return `${enc(from)}${ARROW}${safeSymbol}${ARROW}${enc(to)}`;
+        }),
       ),
     )
     .join(LIST);
@@ -29,39 +32,45 @@ export function serialize(nfa: NFA): string {
   }
 
   return [
-    nfa.name,
-    [...nfa.states].join(LIST),
-    [...nfa.alphabet].join(LIST),
-    nfa.startState,
-    [...nfa.acceptStates].join(LIST),
+    enc(nfa.name),
+    [...nfa.states].map(enc).join(LIST),
+    [...nfa.alphabet].map(enc).join(LIST),
+    enc(nfa.startState),
+    [...nfa.acceptStates].map(enc).join(LIST),
     transitions,
   ].join(SEP);
 }
 
 export function deserialize(input: string): NFA {
   const [
-    name,
+    nameStr,
     statesStr,
     alphabetStr,
-    startState,
+    startStateStr,
     acceptStatesStr,
     transitionsStr,
   ] = input.split(SEP);
 
-  if (!name || !statesStr || !alphabetStr || !startState || !acceptStatesStr) {
+  if (
+    !nameStr ||
+    !statesStr ||
+    !alphabetStr ||
+    !startStateStr ||
+    !acceptStatesStr
+  ) {
     throw new Error(`Invalid ANF: "${input}"`);
   }
 
-  // Our NFAs do not have epsilon as part of the alphabet
   const alphabet = alphabetStr
     .split(LIST)
+    .map(dec)
     .filter((symbol) => symbol !== EPSILON);
 
-  const builder = nfa(name)
+  const builder = nfa(dec(nameStr))
     .alphabet(...alphabet)
-    .states(...statesStr.split(LIST))
-    .start(startState)
-    .accept(...acceptStatesStr.split(LIST));
+    .states(...statesStr.split(LIST).map(dec))
+    .start(dec(startStateStr))
+    .accept(...acceptStatesStr.split(LIST).map(dec));
 
   if (transitionsStr) {
     for (const t of transitionsStr.split(LIST)) {
@@ -69,7 +78,9 @@ export function deserialize(input: string): NFA {
       if (!from || !symbol || !to) {
         throw new Error(`Invalid transition: "${t}"`);
       }
-      builder.transition(from, symbol === EPS_TOKEN ? EPSILON : symbol, to);
+
+      const decodedSymbol = symbol === EPS_TOKEN ? EPSILON : dec(symbol);
+      builder.transition(dec(from), decodedSymbol, dec(to));
     }
   }
 

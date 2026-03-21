@@ -48,7 +48,7 @@ interface DeltaContextValue {
 const DeltaContext = createContext<DeltaContextValue | null>(null);
 
 const DEFAULT_ANF =
-  "# of a's divisible by 2 or 3|q0;q1;q2;q3;q4;q5|a;b|q0|q0;q2;q3;q4|q0>a>q1;q0>b>q0;q1>a>q2;q1>b>q1;q2>a>q3;q2>b>q2;q3>a>q4;q3>b>q3;q4>a>q5;q4>b>q4;q5>a>q0;q5>b>q5";
+  "%23%20of%20a's%20divisible%20by%202%20or%203|q0;q1;q2;q3;q4;q5|a;b|q0|q0;q2;q3;q4|q0>a>q1;q0>b>q0;q1>a>q2;q1>b>q1;q2>a>q3;q2>b>q2;q3>a>q4;q3>b>q3;q4>a>q5;q4>b>q4;q5>a>q0;q5>b>q5";
 
 const DEFAULT_VALUE = `//---
 // Welcome to Delta! This is the code editor. If you'd like to use 

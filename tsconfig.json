@@ -20,6 +20,7 @@
     ],
     "paths": {
       "@/components/*": ["./app/components/*"],
+      "@/icons/*": ["./app/components/icons/*"],
       "@/context/*": ["./app/context/*"],
       "@/hooks/*": ["./app/hooks/*"],
       "@/lib/*": ["./app/lib/*"]

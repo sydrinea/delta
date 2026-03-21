@@ -95,6 +95,30 @@ export function TestSuite({ machine }: TestSuiteProps) {
     e.target.value = "";
   };
 
+  const handleTestExport = () => {
+    if (tests.length === 0) return;
+
+    const exportData = tests.map(({ input, expected }) => ({
+      input,
+      expected,
+    }));
+
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
+      type: "application/json",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${machine?.name || "delta"}_tests.json`;
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const hasResults = Object.keys(results).length > 0;
   const allPassed = hasResults && tests.every((t) => results[t.id]?.passed);
   const passCount = tests.filter((t) => results[t.id]?.passed).length;
@@ -124,6 +148,15 @@ export function TestSuite({ machine }: TestSuiteProps) {
                   onChange={handleTestImport}
                 />
               </label>
+            </Tooltip>
+            <Tooltip label="Export tests to JSON">
+              <button
+                onClick={handleTestExport}
+                disabled={tests.length === 0}
+                className="text-xs px-3 py-1 rounded-lg bg-ctp-mauve/20 border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve/30 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
+              >
+                export
+              </button>
             </Tooltip>
             <Tooltip label="shift+cmd+t">
               <button

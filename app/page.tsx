@@ -10,7 +10,8 @@ import { Tooltip } from "@/components/Tooltip";
 import { ExecutionError, runCode } from "./runCode";
 import { FlowEditor } from "@/components/FlowEditor";
 import { nfaToFlow } from "@/lib/compiler/toFlow";
-import { Check, Copy } from "@/components/icons";
+import { Check } from "@/icons/Check";
+import { Copy } from "@/icons/Copy";
 
 export default function Home() {
   return (
@@ -39,8 +40,8 @@ function NFAPage() {
     editorValue,
     setEditorError,
     setAnf,
-    tests,
   } = useDelta();
+
   const [copied, setCopied] = useState(false);
 
   const handleCopyANF = () => {
@@ -64,61 +65,57 @@ function NFAPage() {
 
       {/* right — preview + tests */}
       <div className="flex flex-col w-1/2 overflow-y-auto">
-        <div className="flex flex-col gap-3 p-6">
-          <div className="flex items-center gap-3">
-            <Tooltip label="cmd+s">
-              <button
-                onClick={() => runCode(editorValue, setAnf, setEditorError)}
-                disabled={!machine || tests.length === 0}
-                className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              >
-                compile
-              </button>
-            </Tooltip>
-            <div className={`rounded-lg py-1.5 transition-colors`}>
+        <div className="flex flex-col gap-4 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Tooltip label="cmd+s">
+                <button
+                  onClick={() => runCode(editorValue, setAnf, setEditorError)}
+                  className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  compile
+                </button>
+              </Tooltip>
               <p
-                className={`text-xs ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
+                className={`text-xs font-mono ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
               >
                 {editorError ? "✗ failed to compile; check errors" : "✓ valid"}
               </p>
             </div>
-          </div>
 
-          <h1 className="text-ctp-subtext1 text-lg font-bold text-center">
-            {machine?.name ?? "—"}
-          </h1>
-
-          <div className="relative">
-            <input
-              type="text"
-              value={anf ?? ""}
-              readOnly
-              placeholder="ANF string"
-              className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-2 pr-10 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none"
-            />
-            <button
-              onClick={handleCopyANF}
-              title="Copy ANF"
-              className="absolute right-2 top-1/2 -translate-y-1/2 text-ctp-overlay0 hover:text-ctp-text transition-colors"
-            >
-              {copied ? <Check /> : <Copy />}
-            </button>
+            <div className="flex items-center gap-2">
+              <h1 className="text-ctp-text text-sm font-bold uppercase tracking-widest">
+                {machine?.name ?? "untitled"}
+              </h1>
+              <Tooltip label="Copy ANF">
+                <button
+                  onClick={handleCopyANF}
+                  className="text-ctp-overlay0 hover:text-ctp-text transition-colors flex items-center"
+                >
+                  {copied ? <Check /> : <Copy />}
+                </button>
+              </Tooltip>
+            </div>
           </div>
 
           {machineError && (
-            <div className="bg-ctp-red/20 border border-ctp-red rounded-lg px-3 py-2">
-              <p className="text-ctp-red text-xs">{machineError}</p>
+            <div className="bg-ctp-red/10 border border-ctp-red/30 rounded-xl px-4 py-3">
+              <p className="text-ctp-red text-xs font-mono leading-relaxed">
+                {machineError}
+              </p>
             </div>
           )}
 
-          {machine && <AutomataViewer nfa={machine} />}
-
-          <TestSuite machine={machine} />
+          <div className="flex flex-col gap-4">
+            {machine && <AutomataViewer nfa={machine} />}
+            <TestSuite machine={machine} />
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
 type LeftTab = "editor" | "canvas" | "visualizer";
 
 interface LeftPanelProps {
