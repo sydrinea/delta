@@ -79,8 +79,8 @@ function NFAPage() {
       {/* right panel — full width on mobile, half on desktop */}
       <div className="flex flex-col w-full md:w-1/2 overflow-y-auto">
         <div className="flex flex-col gap-4 p-6">
-          <div className="flex flex-col-reverse lg:flex-row items-start justify-between gap-3 md:gap-3">
-            <div className="flex items-center gap-y-3 lg:flex-row">
+          <div className="flex flex-col-reverse lg:flex-row justify-between gap-3">
+            <div className="flex items-center gap-y-3">
               <Tooltip label="cmd+s">
                 <button
                   onClick={() => runCode(editorValue, setAnf, setEditorError)}
@@ -97,7 +97,7 @@ function NFAPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <h1 className="text-ctp-text text-sm text-end font-bold uppercase tracking-widest w-56 xl:w-80 text-nowrap overflow-scroll">
+              <h1 className="text-ctp-text text-sm text-center font-bold uppercase tracking-widest w-56 xl:w-80 text-nowrap overflow-scroll">
                 {machine?.name ?? "untitled"}
               </h1>
               <Tooltip label="Share Machine">
