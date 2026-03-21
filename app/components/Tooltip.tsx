@@ -1,31 +1,68 @@
 import { createPortal } from "react-dom";
 import { useRef, useState } from "react";
 
+type AlignPos = "center" | "right" | "left";
+
+function calculateAlignment(
+  rect: DOMRect,
+  tooltipWidth: number,
+): { left: number; align: AlignPos } {
+  const center = rect.left + rect.width / 2;
+
+  if (center + tooltipWidth / 2 > window.innerWidth - 8) {
+    return { left: rect.right, align: "right" };
+  }
+
+  if (center - tooltipWidth / 2 < 8) {
+    return { left: rect.left, align: "left" };
+  }
+
+  return { left: center, align: "center" };
+}
+
 interface TooltipProps {
   label: string;
   children: React.ReactNode;
 }
 
+interface Pos {
+  top: number;
+  left: number;
+  align: AlignPos;
+}
+
+const STYLE_MAP = {
+  center: {
+    container: { transform: "translate(-50%, -100%)" },
+    arrow: { left: "50%", right: "auto", transform: "translateX(-50%)" },
+  },
+  right: {
+    container: { transform: "translate(-100%, -100%)" },
+    arrow: { left: "auto", right: "12px", transform: "none" },
+  },
+  left: {
+    container: { transform: "translate(0, -100%)" },
+    arrow: { left: "12px", right: "auto", transform: "none" },
+  },
+} as const;
+
 export function Tooltip({ label, children }: TooltipProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<{
-    top: number;
-    left: number;
-    align: "center" | "right";
-  } | null>(null);
+  const [pos, setPos] = useState<Pos | null>(null);
 
-  const show = () => {
+  const show = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+
     const rect = ref.current?.getBoundingClientRect();
     if (!rect) return;
 
-    const center = rect.left + rect.width / 2;
     const tooltipWidth = label.length * 7 + 16; // rough estimate
-    const wouldOverhang = center + tooltipWidth / 2 > window.innerWidth - 8;
+    const { left, align } = calculateAlignment(rect, tooltipWidth);
 
     setPos({
       top: rect.top,
-      left: wouldOverhang ? rect.right : center,
-      align: wouldOverhang ? "right" : "center",
+      left,
+      align,
     });
   };
 
@@ -33,33 +70,25 @@ export function Tooltip({ label, children }: TooltipProps) {
     <div
       ref={ref}
       className="relative"
-      onMouseEnter={show}
-      onMouseLeave={() => setPos(null)}
+      onPointerEnter={show}
+      onPointerLeave={() => setPos(null)}
     >
       {children}
       {pos &&
         createPortal(
           <div
-            className="hidden md:block fixed z-50 pointer-events-none"
+            className="fixed z-50 pointer-events-none"
             style={{
               top: pos.top - 8,
               left: pos.left,
-              transform:
-                pos.align === "center"
-                  ? "translate(-50%, -100%)"
-                  : "translate(-100%, -100%)",
+              ...STYLE_MAP[pos.align].container,
             }}
           >
             <div className="relative px-2 py-1 text-xs rounded bg-ctp-surface0 border-t-2 border-ctp-mauve/65 text-ctp-text whitespace-nowrap">
               {label}
               <svg
                 className="absolute top-full text-ctp-surface0"
-                style={{
-                  left: pos.align === "center" ? "50%" : "auto",
-                  right: pos.align === "right" ? "8px" : "auto",
-                  transform:
-                    pos.align === "center" ? "translateX(-50%)" : "none",
-                }}
+                style={STYLE_MAP[pos.align].arrow}
                 width="8"
                 height="4"
                 viewBox="0 0 8 4"
