@@ -16,15 +16,7 @@ import { Share } from "@/icons/Share";
 export default function Home() {
   return (
     <DeltaProvider label="nfa">
-      <section className="md:hidden h-screen bg-ctp-base flex flex-col overflow-hidden font-mono m-5 text-center">
-        <div className="flex-1 flex items-center justify-center">
-          <p className="text-ctp-subtext0 text-sm">
-            Delta isn't available for windows this narrow. Please resize your
-            web browser or try a larger device.
-          </p>
-        </div>
-      </section>
-      <section className="hidden md:flex md:flex-col md:h-screen md:overflow-hidden">
+      <section className="flex md:flex-col md:h-screen md:overflow-hidden">
         <NFAPage />
       </section>
     </DeltaProvider>
@@ -74,7 +66,8 @@ function NFAPage() {
   return (
     <div className="flex flex-1 overflow-hidden">
       {/* left — editor */}
-      <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
+      {/* left panel — hidden on mobile */}
+      <div className="hidden md:flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
         <LeftPanel
           setAnf={setAnf}
           setEditorError={setEditorError}
@@ -83,7 +76,8 @@ function NFAPage() {
       </div>
 
       {/* right — preview + tests */}
-      <div className="flex flex-col w-1/2 overflow-y-auto">
+      {/* right panel — full width on mobile, half on desktop */}
+      <div className="flex flex-col w-full md:w-1/2 overflow-y-auto">
         <div className="flex flex-col gap-4 p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -126,7 +120,18 @@ function NFAPage() {
           )}
 
           <div className="flex flex-col gap-4">
-            {machine && <AutomataViewer nfa={machine} />}
+            {/* graph viewer — desktop only */}
+            {machine && (
+              <div className="hidden md:block">
+                <AutomataViewer nfa={machine} />
+              </div>
+            )}
+            {/* visualizer — mobile only */}
+            {machine && (
+              <div className="md:hidden">
+                <Visualizer />
+              </div>
+            )}
             <TestSuite machine={machine} />
           </div>
         </div>
