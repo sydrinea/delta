@@ -93,20 +93,20 @@ export function AutomataViewer({ nfa, activeStates }: AutomataViewerProps) {
         className="bg-ctp-mantle rounded-2xl p-6 border border-ctp-surface0 flex items-center justify-center min-h-48 overflow-hidden"
       />
 
-      <div className="absolute top-3 right-3 flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="absolute bottom-3 left-3 flex flex-row items-center gap-1 p-1 rounded-full bg-ctp-crust/80 backdrop-blur-sm border border-ctp-surface1 shadow-sm shadow-ctp-crust">
         <Tooltip label="Download PNG">
           <button
             onClick={handleDownloadPng}
-            className="p-1.5 rounded-md bg-ctp-mantle text-ctp-overlay0 hover:text-ctp-green transition-colors border border-ctp-surface1 shadow-sm"
+            className="p-1.5 rounded-full text-ctp-overlay0 hover:text-ctp-green hover:bg-ctp-surface0 transition-all"
           >
             <Download />
           </button>
         </Tooltip>
-
+        <div className="w-px h-4 bg-ctp-surface1" />
         <Tooltip label="Copy GraphViz DOT">
           <button
             onClick={handleCopyDot}
-            className="p-1.5 rounded-md bg-ctp-mantle text-ctp-overlay0 hover:text-ctp-text transition-colors border border-ctp-surface1 shadow-sm"
+            className="p-1.5 rounded-full text-ctp-overlay0 hover:text-ctp-mauve hover:bg-ctp-surface0 transition-all"
           >
             {copied ? <Check /> : <Graph />}
           </button>
