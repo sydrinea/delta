@@ -89,7 +89,7 @@ export function Visualizer() {
       onBlur={() => setFocused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="flex flex-col gap-4 p-4 h-full overflow-y-scroll focus:outline-none"
+      className="flex flex-col gap-4 md:p-4 h-full overflow-y-scroll focus:outline-none"
     >
       {/* input + test picker */}
       <div className="flex flex-col md:flex-row gap-2">

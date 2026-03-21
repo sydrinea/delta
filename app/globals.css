@@ -2,10 +2,6 @@
 
 @import "@catppuccin/tailwindcss/mocha.css";
 
-@theme {
-  --breakpoint-xs: 25rem;
-}
-
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;

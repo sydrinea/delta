@@ -40,7 +40,7 @@ export function Tooltip({ label, children }: TooltipProps) {
       {pos &&
         createPortal(
           <div
-            className="fixed z-50 pointer-events-none"
+            className="hidden md:block fixed z-50 pointer-events-none"
             style={{
               top: pos.top - 8,
               left: pos.left,

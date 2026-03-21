@@ -125,18 +125,20 @@ export function TestSuite({ machine }: TestSuiteProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
-        <span className="text-ctp-subtext0 text-xs uppercase tracking-widest">
-          test suite
-        </span>
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
+          <span className="text-ctp-subtext0 text-xs uppercase tracking-widest">
+            test suite
+          </span>
           {hasResults && (
             <span
               className={`text-xs font-bold ${allPassed ? "text-ctp-green" : "text-ctp-red"}`}
             >
-              {passCount}/{tests.length}
+              ({passCount} of {tests.length})
             </span>
           )}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
           <Tooltip label="Import tests from JSON">
             <label className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors cursor-pointer flex items-center justify-center">
               import

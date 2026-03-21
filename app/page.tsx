@@ -64,7 +64,7 @@ function NFAPage() {
   };
 
   return (
-    <div className="flex flex-1 overflow-hidden">
+    <div className="flex flex-col md:flex-row flex-1 md:overflow-hidden">
       {/* left — editor */}
       {/* left panel — hidden on mobile */}
       <div className="hidden md:flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
@@ -79,8 +79,8 @@ function NFAPage() {
       {/* right panel — full width on mobile, half on desktop */}
       <div className="flex flex-col w-full md:w-1/2 overflow-y-auto">
         <div className="flex flex-col gap-4 p-6">
-          <div className="flex flex-col-reverse md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col-reverse lg:flex-row items-start justify-between gap-3 md:gap-3">
+            <div className="flex items-center gap-y-3 lg:flex-row">
               <Tooltip label="cmd+s">
                 <button
                   onClick={() => runCode(editorValue, setAnf, setEditorError)}
@@ -89,15 +89,15 @@ function NFAPage() {
                   compile
                 </button>
               </Tooltip>
-              <p
-                className={`text-xs font-mono ${editorError ? "text-ctp-red" : "text-ctp-green"}`}
+              <a
+                className={`text-xs px-3 py-1 rounded-lg ${editorError ? "text-ctp-red" : "text-ctp-green"} transition-colors`}
               >
-                {editorError ? "✗ failed to compile; check errors" : "✓ valid"}
-              </p>
+                {editorError ? "✗ check errors" : "✓ valid"}
+              </a>
             </div>
 
             <div className="flex items-center gap-2">
-              <h1 className="text-ctp-text text-sm font-bold uppercase tracking-widest">
+              <h1 className="text-ctp-text text-sm text-end font-bold uppercase tracking-widest w-56 xl:w-80 text-nowrap overflow-scroll">
                 {machine?.name ?? "untitled"}
               </h1>
               <Tooltip label="Share Machine">

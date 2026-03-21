@@ -51,11 +51,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="latte overscroll-none">
+    <html lang="en" className="latte overscroll-none bg-ctp-base">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main className="h-dvh bg-ctp-base flex flex-col overflow-hidden font-mono">
+        <main className="h-dvh flex flex-col font-mono">
           <Navbar />
           {children}
         </main>
