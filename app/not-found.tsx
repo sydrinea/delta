@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function NotFound() {
   return (
     <div className="flex-1 flex flex-col items-center justify-center gap-4">
@@ -6,12 +8,12 @@ export default function NotFound() {
       <p className="text-ctp-subtext0 text-sm">
         this page doesn't exist — but your automata do
       </p>
-      <a
+      <Link
         href="/"
         className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust transition-colors mt-2"
       >
         find your way home
-      </a>
+      </Link>
     </div>
   );
 }
