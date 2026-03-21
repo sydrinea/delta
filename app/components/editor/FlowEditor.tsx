@@ -27,7 +27,7 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { useDelta } from "@/context/DeltaContext";
 import { flowToCode } from "@/lib/compiler/fromFlow";
-import { runCode } from "../runCode";
+import { runCode } from "../../runCode";
 
 const SetEdgesContext = createContext<
   ((updater: (eds: Edge[]) => Edge[]) => void) | null

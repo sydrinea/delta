@@ -5,7 +5,7 @@ import Editor, { OnMount, useMonaco } from "@monaco-editor/react";
 import * as MonacoEditor from "monaco-editor";
 import defineTheme from "./defineTheme";
 import { useDelta } from "@/context/DeltaContext";
-import { ExecutionError, runCode } from "../runCode";
+import { ExecutionError, runCode } from "../../runCode";
 import DELTA_D_TS from "@/lib/delta-runtime";
 import { Caution } from "@/icons/Caution";
 

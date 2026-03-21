@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { DeltaEditor } from "@/components/DeltaEditor";
+import { DeltaEditor } from "@/components/editor/DeltaEditor";
 import { DeltaProvider, useDelta } from "@/context/DeltaContext";
-import { AutomataViewer } from "@/components/AutomataViewer";
+import { AutomataViewer } from "@/components/visualize/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
-import { Visualizer } from "@/components/Visualizer";
+import { Trace } from "@/components/visualize/Trace";
 import { Tooltip } from "@/components/Tooltip";
 import { ExecutionError, runCode } from "./runCode";
-import { FlowEditor } from "@/components/FlowEditor";
+import { FlowEditor } from "@/components/editor/FlowEditor";
 import { nfaToFlow } from "@/lib/compiler/toFlow";
 import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
@@ -126,10 +126,10 @@ function NFAPage() {
                 <AutomataViewer nfa={machine} />
               </div>
             )}
-            {/* visualizer — mobile only */}
+            {/* trace — mobile only */}
             {machine && (
               <div className="md:hidden">
-                <Visualizer />
+                <Trace />
               </div>
             )}
             <TestSuite machine={machine} />
@@ -192,7 +192,7 @@ function LeftPanel({ setAnf, setEditorError, editorError }: LeftPanelProps) {
             editorError={editorError}
           />
         ) : activeTab === "visualizer" ? (
-          <Visualizer />
+          <Trace />
         ) : (
           <FlowEditor />
         )}

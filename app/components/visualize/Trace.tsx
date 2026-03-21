@@ -6,7 +6,7 @@ import { simulate } from "@/lib/simulator/nfa";
 import { AutomataViewer } from "./AutomataViewer";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
-export function Visualizer() {
+export function Trace() {
   const { machine, tests } = useDelta();
   const [input, setInput] = useState("");
   const [step, setStep] = useState(0);
