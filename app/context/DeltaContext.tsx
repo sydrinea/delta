@@ -10,7 +10,7 @@ import {
 import type { Node, Edge } from "reactflow";
 import type { NFA } from "@/lib/compiler/nfa";
 import { deserialize } from "@/lib/compiler/serialize";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useTabStorage } from "@/hooks/useTabStorage";
 import { ExecutionError } from "../runCode";
 import { nfaToCode } from "@/lib/compiler/nfaToCode";
 
@@ -86,21 +86,21 @@ interface DeltaProviderProps {
 }
 
 export function DeltaProvider({ label, children }: DeltaProviderProps) {
-  const [tests, setTests] = useLocalStorage<TestCase[]>(
+  const [tests, setTests] = useTabStorage<TestCase[]>(
     `delta:${label}:tests`,
     DEFAULT_TESTS,
   );
-  const [anf, setAnf] = useLocalStorage<string | null>(
+  const [anf, setAnf] = useTabStorage<string | null>(
     `delta:${label}:anf`,
     DEFAULT_ANF,
   );
-  const [editorValue, setEditorValue] = useLocalStorage(
+  const [editorValue, setEditorValue] = useTabStorage(
     `delta:${label}:editor`,
     DEFAULT_VALUE,
   );
-  const [nodes, setNodes] = useLocalStorage<Node[]>(`delta:${label}:nodes`, []);
-  const [edges, setEdges] = useLocalStorage<Edge[]>(`delta:${label}:edges`, []);
-  const [startId, setStartId] = useLocalStorage<string | null>(
+  const [nodes, setNodes] = useTabStorage<Node[]>(`delta:${label}:nodes`, []);
+  const [edges, setEdges] = useTabStorage<Edge[]>(`delta:${label}:edges`, []);
+  const [startId, setStartId] = useTabStorage<string | null>(
     `delta:${label}:startId`,
     null,
   );
