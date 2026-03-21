@@ -11,7 +11,7 @@ import { ExecutionError, runCode } from "./runCode";
 import { FlowEditor } from "@/components/FlowEditor";
 import { nfaToFlow } from "@/lib/compiler/toFlow";
 import { Check } from "@/icons/Check";
-import { Copy } from "@/icons/Copy";
+import { Share } from "@/icons/Share";
 
 export default function Home() {
   return (
@@ -44,9 +44,28 @@ function NFAPage() {
 
   const [copied, setCopied] = useState(false);
 
-  const handleCopyANF = () => {
-    if (anf) {
-      navigator.clipboard.writeText(anf);
+  const handleShare = async () => {
+    const SHARE_URL = window.location.hostname.includes("comptheory.tools")
+      ? "https://share.comptheory.tools"
+      : "https://share.delta.sydneyn.dev";
+
+    if (!anf) return;
+
+    try {
+      const res = await fetch(`${SHARE_URL}/anf`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ anf }),
+      });
+      const { id } = await res.json<{ id: string }>();
+      const url = `${window.location.origin}?m=${id}`;
+      navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // fallback to ANF in URL
+      const url = `${window.location.origin}?anf=${encodeURIComponent(anf)}`;
+      navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -87,12 +106,12 @@ function NFAPage() {
               <h1 className="text-ctp-text text-sm font-bold uppercase tracking-widest">
                 {machine?.name ?? "untitled"}
               </h1>
-              <Tooltip label="Copy ANF">
+              <Tooltip label="Share Machine">
                 <button
-                  onClick={handleCopyANF}
+                  onClick={handleShare}
                   className="text-ctp-overlay0 hover:text-ctp-text transition-colors flex items-center"
                 >
-                  {copied ? <Check /> : <Copy />}
+                  {copied ? <Check /> : <Share />}
                 </button>
               </Tooltip>
             </div>

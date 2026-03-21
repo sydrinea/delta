@@ -12,6 +12,7 @@ import type { NFA } from "@/lib/compiler/nfa";
 import { deserialize } from "@/lib/compiler/serialize";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { ExecutionError } from "../runCode";
+import { nfaToCode } from "@/lib/compiler/nfaToCode";
 
 export interface TestCase {
   id: string;
@@ -119,6 +120,40 @@ export function DeltaProvider({ label, children }: DeltaProviderProps) {
       setMachine(null);
     }
   }, [anf]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const machineId = params.get("m");
+    const anfParam = params.get("anf");
+
+    const SHARE_URL = window.location.hostname.includes("comptheory.tools")
+      ? "https://share.comptheory.tools"
+      : "https://share.delta.sydneyn.dev";
+
+    if (machineId) {
+      fetch(`${SHARE_URL}/anf/${machineId}`)
+        .then((res) => res.json<{ anf: string }>())
+        .then(({ anf }) => {
+          setAnf(anf);
+          try {
+            const machine = deserialize(anf);
+            setEditorValue(nfaToCode(machine));
+          } catch {}
+        })
+        .catch(() => {}) // silently fail — default machine loads instead
+        .finally(() => {
+          window.history.replaceState({}, "", window.location.pathname);
+        });
+    } else if (anfParam) {
+      // legacy fallback for raw ANF URLs
+      setAnf(anfParam);
+      try {
+        const machine = deserialize(anfParam);
+        setEditorValue(nfaToCode(machine));
+      } catch {}
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, []);
 
   return (
     <DeltaContext.Provider
