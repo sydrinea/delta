@@ -132,13 +132,10 @@ export function DeltaProvider({ label, children }: DeltaProviderProps) {
 
     if (machineId) {
       fetch(`${SHARE_URL}/anf/${machineId}`)
-        .then((res) => res.json() as Promise<{ anf: string }>)
-        .then(({ anf }) => {
+        .then((res) => res.json() as Promise<{ anf: string; code: string }>)
+        .then(({ anf, code }) => {
           setAnf(anf);
-          try {
-            const machine = deserialize(anf);
-            setEditorValue(nfaToCode(machine));
-          } catch {}
+          setEditorValue(code);
         })
         .catch(() => {}) // silently fail — default machine loads instead
         .finally(() => {

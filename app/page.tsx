@@ -55,7 +55,7 @@ function NFAPage() {
       const res = await fetch(`${SHARE_URL}/anf`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ anf }),
+        body: JSON.stringify({ anf, code: editorValue }),
       });
       const { id } = (await res.json()) as { id: string };
       const url = `${window.location.origin}?m=${id}`;
