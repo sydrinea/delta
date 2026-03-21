@@ -57,7 +57,7 @@ function NFAPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ anf }),
       });
-      const { id } = await res.json<{ id: string }>();
+      const { id } = (await res.json()) as { id: string };
       const url = `${window.location.origin}?m=${id}`;
       navigator.clipboard.writeText(url);
       setCopied(true);

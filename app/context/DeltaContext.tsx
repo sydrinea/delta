@@ -132,7 +132,7 @@ export function DeltaProvider({ label, children }: DeltaProviderProps) {
 
     if (machineId) {
       fetch(`${SHARE_URL}/anf/${machineId}`)
-        .then((res) => res.json<{ anf: string }>())
+        .then((res) => res.json() as Promise<{ anf: string }>)
         .then(({ anf }) => {
           setAnf(anf);
           try {
