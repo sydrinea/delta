@@ -124,50 +124,48 @@ export function TestSuite({ machine }: TestSuiteProps) {
   const passCount = tests.filter((t) => results[t.id]?.passed).length;
 
   return (
-    <div className="flex flex-col gap-3 w-full">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col xs:flex-row xs:items-center justify-between gap-3">
         <span className="text-ctp-subtext0 text-xs uppercase tracking-widest">
           test suite
         </span>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2">
-            {hasResults && (
-              <span
-                className={`text-xs font-bold ${allPassed ? "text-ctp-green" : "text-ctp-red"}`}
-              >
-                {passCount}/{tests.length}
-              </span>
-            )}
-            <Tooltip label="Import tests from JSON">
-              <label className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors cursor-pointer flex items-center justify-center">
-                import
-                <input
-                  type="file"
-                  accept=".json"
-                  className="hidden"
-                  onChange={handleTestImport}
-                />
-              </label>
-            </Tooltip>
-            <Tooltip label="Export tests to JSON">
-              <button
-                onClick={handleTestExport}
-                disabled={tests.length === 0}
-                className="text-xs px-3 py-1 rounded-lg bg-ctp-mauve/20 border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve/30 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
-              >
-                export
-              </button>
-            </Tooltip>
-            <Tooltip label="shift+cmd+t">
-              <button
-                onClick={runTests}
-                disabled={!machine || tests.length === 0}
-                className="text-xs px-3 py-1 rounded-lg bg-ctp-green/20 border border-ctp-green text-ctp-green hover:bg-ctp-green/30 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
-              >
-                run tests
-              </button>
-            </Tooltip>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {hasResults && (
+            <span
+              className={`text-xs font-bold ${allPassed ? "text-ctp-green" : "text-ctp-red"}`}
+            >
+              {passCount}/{tests.length}
+            </span>
+          )}
+          <Tooltip label="Import tests from JSON">
+            <label className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors cursor-pointer flex items-center justify-center">
+              import
+              <input
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleTestImport}
+              />
+            </label>
+          </Tooltip>
+          <Tooltip label="Export tests to JSON">
+            <button
+              onClick={handleTestExport}
+              disabled={tests.length === 0}
+              className="text-xs px-3 py-1 rounded-lg bg-ctp-mauve/20 border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve/30 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
+            >
+              export
+            </button>
+          </Tooltip>
+          <Tooltip label="shift+cmd+t">
+            <button
+              onClick={runTests}
+              disabled={!machine || tests.length === 0}
+              className="text-xs px-3 py-1 rounded-lg bg-ctp-green/20 border border-ctp-green text-ctp-green hover:bg-ctp-green/30 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
+            >
+              run tests
+            </button>
+          </Tooltip>
         </div>
       </div>
 

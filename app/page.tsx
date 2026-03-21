@@ -79,7 +79,7 @@ function NFAPage() {
       {/* right panel — full width on mobile, half on desktop */}
       <div className="flex flex-col w-full md:w-1/2 overflow-y-auto">
         <div className="flex flex-col gap-4 p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col-reverse md:flex-row items-start md:items-center justify-between gap-3 md:gap-0">
             <div className="flex items-center gap-3">
               <Tooltip label="cmd+s">
                 <button

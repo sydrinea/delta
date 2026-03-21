@@ -89,22 +89,22 @@ export function Visualizer() {
       onBlur={() => setFocused(false)}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
-      className="flex flex-col gap-4 p-4 h-full overflow-y-auto focus:outline-none"
+      className="flex flex-col gap-4 p-4 h-full overflow-y-scroll focus:outline-none"
     >
       {/* input + test picker */}
-      <div className="flex gap-2">
+      <div className="flex flex-col md:flex-row gap-2">
         <input
           type="text"
           value={input}
           onChange={handleInputChange}
           placeholder="input string"
-          className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
+          className="flex-1 w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
         />
-        <div className="relative">
+        <div className="relative w-full md:w-auto">
           <select
             onChange={handleTestSelect}
             value={selectedTest}
-            className="appearance-none bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-7 py-1.5 text-sm text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
+            className="appearance-none w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-7 py-1.5 text-sm text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
           >
             <option value="" disabled>
               pick test
@@ -160,12 +160,12 @@ export function Visualizer() {
             })}
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-ctp-subtext0">
+          <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 text-sm text-ctp-subtext0">
             <span>
               step <span className="text-ctp-text font-bold">{step}</span> /{" "}
               {trace.length - 1}
             </span>
-            <span>·</span>
+            <span className="hidden md:inline">·</span>
             <span>
               active{" "}
               <span className="text-ctp-mauve font-bold">
