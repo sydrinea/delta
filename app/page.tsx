@@ -97,7 +97,7 @@ function NFAPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <h1 className="text-ctp-text text-sm text-center font-bold uppercase tracking-widest w-56 xl:w-80 text-nowrap overflow-scroll">
+              <h1 className="text-ctp-text text-sm lg:text-end font-bold uppercase tracking-widest max-w-56 xl:max-w-80 text-nowrap overflow-scroll">
                 {machine?.name ?? "untitled"}
               </h1>
               <Tooltip label="Share Machine">
