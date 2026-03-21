@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Heart } from "./icons/Heart";
+import { version } from "../../package.json";
 
 const TABS = [
   { label: "NFA / DFA", href: "/" },
@@ -16,7 +17,7 @@ const MadeBy = () => (
     href="https://github.com/sydrinea"
     target="_blank"
     rel="noopener noreferrer"
-    className="flex items-center gap-1.5 text-ctp-overlay0 hover:text-ctp-text transition-colors text-xs"
+    className="flex items-center gap-1.5 text-ctp-overlay1 hover:text-ctp-text transition-colors text-xs"
   >
     made with <Heart /> by @sydrinea
   </a>
@@ -86,8 +87,12 @@ export default function Navbar() {
           delta
         </h1>
 
-        <div className="hidden md:flex">
+        <div className="hidden md:flex items-center gap-1.5">
           <MadeBy />
+          <span className="text-ctp-overlay1 text-xs">·</span>
+          <span className="text-ctp-overlay0 text-xs font-mono">
+            v{version}
+          </span>
         </div>
       </header>
 
@@ -131,8 +136,14 @@ export default function Navbar() {
             })}
           </nav>
 
-          <div className="mt-12">
+          <div className="mt-12 flex flex-col gap-1">
             <MadeBy />
+            <span
+              className="text-ctp-overlay0 font-mono text-sm"
+              style={{ fontSize: "0.65rem" }}
+            >
+              v{version}
+            </span>
           </div>
         </div>
       </div>
