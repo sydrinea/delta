@@ -65,7 +65,7 @@ const machine = Delta.dfa("# of a's divisible by 2 or 3")
   .start("q0")
   .accept("q0", "q2", "q3", "q4")
   .increment("a")
-  .all((s) => s.loop("b").done())
+  .all((s) => s.loop("b"))
   .build();
 
 export default machine;`;
