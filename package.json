@@ -1,6 +1,6 @@
 {
   "name": "delta",
-  "version": "0.1.2-beta.5",
+  "version": "0.1.2-beta.6",
   "private": true,
   "scripts": {
     "dev": "next dev",
