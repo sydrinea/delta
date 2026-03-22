@@ -123,6 +123,11 @@ declare module "delta:lib" {
      */
     char(s: string): this;
 
+    /** Push an NFA onto the stack.
+     * @example a sub-machine to be composed with others (like composing machines for (ab)* (ab)*)
+     */
+    machine(nfa: NFA): this;
+
     /** Push an NFA accepting only the epsilon (empty string) onto the stack. 
      * @example .eps() 
      */

@@ -15,6 +15,11 @@ class ThompsonBuilder {
     return this;
   }
 
+  public machine(nfa: NFA): this {
+    this.stack.push(nfa);
+    return this;
+  }
+
   public eps(): this {
     this.stack.push(epsilon());
     return this;
