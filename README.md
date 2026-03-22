@@ -1,45 +1,31 @@
 # Delta
 
-Delta is a interactive automata engine that runs in your browser, providing real-time visual syncing, live traces, and batch testing to prove your DFAs, NFAs, PDAs, and Turing Machines actually work.
+Delta is an interactive environment to design, test, and visualize DFAs and NFAs that prioritizes a declarative, code-first approach to automata design.
 
-## Core Features
+## Tech Demo
 
-- **Visual Builder:** Drag, drop, and connect states on an infinite canvas.
-- **Live Code Sync:** Every visual change you make instantly compiles into a formal mathematical definition in the built-in editor.
-- **Programmatic API:** For massive or complex languages, skip the drawing. Define your states, alphabets, and transitions entirely in TypeScript, and Delta will auto-generate the visual graph for you.
-- **Instant Simulator:** Run strings through your machine and trace exactly which states they hit step-by-step.
-- **Batch Testing:** Build a suite of passing and failing test cases to verify your homework logic in milliseconds.
+[![YouTube demonstration of Delta](https://img.youtube.com/vi/zOM9aVSUVi0/maxresdefault.jpg)](https://www.youtube.com/watch?v=zOM9aVSUVi0)
 
-## Quick Start
+## Key Features
 
-### Building Visually
+**Declarative Fluent API**: Define complex DFAs and NFAs using a readable, chainable JavaScript API that maps directly to formal mathematical tuples.
 
-1. Click `+ state` to add a new node to the canvas.
-2. Click `toggle accept` or `set start` to define your machine's parameters.
-3. Drag from the edge of one state to another to create a transition.
-4. Double-click the transition label to change its accepted symbol (use `ε` for epsilon transitions).
+**Integrated Test Suites**: Treat automata as software by running batteries of test inputs with instant feedback.
 
-### Building with Code
+**Thompson’s Construction Sandbox**: A dedicated stack-based API for building NFAs from regular expressions using union, concatenation, and kleene star operations.
 
-For complex problems (like unions or closures), drawing gets messy. Jump into the code editor and use the fluent API:
+**Subset Construction**: Seamlessly convert NFAs to DFAs with options to preserve state naming, providing a clear view of the power set construction.
 
-```typescript
-const machine = Delta.nfa("the language 0(00)* union Σ*11")
-  .alphabet("0", "1")
-  .states("q0", "Oven", "Odd", "trap", "junk", "solo", "aces")
-  .start("q0")
-  .accept("Odd", "aces")
-  .transition("q0", Delta.EPS, "Oven")
-  .transition("q0", Delta.EPS, "junk")
-  .bounce("Oven", "0", "Odd")
-  .bounce("junk", "1", "solo", "0")
-  .plus("solo", "1", "aces")
-  .plus("Odd", "1", "trap")
-  .batch(
-    (s) => ["trap", "junk"].includes(s),
-    (s) => s.loop("0"),
-  )
-  .transition("aces", "0", "junk")
-  .transition("Oven", "1", "trap")
-  .build();
-```
+**Sharing**: Shareable URLs let you easily save progress and send automata to others.
+
+## Future Work
+
+I plan to expand to PDAs and Turing Machines with the same visualization tools and fluent API that I've developed for NFAs and DFAs, focusing on streamlining common patterns like tape rewinding and complex state transitions.
+
+## Build & Run
+
+The codebase is a straightforward Node.js project:
+
+1. Clone the repository
+2. Install dependencies with `npm install`
+3. Run the development environment using `npm run dev`
