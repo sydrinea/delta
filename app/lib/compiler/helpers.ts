@@ -1,6 +1,6 @@
 import nfa from "./nfa";
 import type { NFA } from "./nfa";
-import { EPSILON } from "./constants";
+import { EPS, EPSILON } from "./constants";
 
 /**
  * Automates listing of numerical states
@@ -44,7 +44,12 @@ export function char(s: string): NFA {
 }
 
 export function epsilon(): NFA {
-  return char(EPSILON);
+  return nfa(EPS)
+    .states("q0", "q1")
+    .start("q0")
+    .accept("q1")
+    .transition("q0", EPS, "q1")
+    .build();
 }
 
 export function union(a: NFA, b: NFA): NFA {

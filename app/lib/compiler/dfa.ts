@@ -1,5 +1,5 @@
 import { EPSILON } from "./constants";
-import { NFABuilder, NFA, NFAMessages } from "./nfa";
+import { NFABuilder, NFA, NFAMessages, NFABuildError } from "./nfa";
 
 /**
  * Everything that may fail when constructing the DFA
@@ -59,7 +59,7 @@ class DFABuilder extends NFABuilder {
 
     const errors = this._messages.filter((m) => m.severity === "error");
     if (errors.length > 0) {
-      throw new Error(errors.map((m) => m.content).join("\n"));
+      throw new NFABuildError(this._messages);
     }
 
     return {

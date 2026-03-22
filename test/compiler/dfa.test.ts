@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import dfa, { DFAMessages } from "@/lib/compiler/dfa";
+import { getBuildError } from "../utils";
 
 describe("DFABuilder", () => {
   describe("nondeterministic transitions", () => {
@@ -12,13 +13,19 @@ describe("DFABuilder", () => {
         .transition("q0", "0", "q1")
         .transition("q0", "0", "q0");
 
-      expect(builder.messages).toContainEqual({
-        severity: "error",
-        content: DFAMessages.nondeterministicTransition("q0", "0"),
-      });
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.nondeterministicTransition("q0", "0"),
+        }),
+      );
 
-      expect(() => builder.build()).toThrow(
-        DFAMessages.nondeterministicTransition("q0", "0"),
+      const err = getBuildError(() => builder.build());
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.nondeterministicTransition("q0", "0"),
+        }),
       );
     });
 
@@ -40,7 +47,7 @@ describe("DFABuilder", () => {
 
   describe("missing transitions", () => {
     it("throws on missing transition for a symbol", () => {
-      expect(() =>
+      const err = getBuildError(() =>
         dfa("test")
           .alphabet("0", "1")
           .states("q0", "q1")
@@ -51,7 +58,14 @@ describe("DFABuilder", () => {
           .transition("q1", "0", "q1")
           // missing q1 --1-->
           .build(),
-      ).toThrow(DFAMessages.missingTransition("q1", "1"));
+      );
+
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.missingTransition("q1", "1"),
+        }),
+      );
     });
 
     it("accumulates errors for all missing transitions", () => {
@@ -63,12 +77,25 @@ describe("DFABuilder", () => {
         .transition("q0", "0", "q1");
       // missing q0 --1--> and both q1 transitions
 
-      expect(() => builder.build()).toThrow(
-        [
-          DFAMessages.missingTransition("q0", "1"),
-          DFAMessages.missingTransition("q1", "0"),
-          DFAMessages.missingTransition("q1", "1"),
-        ].join("\n"),
+      const err = getBuildError(() => builder.build());
+
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.missingTransition("q0", "1"),
+        }),
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.missingTransition("q1", "0"),
+        }),
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.missingTransition("q1", "1"),
+        }),
       );
     });
 
@@ -83,17 +110,32 @@ describe("DFABuilder", () => {
         .transition("q0", "1", "q0");
       // missing q1 --0--> and q1 --1-->
 
-      expect(builder.messages).toContainEqual({
-        severity: "error",
-        content: DFAMessages.nondeterministicTransition("q0", "0"),
-      });
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.nondeterministicTransition("q0", "0"),
+        }),
+      );
 
-      expect(() => builder.build()).toThrow(
-        [
-          DFAMessages.nondeterministicTransition("q0", "0"),
-          DFAMessages.missingTransition("q1", "0"),
-          DFAMessages.missingTransition("q1", "1"),
-        ].join("\n"),
+      const err = getBuildError(() => builder.build());
+
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.nondeterministicTransition("q0", "0"),
+        }),
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.missingTransition("q1", "0"),
+        }),
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: DFAMessages.missingTransition("q1", "1"),
+        }),
       );
     });
 

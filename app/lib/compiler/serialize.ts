@@ -51,26 +51,26 @@ export function deserialize(input: string): NFA {
     transitionsStr,
   ] = input.split(SEP);
 
-  if (
-    !nameStr ||
-    !statesStr ||
-    !alphabetStr ||
-    !startStateStr ||
-    !acceptStatesStr
-  ) {
+  if (!nameStr || !statesStr || !startStateStr) {
     throw new Error(`Invalid ANF: "${input}"`);
   }
 
   const alphabet = alphabetStr
-    .split(LIST)
-    .map(dec)
-    .filter((symbol) => symbol !== EPSILON);
+    ? alphabetStr
+        .split(LIST)
+        .map(dec)
+        .filter((symbol) => symbol !== EPSILON)
+    : [];
+
+  const acceptStates = acceptStatesStr
+    ? acceptStatesStr.split(LIST).map(dec)
+    : [];
 
   const builder = nfa(dec(nameStr))
     .alphabet(...alphabet)
     .states(...statesStr.split(LIST).map(dec))
     .start(dec(startStateStr))
-    .accept(...acceptStatesStr.split(LIST).map(dec));
+    .accept(...acceptStates);
 
   if (transitionsStr) {
     for (const t of transitionsStr.split(LIST)) {

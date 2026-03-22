@@ -3,6 +3,7 @@ import dfa from "@/lib/compiler/dfa";
 import { serialize, deserialize } from "@/lib/compiler/serialize";
 import { simulate } from "@/lib/simulator/nfa";
 import { NFAMessages } from "@/lib/compiler/nfa";
+import { getBuildError } from "../utils";
 
 describe("serialize/deserialize (onlyAs)", () => {
   const onlyAs = dfa("onlyAs")
@@ -19,7 +20,7 @@ describe("serialize/deserialize (onlyAs)", () => {
   const anf = serialize(onlyAs);
 
   it("serializes to correct ANF string", () => {
-    expect(anf).toBe("onlyAs|q0,q1|a,b|q0|q0|q0>a>q0,q0>b>q1,q1>a>q1,q1>b>q1");
+    expect(anf).toBe("onlyAs|q0;q1|a;b|q0|q0|q0>a>q0;q0>b>q1;q1>a>q1;q1>b>q1");
   });
 
   describe("deserialize", () => {
@@ -79,36 +80,99 @@ describe("serialize/deserialize (onlyAs)", () => {
 
 describe("invalid automata via builder", () => {
   it("throws if start state not declared", () => {
-    expect(() =>
-      deserialize("onlyAs|q0,q1|a,b|q99|q0|q0>a>q0,q0>b>q1,q1>a>q1,q1>b>q1"),
-    ).toThrow(NFAMessages.startStateNotDeclared("q99"));
+    const err = getBuildError(() =>
+      deserialize("onlyAs|q0;q1|a;b|q99|q0|q0>a>q0;q0>b>q1;q1>a>q1;q1>b>q1"),
+    );
+    expect(err.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: NFAMessages.startStateNotDeclared("q99"),
+      }),
+    );
   });
 
   it("throws if accept state not declared", () => {
-    expect(() =>
-      deserialize("onlyAs|q0,q1|a,b|q0|q99|q0>a>q0,q0>b>q1,q1>a>q1,q1>b>q1"),
-    ).toThrow(NFAMessages.acceptStateNotDeclared("q99"));
+    const err = getBuildError(() =>
+      deserialize("onlyAs|q0;q1|a;b|q0|q99|q0>a>q0;q0>b>q1;q1>a>q1;q1>b>q1"),
+    );
+    expect(err.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: NFAMessages.acceptStateNotDeclared("q99"),
+      }),
+    );
   });
 
   it("throws if transition source not declared", () => {
-    expect(() =>
-      deserialize("onlyAs|q0,q1|a,b|q0|q0|q99>a>q0,q0>b>q1,q1>a>q1,q1>b>q1"),
-    ).toThrow(NFAMessages.transitionSourceNotDeclared("q99"));
+    const err = getBuildError(() =>
+      deserialize("onlyAs|q0;q1|a;b|q0|q0|q99>a>q0;q0>b>q1;q1>a>q1;q1>b>q1"),
+    );
+    expect(err.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: NFAMessages.transitionSourceNotDeclared("q99"),
+      }),
+    );
   });
 
   it("throws if transition target not declared", () => {
-    expect(() =>
-      deserialize("onlyAs|q0,q1|a,b|q0|q0|q0>a>q99,q0>b>q1,q1>a>q1,q1>b>q1"),
-    ).toThrow(NFAMessages.transitionTargetNotDeclared("q99"));
+    const err = getBuildError(() =>
+      deserialize("onlyAs|q0;q1|a;b|q0|q0|q0>a>q99;q0>b>q1;q1>a>q1;q1>b>q1"),
+    );
+    expect(err.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: NFAMessages.transitionTargetNotDeclared("q99"),
+      }),
+    );
   });
 
   it("warns on transition symbol not in alphabet", () => {
     const m = deserialize(
-      "onlyAs|q0,q1|a,b|q0|q0|q0>a>q0,q0>b>q1,q0>9>q1,q1>a>q1,q1>b>q1",
+      "onlyAs|q0;q1|a;b|q0|q0|q0>a>q0;q0>b>q1;q0>9>q1;q1>a>q1;q1>b>q1",
     );
-    expect(m.messages).toContainEqual({
-      severity: "warning",
-      content: NFAMessages.transitionSymbolNotInAlphabet("9"),
-    });
+    expect(m.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "warning",
+        content: NFAMessages.transitionSymbolNotInAlphabet("9"),
+      }),
+    );
+  });
+});
+
+describe("edge cases", () => {
+  it("handles an empty alphabet and empty transitions", () => {
+    const emptyAlpha = dfa("emptyAlpha")
+      .states("q0")
+      .start("q0")
+      .accept("q0")
+      .build();
+
+    const anf = serialize(emptyAlpha);
+    expect(anf).toBe("emptyAlpha|q0||q0|q0|");
+
+    const restored = deserialize(anf);
+    expect(restored.alphabet.size).toBe(0);
+    const transitionCount = restored.transitions
+      .values()
+      .map((transitions) => transitions.size)
+      .reduce((a, _) => a + 1);
+    expect(transitionCount).toEqual(0);
+    expect(restored.startState).toBe("q0");
+  });
+
+  it("handles a machine with no accept states", () => {
+    const rejectAll = dfa("rejectAll")
+      .alphabet("a")
+      .states("q0")
+      .start("q0")
+      .transition("q0", "a", "q0")
+      .build();
+
+    const anf = serialize(rejectAll);
+    expect(anf).toBe("rejectAll|q0|a|q0||q0>a>q0");
+
+    const restored = deserialize(anf);
+    expect(restored.acceptStates.size).toBe(0);
   });
 });

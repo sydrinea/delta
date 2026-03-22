@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import nfa, { NFAMessages } from "@/lib/compiler/nfa";
+import { getBuildError } from "../utils";
+import { EPS } from "@/lib/compiler/constants";
 
 describe("NFABuilder", () => {
   describe("valid construction", () => {
@@ -29,10 +31,12 @@ describe("NFABuilder", () => {
         .transition("q0", "0", "q0")
         .build();
 
-      expect(m.messages).toContainEqual({
-        severity: "warning",
-        content: NFAMessages.missingTransition("q0", "1"),
-      });
+      expect(m.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "warning",
+          content: NFAMessages.missingTransition("q0", "1"),
+        }),
+      );
     });
 
     it("allows nondeterministic transitions", () => {
@@ -65,20 +69,26 @@ describe("NFABuilder", () => {
     });
 
     it("throws if no start state defined", () => {
-      expect(() =>
+      const err = getBuildError(() =>
         nfa("test")
           .alphabet("0")
           .states("q0")
           .accept("q0")
           .transition("q0", "0", "q0")
           .build(),
-      ).toThrow(NFAMessages.noStartState);
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.noStartState,
+        }),
+      );
     });
   });
 
   describe("start()", () => {
     it("throws if start state not declared", () => {
-      expect(() =>
+      const err = getBuildError(() =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -86,13 +96,45 @@ describe("NFABuilder", () => {
           .accept("q0")
           .transition("q0", "0", "q0")
           .build(),
-      ).toThrow(NFAMessages.startStateNotDeclared("q99"));
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.startStateNotDeclared("q99"),
+        }),
+      );
+    });
+  });
+
+  describe("alphabet()", () => {
+    it("throws if epsilon is included in the formal alphabet", () => {
+      const builder = nfa("test")
+        .alphabet("0", "1", EPS)
+        .states("q0")
+        .start("q0")
+        .accept("q0")
+        .transition("q0", "0", "q0");
+
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.epsilonInAlphabet,
+        }),
+      );
+
+      const err = getBuildError(() => builder.build());
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.epsilonInAlphabet,
+        }),
+      );
     });
   });
 
   describe("accept()", () => {
     it("throws if accept state not declared", () => {
-      expect(() =>
+      const err = getBuildError(() =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -100,7 +142,13 @@ describe("NFABuilder", () => {
           .accept("q99")
           .transition("q0", "0", "q0")
           .build(),
-      ).toThrow(NFAMessages.acceptStateNotDeclared("q99"));
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.acceptStateNotDeclared("q99"),
+        }),
+      );
     });
 
     it("throws for each undeclared accept state", () => {
@@ -111,22 +159,32 @@ describe("NFABuilder", () => {
         .accept("q98", "q99")
         .transition("q0", "0", "q0");
 
-      expect(builder.messages).toContainEqual({
-        severity: "error",
-        content: NFAMessages.acceptStateNotDeclared("q98"),
-      });
-      expect(builder.messages).toContainEqual({
-        severity: "error",
-        content: NFAMessages.acceptStateNotDeclared("q99"),
-      });
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.acceptStateNotDeclared("q98"),
+        }),
+      );
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.acceptStateNotDeclared("q99"),
+        }),
+      );
 
-      expect(() => builder.build()).toThrow();
+      const err = getBuildError(() => builder.build());
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.acceptStateNotDeclared("q98"),
+        }),
+      );
     });
   });
 
   describe("transition()", () => {
     it("throws if from state not declared", () => {
-      expect(() =>
+      const err = getBuildError(() =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -134,11 +192,17 @@ describe("NFABuilder", () => {
           .accept("q0")
           .transition("q99", "0", "q0")
           .build(),
-      ).toThrow(NFAMessages.transitionSourceNotDeclared("q99"));
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.transitionSourceNotDeclared("q99"),
+        }),
+      );
     });
 
     it("throws if to state not declared", () => {
-      expect(() =>
+      const err = getBuildError(() =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -146,7 +210,13 @@ describe("NFABuilder", () => {
           .accept("q0")
           .transition("q0", "0", "q99")
           .build(),
-      ).toThrow(NFAMessages.transitionTargetNotDeclared("q99"));
+      );
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.transitionTargetNotDeclared("q99"),
+        }),
+      );
     });
 
     it("warns if symbol not in alphabet", () => {
@@ -159,10 +229,12 @@ describe("NFABuilder", () => {
         .transition("q0", "0", "q0")
         .build();
 
-      expect(m.messages).toContainEqual({
-        severity: "warning",
-        content: NFAMessages.transitionSymbolNotInAlphabet("9"),
-      });
+      expect(m.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "warning",
+          content: NFAMessages.transitionSymbolNotInAlphabet("9"),
+        }),
+      );
     });
 
     it("skips insertion but continues building on invalid symbol", () => {
@@ -178,10 +250,12 @@ describe("NFABuilder", () => {
         .transition("q1", "1", "q1")
         .build();
 
-      expect(m.messages).toContainEqual({
-        severity: "warning",
-        content: NFAMessages.transitionSymbolNotInAlphabet("9"),
-      });
+      expect(m.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "warning",
+          content: NFAMessages.transitionSymbolNotInAlphabet("9"),
+        }),
+      );
       expect(m.transitions.get("q0")?.get("0")).toStrictEqual(new Set(["q1"]));
     });
 
@@ -194,16 +268,26 @@ describe("NFABuilder", () => {
         .transition("q99", "0", "q0")
         .transition("q0", "0", "q99");
 
-      expect(builder.messages).toContainEqual({
-        severity: "error",
-        content: NFAMessages.transitionSourceNotDeclared("q99"),
-      });
-      expect(builder.messages).toContainEqual({
-        severity: "error",
-        content: NFAMessages.transitionTargetNotDeclared("q99"),
-      });
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.transitionSourceNotDeclared("q99"),
+        }),
+      );
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.transitionTargetNotDeclared("q99"),
+        }),
+      );
 
-      expect(() => builder.build()).toThrow();
+      const err = getBuildError(() => builder.build());
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.transitionSourceNotDeclared("q99"),
+        }),
+      );
     });
   });
 
@@ -217,10 +301,12 @@ describe("NFABuilder", () => {
         .transition("q0", "0", "q0")
         .build();
 
-      expect(m.messages).toContainEqual({
-        severity: "warning",
-        content: NFAMessages.missingTransition("q0", "1"),
-      });
+      expect(m.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "warning",
+          content: NFAMessages.missingTransition("q0", "1"),
+        }),
+      );
     });
 
     it("warns for every missing transition", () => {
@@ -258,10 +344,12 @@ describe("NFABuilder", () => {
     it("exposes messages before build()", () => {
       const builder = nfa("test").alphabet("0").states("q0").start("q99");
 
-      expect(builder.messages).toContainEqual({
-        severity: "error",
-        content: NFAMessages.startStateNotDeclared("q99"),
-      });
+      expect(builder.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: NFAMessages.startStateNotDeclared("q99"),
+        }),
+      );
     });
   });
 });

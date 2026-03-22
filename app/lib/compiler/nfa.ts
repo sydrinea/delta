@@ -1,4 +1,4 @@
-import { EPSILON } from "./constants";
+import { EPS, EPSILON } from "./constants";
 
 /**
  * Represents an NFA of the 5-tuple (Q, Σ, 𝛿, q0, F)
@@ -58,6 +58,7 @@ export const NFAMessages = {
     `Transition symbol '${symbol}' is not in the alphabet`,
   missingTransition: (state: string, symbol: string) =>
     `State '${state}' has no transition for symbol '${symbol}'`,
+  epsilonInAlphabet: `${EPS} cannot be declared as part of the alphabet`,
   noStartState: "No start state defined",
   alreadyBuilt: "build() already called",
 } as const;
@@ -113,7 +114,10 @@ export class NFABuilder {
    * @returns a modified {@link NFABuilder} object
    */
   public alphabet(...symbols: string[]): this {
-    symbols.forEach((symbol) => this._alphabet.add(symbol));
+    symbols.forEach((symbol) => {
+      if (symbol === EPS) this.message("error", NFAMessages.epsilonInAlphabet);
+      this._alphabet.add(symbol);
+    });
     return this;
   }
 
