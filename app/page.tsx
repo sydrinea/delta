@@ -153,8 +153,11 @@ function LeftPanel({ setAnf, setEditorError, editorError }: LeftPanelProps) {
   const { machine, setNodes, setEdges, setStartId } = useDelta();
 
   const handleTabChange = (tab: LeftTab) => {
-    // editor → canvas: populate graph from compiled machine
-    if (activeTab === "editor" && tab === "canvas") {
+    // editor | visualizer → canvas: populate graph from compiled machine
+    if (
+      (activeTab === "editor" || activeTab === "visualizer") &&
+      tab === "canvas"
+    ) {
       if (machine) {
         const { nodes: newNodes, edges: newEdges } = nfaToFlow(machine);
         setNodes(newNodes);
