@@ -23,6 +23,8 @@ import ReactFlow, {
   Node,
   Edge,
   ConnectionMode,
+  applyNodeChanges,
+  applyEdgeChanges,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useDelta } from "@/context/DeltaContext";
@@ -202,17 +204,22 @@ export function FlowEditor() {
 
   const syncToEditor = useCallback(
     (newNodes: Node[], newEdges: Edge[], newStartId: string | null) => {
-      if (newNodes.length > 0 && newStartId) {
-        const code = flowToCode(newNodes, newEdges, newStartId);
-        setTimeout(() => {
-          setEditorValue(code);
-          setCtxNodes(newNodes);
-          setCtxEdges(newEdges);
-          runCode(code, setAnf, setEditorError);
-        }, 0);
-      }
+      const code = flowToCode(newNodes, newEdges, newStartId);
+      setTimeout(() => {
+        setEditorValue(code);
+        setCtxNodes(newNodes);
+        setCtxEdges(newEdges);
+        runCode(code, setAnf, setEditorError);
+      }, 0);
     },
     [setEditorValue, setCtxNodes, setCtxEdges, setAnf, setEditorError],
+  );
+
+  const syncNodes = useCallback(
+    (newNodes: Node[], overrideStartId: string | null = startId) => {
+      syncToEditor(newNodes, edges, overrideStartId);
+    },
+    [edges, startId, syncToEditor],
   );
 
   const syncEdges = useCallback(
@@ -224,20 +231,33 @@ export function FlowEditor() {
 
   const handleNodesChange = useCallback(
     (changes: any) => {
+      onNodesChange(changes);
+      const nextNodes = applyNodeChanges(changes, nodes);
+
       const removals = changes.filter((c: any) => c.type === "remove");
       if (removals.length > 0) {
         setStateCount((c) => c - removals.length);
+
+        if (removals.some((r: any) => r.id === startId)) {
+          setStartId(null);
+          syncNodes(nextNodes, null);
+          return;
+        }
       }
-      onNodesChange(changes);
+
+      syncNodes(nextNodes);
     },
-    [onNodesChange],
+    [onNodesChange, nodes, syncNodes, startId, setStartId],
   );
 
   const handleEdgesChange = useCallback(
     (changes: any) => {
       onEdgesChange(changes);
+
+      const nextEdges = applyEdgeChanges(changes, edges);
+      syncEdges(nextEdges);
     },
-    [onEdgesChange],
+    [onEdgesChange, edges, syncEdges],
   );
 
   const onConnect = useCallback(
@@ -301,6 +321,7 @@ export function FlowEditor() {
     setCtxNodes([]);
     setCtxEdges([]);
     setEditorValue("");
+    syncToEditor([], [], null);
   }, [
     setNodes,
     setEdges,
@@ -308,6 +329,7 @@ export function FlowEditor() {
     setCtxNodes,
     setCtxEdges,
     setEditorValue,
+    syncToEditor,
   ]);
 
   return (
