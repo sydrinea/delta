@@ -19,9 +19,14 @@ import ReactFlow, {
   ConnectionMode,
   applyNodeChanges,
   applyEdgeChanges,
+  useReactFlow,
+  useStoreApi,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useDeltaStore } from "@/store/deltaStore";
+import { getFlowElementsFromDot } from "./layoutNFA";
+import { deserialize } from "@/lib/compiler/serialize";
+import { toDot } from "@/lib/compiler/dot";
 
 function AutomataEdge({
   id,
@@ -57,13 +62,17 @@ function AutomataEdge({
   const handleBlur = (e: React.FocusEvent) => {
     if (!containerRef.current?.contains(e.relatedTarget as Element)) {
       setEditing(false);
+      updateEdges();
     }
   };
 
   const handleLabelChange = (value: string) => {
     setLabel(value);
+  };
+
+  const updateEdges = () => {
     const newEdges = edges.map((e) =>
-      e.id === id ? { ...e, data: { ...e.data, label: value } } : e,
+      e.id === id ? { ...e, data: { ...e.data, label } } : e,
     );
     syncFromFlow(nodes, newEdges, startId);
   };
@@ -98,6 +107,7 @@ function AutomataEdge({
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     setEditing(false);
+                    updateEdges();
                   }
                 }}
                 className="w-16 text-xs text-center bg-transparent border-b border-ctp-surface1 font-mono text-ctp-text focus:outline-none"
@@ -170,6 +180,7 @@ const nodeTypes = { state: StateNode };
 const edgeTypes = { automata: AutomataEdge };
 
 export function FlowEditor() {
+  const anf = useDeltaStore((s) => s.anf);
   const storeNodes = useDeltaStore((s) => s.nodes);
   const storeEdges = useDeltaStore((s) => s.edges);
   const startId = useDeltaStore((s) => s.startId);
@@ -178,56 +189,166 @@ export function FlowEditor() {
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
-  const [stateCount, setStateCount] = useState(storeNodes.length);
+  const [inUseStates, setInUseStates] = useState(
+    storeNodes.map((_, index) => index),
+  );
+  const [hasInitialLayout, setHasInitialLayout] = useState(false);
+  const { screenToFlowPosition, getNodes } = useReactFlow();
+  const store = useStoreApi();
+
+  const getCenter = () => {
+    const { domNode } = store.getState();
+    if (!domNode) return { x: 0, y: 0 };
+
+    const rect = domNode.getBoundingClientRect();
+
+    const centerX = rect.x + rect.width / 2;
+    const centerY = rect.y + rect.height / 2;
+
+    return screenToFlowPosition({ x: centerX, y: centerY });
+  };
+
+  const pendingStateRef = useRef<{
+    nodes: Node[];
+    edges: Edge[];
+    startId: string | null;
+  } | null>(null);
+  const isMicrotaskQueued = useRef(false);
+
+  const batchStoreUpdate = useCallback(
+    (
+      updater: (prev: {
+        nodes: Node[];
+        edges: Edge[];
+        startId: string | null;
+      }) => {
+        nodes: Node[];
+        edges: Edge[];
+        startId: string | null;
+      },
+    ) => {
+      if (!pendingStateRef.current) {
+        const state = useDeltaStore.getState();
+        pendingStateRef.current = {
+          nodes: state.nodes,
+          edges: state.edges,
+          startId: state.startId,
+        };
+      }
+
+      pendingStateRef.current = updater(pendingStateRef.current);
+
+      if (!isMicrotaskQueued.current) {
+        isMicrotaskQueued.current = true;
+        queueMicrotask(() => {
+          if (pendingStateRef.current) {
+            syncFromFlow(
+              pendingStateRef.current.nodes,
+              pendingStateRef.current.edges,
+              pendingStateRef.current.startId,
+            );
+            pendingStateRef.current = null;
+          }
+          isMicrotaskQueued.current = false;
+        });
+      }
+    },
+    [syncFromFlow],
+  );
 
   useEffect(() => {
-    setNodes(storeNodes);
-    setEdges(storeEdges);
-  }, [storeNodes, storeEdges, setNodes, setEdges]);
+    async function initializeLayout() {
+      if (anf) {
+        const dotString = toDot(deserialize(anf));
+        const { nodes: layoutedNodes, edges: layoutedEdges } =
+          await getFlowElementsFromDot(dotString);
 
-  const syncNodes = useCallback(
-    (newNodes: Node[], overrideStartId: string | null = startId) => {
-      syncFromFlow(newNodes, edges, overrideStartId);
-    },
-    [edges, startId, syncFromFlow],
-  );
+        setNodes(layoutedNodes);
+        setEdges(layoutedEdges);
+        syncFromFlow(layoutedNodes, layoutedEdges, startId);
+        setHasInitialLayout(true);
+      }
+    }
 
-  const syncEdges = useCallback(
-    (newEdges: Edge[]) => {
-      syncFromFlow(nodes, newEdges, startId);
-    },
-    [nodes, startId, syncFromFlow],
-  );
+    if (!hasInitialLayout) {
+      initializeLayout();
+    } else {
+      setNodes(storeNodes);
+      setEdges(storeEdges);
+    }
+  }, [storeNodes, storeEdges, hasInitialLayout]);
+
+  const onNodeDragStop = useCallback(() => {
+    const globalState = useDeltaStore.getState();
+    syncFromFlow(getNodes(), globalState.edges, globalState.startId);
+  }, [getNodes, syncFromFlow]);
 
   const handleNodesChange = useCallback(
     (changes: any) => {
       onNodesChange(changes);
 
-      const removals = changes.filter((c: any) => c.type === "remove");
-      if (removals.length > 0) {
-        const nextNodes = applyNodeChanges(changes, nodes);
-        const nextStartId = removals.some((r: any) => r.id === startId)
-          ? null
-          : startId;
+      const removals = changes.filter((c: any) => c.type === "remove") as any[];
 
-        const removedIds = new Set(removals.map((r: any) => r.id));
-        const validEdges = edges.filter(
-          (e) => !removedIds.has(e.source) && !removedIds.has(e.target),
-        );
+      const requiresStoreSync = changes.some(
+        (c: any) => c.type === "remove" || c.type === "select",
+      );
 
-        syncFromFlow(nextNodes, validEdges, nextStartId);
+      if (!requiresStoreSync) {
+        return;
+      }
+
+      if (removals.length) {
+        batchStoreUpdate((prev) => {
+          const nextNodes = applyNodeChanges(changes, prev.nodes);
+
+          const removedIds = new Set<string>(
+            removals.map((r: any) => r.id as string),
+          );
+
+          const nextStartId = removedIds.has(prev.startId ?? "")
+            ? null
+            : prev.startId;
+
+          const validEdges = prev.edges.filter(
+            (e) => !removedIds.has(e.source) && !removedIds.has(e.target),
+          );
+
+          const removedNums = new Set(
+            Array.from(removedIds).map((value) =>
+              parseInt(value.replace("q", "").trim()),
+            ),
+          );
+          setInUseStates((prev) => prev.filter((id) => !removedNums.has(id)));
+
+          return { nodes: nextNodes, edges: validEdges, startId: nextStartId };
+        });
+      } else {
+        const state = useDeltaStore.getState();
+        const nextNodes = applyNodeChanges(changes, state.nodes);
+        syncFromFlow(nextNodes, state.edges, state.startId);
       }
     },
-    [onNodesChange, nodes, edges, startId, syncFromFlow],
+    [onNodesChange, batchStoreUpdate, syncFromFlow],
   );
 
   const handleEdgesChange = useCallback(
     (changes: any) => {
       onEdgesChange(changes);
-      const nextEdges = applyEdgeChanges(changes, edges);
-      syncEdges(nextEdges);
+
+      const removals = changes.filter((c: any) => c.type === "remove");
+
+      if (removals.length) {
+        batchStoreUpdate((prev) => {
+          const nextEdges = applyEdgeChanges(changes, prev.edges);
+          return { ...prev, edges: nextEdges };
+        });
+      } else {
+        const state = useDeltaStore.getState();
+        const nextEdges = applyEdgeChanges(changes, state.edges);
+        syncFromFlow(state.nodes, nextEdges, state.startId);
+      }
     },
-    [onEdgesChange, edges, syncEdges],
+    [onEdgesChange, batchStoreUpdate, syncFromFlow],
   );
 
   const onConnect = useCallback(
@@ -244,6 +365,7 @@ export function FlowEditor() {
         id: `edge-${connection.sourceHandle}-${connection.targetHandle}-${Date.now()}`,
         markerEnd: { type: MarkerType.ArrowClosed, color: "#4c4f69" },
       };
+
       const newEdges = [...edges, newEdge];
       syncFromFlow(nodes, newEdges, startId);
     },
@@ -251,19 +373,29 @@ export function FlowEditor() {
   );
 
   const addState = useCallback(() => {
-    const id = `q${stateCount}`;
+    const smallestGap = findSmallestGap(inUseStates);
+    const id = `q${smallestGap}`;
+
+    const { x: centerX, y: centerY } = getCenter();
+
     const newNode: Node = {
       id,
       type: "state",
-      position: { x: 100, y: 200 },
+      position: {
+        x: centerX + (smallestGap - 1) * 20,
+        y: centerY + (smallestGap - 1) * 20,
+      },
       data: { label: id, isAccept: false },
     };
+
     const newNodes = [...nodes, newNode];
     const newStartId = startId ?? id;
+
     if (!startId) setStartId(id);
-    setStateCount((c) => c + 1);
+
+    setInUseStates((prev) => [...prev, smallestGap]);
     syncFromFlow(newNodes, edges, newStartId);
-  }, [stateCount, nodes, edges, startId, setStartId, syncFromFlow]);
+  }, [inUseStates, nodes, edges, startId, setStartId, syncFromFlow]);
 
   const toggleAccept = useCallback(() => {
     const newNodes = nodes.map((n) =>
@@ -281,7 +413,7 @@ export function FlowEditor() {
   }, [nodes, edges, syncFromFlow]);
 
   const clearGraph = useCallback(() => {
-    setStateCount(0);
+    setInUseStates([]);
     syncFromFlow([], [], null);
   }, [syncFromFlow]);
 
@@ -317,22 +449,40 @@ export function FlowEditor() {
       </div>
 
       <div className="flex-1">
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={handleNodesChange}
-          onEdgesChange={handleEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          edgeTypes={edgeTypes}
-          connectionRadius={20}
-          connectionMode={ConnectionMode.Loose}
-          proOptions={{ hideAttribution: true }}
-          fitView
-        >
-          <Background color="#acb0be" gap={16} size={1} />
-        </ReactFlow>
+        {hasInitialLayout && (
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodeDragStop={onNodeDragStop}
+            onNodesChange={handleNodesChange}
+            onEdgesChange={handleEdgesChange}
+            onConnect={onConnect}
+            nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            connectionRadius={20}
+            connectionMode={ConnectionMode.Loose}
+            proOptions={{ hideAttribution: true }}
+            fitView
+          >
+            <Background color="#acb0be" gap={16} size={1} />
+          </ReactFlow>
+        )}
       </div>
     </div>
   );
+}
+
+function findSmallestGap(numbers: number[]): number {
+  if (numbers.length === 0) return 0;
+
+  const sorted = [...new Set(numbers)].sort((a, b) => a - b);
+
+  const elementBeforeGap = sorted.find((num, index, arr) => {
+    if (index === arr.length - 1) return false;
+    return arr[index + 1] > num + 1;
+  });
+
+  return elementBeforeGap !== undefined
+    ? elementBeforeGap + 1
+    : sorted[sorted.length - 1] + 1;
 }

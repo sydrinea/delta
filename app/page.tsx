@@ -14,6 +14,7 @@ import { deserialize } from "@/lib/compiler/serialize";
 import { nfaToCode } from "@/lib/compiler/nfaToCode";
 import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
+import { ReactFlowProvider } from "reactflow";
 
 export default function Home() {
   return (
@@ -211,7 +212,9 @@ function LeftPanel() {
         ) : activeTab === "visualizer" ? (
           <Trace />
         ) : (
-          <FlowEditor />
+          <ReactFlowProvider>
+            <FlowEditor />
+          </ReactFlowProvider>
         )}
       </div>
     </div>

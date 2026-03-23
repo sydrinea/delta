@@ -24,8 +24,9 @@ export function flowToCode(
   const alphabet = [
     ...new Set(
       edges
-        .filter((e) => e.data?.label !== EPSILON)
-        .map((e) => e.data?.label ?? "a"),
+        .flatMap((e) => (e.data?.label ?? "a").split(","))
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && s !== EPSILON),
     ),
   ];
 
@@ -54,10 +55,23 @@ export function flowToCode(
   }
 
   edges.forEach((e) => {
-    const symbol = e.data?.label ?? "a";
-    lines.push(
-      `  .transition(${JSON.stringify(e.source)}, ${JSON.stringify(symbol)}, ${JSON.stringify(e.target)})`,
-    );
+    const rawLabel = e.data?.label ?? "a";
+    const symbols = rawLabel
+      .split(",")
+      .map((s: string) => s.trim())
+      .filter((s: string) => s.length > 0);
+
+    if (symbols.length === 0) {
+      symbols.push("a");
+    }
+
+    symbols.forEach((symbol: string) => {
+      lines.push(
+        `  .transition(${JSON.stringify(e.source)}, ${JSON.stringify(
+          symbol,
+        )}, ${JSON.stringify(e.target)})`,
+      );
+    });
   });
 
   lines.push(`  .build();`);
