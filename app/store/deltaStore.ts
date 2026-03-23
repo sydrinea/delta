@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import type { Node, Edge } from "reactflow";
 import type { NFA } from "@/lib/compiler/nfa";
 import { deserialize } from "@/lib/compiler/serialize";
@@ -130,6 +130,7 @@ export const useDeltaStore = create<DeltaState>()(
     }),
     {
       name: "delta-store",
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         editorValue: state.editorValue,
         anf: state.anf,
