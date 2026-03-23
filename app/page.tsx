@@ -109,11 +109,11 @@ function NFAPage() {
                   compile
                 </button>
               </Tooltip>
-              <a
+              <p
                 className={`text-xs px-3 py-1 rounded-lg ${editorErrors ? "text-ctp-red" : "text-ctp-green"} transition-colors`}
               >
                 {editorErrors ? "✗ check errors" : "✓ valid"}
-              </a>
+              </p>
             </div>
 
             <div className="flex items-center gap-2">

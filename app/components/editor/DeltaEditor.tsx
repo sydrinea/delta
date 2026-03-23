@@ -69,10 +69,10 @@ export function DeltaEditor() {
 
         if (tsErrors.length > 0) return;
 
-        setEditorErrors([]);
+        setEditorErrors(null);
         runCode(editor.getValue(), setAnf, setEditorErrors);
       } catch (err) {
-        setEditorErrors([]);
+        setEditorErrors(null);
         runCode(editor.getValue(), setAnf, setEditorErrors);
       }
     });
