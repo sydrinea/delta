@@ -110,9 +110,11 @@ function NFAPage() {
                 </button>
               </Tooltip>
               <p
-                className={`text-xs px-3 py-1 rounded-lg ${editorErrors ? "text-ctp-red" : "text-ctp-green"} transition-colors`}
+                className={`text-xs px-3 py-1 rounded-lg ${editorErrors && editorErrors?.length > 0 ? "text-ctp-red" : "text-ctp-green"} transition-colors`}
               >
-                {editorErrors ? "✗ check errors" : "✓ valid"}
+                {editorErrors && editorErrors?.length > 0
+                  ? "✗ check errors"
+                  : "✓ valid"}
               </p>
             </div>
 
