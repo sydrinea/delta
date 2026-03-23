@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useDelta } from "@/context/DeltaContext";
+import { useDeltaStore } from "@/store/deltaStore";
 import { simulate } from "@/lib/simulator/nfa";
 import { AutomataViewer } from "./AutomataViewer";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
 export function Trace() {
-  const { machine, tests } = useDelta();
+  const { machine, tests } = useDeltaStore();
   const [input, setInput] = useState("");
   const [step, setStep] = useState(0);
   const [trace, setTrace] = useState<ReturnType<typeof simulate>["trace"]>([]);

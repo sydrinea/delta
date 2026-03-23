@@ -4,30 +4,28 @@ import { useEffect, useRef } from "react";
 import Editor, { OnMount, useMonaco } from "@monaco-editor/react";
 import * as MonacoEditor from "monaco-editor";
 import defineTheme from "./defineTheme";
-import { useDelta } from "@/context/DeltaContext";
-import { ExecutionError, runCode } from "../../runCode";
+import { useDeltaStore } from "@/store/deltaStore";
+import { runCode } from "../../runCode";
 import DELTA_D_TS from "@/lib/delta-runtime";
 import { Caution } from "@/icons/Caution";
 
-interface DeltaEditorProps {
-  onValidMachine: (anf: string) => void;
-  onError: (error: ExecutionError | null) => void;
-  editorError: ExecutionError | null;
-}
-
-export function DeltaEditor({
-  onValidMachine,
-  onError,
-  editorError,
-}: DeltaEditorProps) {
+export function DeltaEditor() {
   const editorRef = useRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(
     null,
   );
-  const { editorValue, setEditorValue } = useDelta();
+
+  const editorValue = useDeltaStore((s) => s.editorValue);
+  const setEditorValue = useDeltaStore((s) => s.setEditorValue);
+  const editorError = useDeltaStore((s) => s.editorError);
+  const setEditorError = useDeltaStore((s) => s.setEditorError);
+  const setAnf = useDeltaStore((s) => s.setAnf);
+
   const monaco = useMonaco();
 
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor;
+
+    runCode(editorRef.current.getValue(), setAnf, setEditorError);
 
     defineTheme(monaco);
     monaco.editor.setTheme("catppuccin-latte");
@@ -71,11 +69,11 @@ export function DeltaEditor({
 
         if (tsErrors.length > 0) return;
 
-        onError(null);
-        runCode(editor.getValue(), onValidMachine, onError);
+        setEditorError(null);
+        runCode(editor.getValue(), setAnf, setEditorError);
       } catch (err) {
-        onError(null);
-        runCode(editor.getValue(), onValidMachine, onError);
+        setEditorError(null);
+        runCode(editor.getValue(), setAnf, setEditorError);
       }
     });
   };

@@ -1,40 +1,69 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DeltaEditor } from "@/components/editor/DeltaEditor";
-import { DeltaProvider, useDelta } from "@/context/DeltaContext";
+import { useDeltaStore } from "@/store/deltaStore";
 import { AutomataViewer } from "@/components/visualize/AutomataViewer";
 import { TestSuite } from "@/components/TestSuite";
 import { Trace } from "@/components/visualize/Trace";
 import { Tooltip } from "@/components/Tooltip";
-import { ExecutionError, runCode } from "./runCode";
+import { runCode } from "./runCode";
 import { FlowEditor } from "@/components/editor/FlowEditor";
 import { nfaToFlow } from "@/lib/compiler/toFlow";
+import { deserialize } from "@/lib/compiler/serialize";
+import { nfaToCode } from "@/lib/compiler/nfaToCode";
 import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
 
 export default function Home() {
   return (
-    <DeltaProvider label="nfa">
-      <section className="flex md:flex-col md:h-screen md:overflow-hidden">
-        <NFAPage />
-      </section>
-    </DeltaProvider>
+    <section className="flex md:flex-col md:h-screen md:overflow-hidden">
+      <NFAPage />
+    </section>
   );
 }
 
 function NFAPage() {
-  const {
-    anf,
-    machine,
-    machineError,
-    editorError,
-    editorValue,
-    setEditorError,
-    setAnf,
-  } = useDelta();
+  const anf = useDeltaStore((s) => s.anf);
+  const setAnf = useDeltaStore((s) => s.setAnf);
+  const machine = useDeltaStore((s) => s.machine);
+  const machineError = useDeltaStore((s) => s.machineError);
+  const editorError = useDeltaStore((s) => s.editorError);
+  const editorValue = useDeltaStore((s) => s.editorValue);
+  const setEditorError = useDeltaStore((s) => s.setEditorError);
+  const setEditorValue = useDeltaStore((s) => s.setEditorValue);
 
   const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const machineId = params.get("m");
+    const anfParam = params.get("anf");
+
+    const SHARE_URL = window.location.hostname.includes("comptheory.tools")
+      ? "https://share.comptheory.tools"
+      : "https://share.delta.sydneyn.dev";
+
+    if (machineId) {
+      fetch(`${SHARE_URL}/anf/${machineId}`)
+        .then((res) => res.json() as Promise<{ anf: string; code: string }>)
+        .then(({ anf, code }) => {
+          setAnf(anf);
+          setEditorValue(code);
+        })
+        .catch(() => {})
+        .finally(() => {
+          window.history.replaceState({}, "", window.location.pathname);
+        });
+    } else if (anfParam) {
+      setAnf(anfParam);
+      try {
+        const m = deserialize(anfParam);
+        setEditorValue(nfaToCode(m));
+      } catch {}
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [setAnf, setEditorValue]);
 
   const handleShare = async () => {
     const SHARE_URL = window.location.hostname.includes("comptheory.tools")
@@ -65,18 +94,9 @@ function NFAPage() {
 
   return (
     <div className="flex flex-col md:flex-row flex-1 md:overflow-hidden">
-      {/* left — editor */}
-      {/* left panel — hidden on mobile */}
       <div className="hidden md:flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
-        <LeftPanel
-          setAnf={setAnf}
-          setEditorError={setEditorError}
-          editorError={editorError}
-        />
+        <LeftPanel />
       </div>
-
-      {/* right — preview + tests */}
-      {/* right panel — full width on mobile, half on desktop */}
       <div className="flex flex-col w-full md:w-1/2 overflow-y-auto">
         <div className="flex flex-col gap-4 p-6">
           <div className="flex flex-col-reverse lg:flex-row justify-between gap-3">
@@ -142,30 +162,26 @@ function NFAPage() {
 
 type LeftTab = "editor" | "canvas" | "visualizer";
 
-interface LeftPanelProps {
-  setAnf: (anf: string) => void;
-  setEditorError: (error: ExecutionError | null) => void;
-  editorError: ExecutionError | null;
-}
-
-function LeftPanel({ setAnf, setEditorError, editorError }: LeftPanelProps) {
+function LeftPanel() {
   const [activeTab, setActiveTab] = useState<LeftTab>("editor");
-  const { machine, setNodes, setEdges, setStartId } = useDelta();
+
+  const machine = useDeltaStore((s) => s.machine);
+  const setNodes = useDeltaStore((s) => s.setNodes);
+  const setEdges = useDeltaStore((s) => s.setEdges);
+  const setStartId = useDeltaStore((s) => s.setStartId);
 
   const handleTabChange = (tab: LeftTab) => {
-    // editor | visualizer → canvas: populate graph from compiled machine
     if (
       (activeTab === "editor" || activeTab === "visualizer") &&
       tab === "canvas"
     ) {
       if (machine) {
-        const { nodes: newNodes, edges: newEdges } = nfaToFlow(machine);
-        setNodes(newNodes);
-        setEdges(newEdges);
+        const { nodes, edges } = nfaToFlow(machine);
+        setNodes(nodes);
+        setEdges(edges);
         setStartId(machine.startState);
       }
     }
-
     setActiveTab(tab);
   };
 
@@ -189,11 +205,7 @@ function LeftPanel({ setAnf, setEditorError, editorError }: LeftPanelProps) {
 
       <div className="flex-1 overflow-hidden">
         {activeTab === "editor" ? (
-          <DeltaEditor
-            onValidMachine={setAnf}
-            onError={setEditorError}
-            editorError={editorError}
-          />
+          <DeltaEditor />
         ) : activeTab === "visualizer" ? (
           <Trace />
         ) : (

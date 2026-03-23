@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { simulate } from "@/lib/simulator/nfa";
 import type { NFA } from "@/lib/compiler/nfa";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
-import { useDelta } from "@/context/DeltaContext";
+import { useDeltaStore } from "@/store/deltaStore";
 import { Tooltip } from "./Tooltip";
 import z from "zod";
 
@@ -36,7 +36,9 @@ interface TestSuiteProps {
 
 export function TestSuite({ machine }: TestSuiteProps) {
   const [results, setResults] = useState<Record<string, TestResult>>({});
-  const { tests, setTests } = useDelta();
+
+  const tests = useDeltaStore((s) => s.tests);
+  const setTests = useDeltaStore((s) => s.setTests);
 
   useKeyboardShortcut([
     {
