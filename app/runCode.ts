@@ -25,7 +25,7 @@ export interface ExecutionError {
 export const runCode = async (
   value: string,
   onValidMachine: (anf: string) => void,
-  onError: (error: ExecutionError | null) => void,
+  onError: (errors: ExecutionError[] | null) => void,
 ) => {
   const worker = new Worker(new URL("./lib/worker.ts", import.meta.url), {
     type: "module",
@@ -33,11 +33,13 @@ export const runCode = async (
 
   const timeout = setTimeout(() => {
     worker.terminate();
-    onError({
-      message: "Execution timed out (Possible infinite loop)",
-      line: 0,
-      column: 0,
-    });
+    onError([
+      {
+        message: "Execution timed out (Possible infinite loop)",
+        line: 0,
+        column: 0,
+      },
+    ]);
   }, 5000);
 
   worker.onmessage = (e) => {
@@ -45,24 +47,26 @@ export const runCode = async (
     const { type, payload } = e.data;
 
     if (type === "ERROR") {
-      for (const error of payload) {
-        onError({
+      onError(
+        payload.map((error: ExecutionError) => ({
           message: error.message.split("\n").join("; "),
           line: error.line,
           column: error.column,
-        });
-      }
+        })),
+      );
       worker.terminate();
       return;
     }
 
     const { success } = NFASchema.safeParse(payload);
     if (!success) {
-      onError({
-        message: "Invalid export. Did you forget to call .build()?",
-        line: 0,
-        column: 0,
-      });
+      onError([
+        {
+          message: "Invalid export. Did you forget to call .build()?",
+          line: 0,
+          column: 0,
+        },
+      ]);
       worker.terminate();
       return;
     }
@@ -73,7 +77,7 @@ export const runCode = async (
 
   worker.onerror = (err) => {
     clearTimeout(timeout);
-    onError({ message: `Worker error: ${err.message}`, line: 1, column: 1 });
+    onError([{ message: `Worker error: ${err.message}`, line: 1, column: 1 }]);
     worker.terminate();
   };
 

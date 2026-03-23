@@ -16,8 +16,8 @@ export function DeltaEditor() {
 
   const editorValue = useDeltaStore((s) => s.editorValue);
   const setEditorValue = useDeltaStore((s) => s.setEditorValue);
-  const editorError = useDeltaStore((s) => s.editorError);
-  const setEditorError = useDeltaStore((s) => s.setEditorError);
+  const editorErrors = useDeltaStore((s) => s.editorErrors);
+  const setEditorErrors = useDeltaStore((s) => s.setEditorErrors);
   const setAnf = useDeltaStore((s) => s.setAnf);
 
   const monaco = useMonaco();
@@ -25,7 +25,7 @@ export function DeltaEditor() {
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor;
 
-    runCode(editorRef.current.getValue(), setAnf, setEditorError);
+    runCode(editorRef.current.getValue(), setAnf, setEditorErrors);
 
     defineTheme(monaco);
     monaco.editor.setTheme("catppuccin-latte");
@@ -69,11 +69,11 @@ export function DeltaEditor() {
 
         if (tsErrors.length > 0) return;
 
-        setEditorError(null);
-        runCode(editor.getValue(), setAnf, setEditorError);
+        setEditorErrors([]);
+        runCode(editor.getValue(), setAnf, setEditorErrors);
       } catch (err) {
-        setEditorError(null);
-        runCode(editor.getValue(), setAnf, setEditorError);
+        setEditorErrors([]);
+        runCode(editor.getValue(), setAnf, setEditorErrors);
       }
     });
   };
@@ -94,25 +94,23 @@ export function DeltaEditor() {
 
     if (!model || !monaco) return;
 
-    if (editorError) {
-      if (editorError && editorError.line > 0) {
-        monaco.editor.setModelMarkers(model, "delta-runtime", [
-          {
-            startLineNumber: editorError.line,
-            startColumn: editorError.column,
-            endLineNumber: editorError.line,
-            endColumn: model.getLineMaxColumn(editorError.line),
-            message: editorError.message,
-            severity: monaco.MarkerSeverity.Error,
-          },
-        ]);
-      } else {
-        monaco.editor.setModelMarkers(model, "delta-runtime", []);
-      }
+    if (editorErrors) {
+      monaco.editor.setModelMarkers(
+        model,
+        "delta-runtime",
+        editorErrors.map((editorError) => ({
+          startLineNumber: editorError.line,
+          startColumn: editorError.column,
+          endLineNumber: editorError.line,
+          endColumn: model.getLineMaxColumn(editorError.line),
+          message: editorError.message,
+          severity: monaco.MarkerSeverity.Error,
+        })),
+      );
     } else {
       monaco.editor.setModelMarkers(model, "delta-runtime", []);
     }
-  }, [monaco, editorError]);
+  }, [monaco, editorErrors]);
 
   return (
     <div className="relative w-full h-full">
@@ -133,21 +131,22 @@ export function DeltaEditor() {
         }}
       />
 
-      {editorError && editorError.line === 0 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-ctp-base/95 backdrop-blur-md border border-ctp-red/30 shadow-sm rounded-lg z-10 flex items-start gap-3 px-4 py-3 transition-all">
-          <Caution />
+      {editorErrors &&
+        editorErrors.filter((err) => err.line === 0).length > 0 && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-ctp-base/95 backdrop-blur-md border border-ctp-red/30 shadow-sm rounded-lg z-10 flex items-start gap-3 px-4 py-3 transition-all">
+            <Caution />
 
-          <div className="flex flex-col">
-            <span className="font-semibold text-sm text-ctp-text">
-              Build Failed
-            </span>
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm text-ctp-text">
+                Build Failed
+              </span>
 
-            <span className="font-mono text-xs mt-1 text-ctp-red/90 leading-relaxed">
-              {editorError.message}
-            </span>
+              <span className="font-mono text-xs mt-1 text-ctp-red/90 leading-relaxed">
+                {editorErrors.find((err) => err.line === 0)!.message}
+              </span>
+            </div>
           </div>
-        </div>
-      )}
+        )}
     </div>
   );
 }

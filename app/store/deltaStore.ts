@@ -56,7 +56,7 @@ interface DeltaState {
   // volatile
   machine: NFA | null;
   machineError: string | null;
-  editorError: ExecutionError | null;
+  editorErrors: ExecutionError[] | null;
 
   setEditorValue: (value: string) => void;
   setAnf: (anf: string | null) => void;
@@ -64,7 +64,7 @@ interface DeltaState {
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
   setStartId: (id: string | null) => void;
-  setEditorError: (error: ExecutionError | null) => void;
+  setEditorErrors: (errors: ExecutionError[] | null) => void;
 
   syncFromFlow: (nodes: Node[], edges: Edge[], startId: string | null) => void;
 }
@@ -89,7 +89,7 @@ export const useDeltaStore = create<DeltaState>()(
 
       machine: initialMachine,
       machineError: null,
-      editorError: null,
+      editorErrors: [],
 
       setEditorValue: (editorValue) => set({ editorValue }),
 
@@ -114,7 +114,7 @@ export const useDeltaStore = create<DeltaState>()(
       setNodes: (nodes) => set({ nodes }),
       setEdges: (edges) => set({ edges }),
       setStartId: (startId) => set({ startId }),
-      setEditorError: (editorError) => set({ editorError }),
+      setEditorErrors: (editorErrors) => set({ editorErrors }),
 
       syncFromFlow: (nodes, edges, startId) => {
         const code = flowToCode(nodes, edges, startId);
@@ -124,7 +124,7 @@ export const useDeltaStore = create<DeltaState>()(
         runCode(
           code,
           (anf) => get().setAnf(anf),
-          (err) => set({ editorError: err }),
+          (err) => set({ editorErrors: err }),
         );
       },
     }),
