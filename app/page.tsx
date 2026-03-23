@@ -28,9 +28,9 @@ function NFAPage() {
   const setAnf = useDeltaStore((s) => s.setAnf);
   const machine = useDeltaStore((s) => s.machine);
   const machineError = useDeltaStore((s) => s.machineError);
-  const editorError = useDeltaStore((s) => s.editorError);
+  const editorErrors = useDeltaStore((s) => s.editorErrors);
   const editorValue = useDeltaStore((s) => s.editorValue);
-  const setEditorError = useDeltaStore((s) => s.setEditorError);
+  const setEditorErrors = useDeltaStore((s) => s.setEditorErrors);
   const setEditorValue = useDeltaStore((s) => s.setEditorValue);
 
   const [copied, setCopied] = useState(false);
@@ -103,16 +103,16 @@ function NFAPage() {
             <div className="flex items-center gap-y-3">
               <Tooltip label="cmd+s">
                 <button
-                  onClick={() => runCode(editorValue, setAnf, setEditorError)}
+                  onClick={() => runCode(editorValue, setAnf, setEditorErrors)}
                   className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   compile
                 </button>
               </Tooltip>
               <a
-                className={`text-xs px-3 py-1 rounded-lg ${editorError ? "text-ctp-red" : "text-ctp-green"} transition-colors`}
+                className={`text-xs px-3 py-1 rounded-lg ${editorErrors ? "text-ctp-red" : "text-ctp-green"} transition-colors`}
               >
-                {editorError ? "✗ check errors" : "✓ valid"}
+                {editorErrors ? "✗ check errors" : "✓ valid"}
               </a>
             </div>
 
