@@ -202,20 +202,23 @@ export function FlowEditor() {
   const handleNodesChange = useCallback(
     (changes: any) => {
       onNodesChange(changes);
-      const nextNodes = applyNodeChanges(changes, nodes);
-      const removals = changes.filter((c: any) => c.type === "remove");
 
+      const removals = changes.filter((c: any) => c.type === "remove");
       if (removals.length > 0) {
-        setStateCount((c) => c - removals.length);
-        if (removals.some((r: any) => r.id === startId)) {
-          setStartId(null);
-          syncNodes(nextNodes, null);
-          return;
-        }
+        const nextNodes = applyNodeChanges(changes, nodes);
+        const nextStartId = removals.some((r: any) => r.id === startId)
+          ? null
+          : startId;
+
+        const removedIds = new Set(removals.map((r: any) => r.id));
+        const validEdges = edges.filter(
+          (e) => !removedIds.has(e.source) && !removedIds.has(e.target),
+        );
+
+        syncFromFlow(nextNodes, validEdges, nextStartId);
       }
-      syncNodes(nextNodes);
     },
-    [onNodesChange, nodes, syncNodes, startId, setStartId],
+    [onNodesChange, nodes, edges, startId, syncFromFlow],
   );
 
   const handleEdgesChange = useCallback(

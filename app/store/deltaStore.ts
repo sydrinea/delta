@@ -45,7 +45,7 @@ const DEFAULT_TESTS = [
 ];
 
 interface DeltaState {
-  // Persisted State
+  // persisted
   editorValue: string;
   anf: string | null;
   tests: TestCase[];
@@ -53,12 +53,11 @@ interface DeltaState {
   edges: Edge[];
   startId: string | null;
 
-  // Volatile State
+  // volatile
   machine: NFA | null;
   machineError: string | null;
   editorError: ExecutionError | null;
 
-  // Actions
   setEditorValue: (value: string) => void;
   setAnf: (anf: string | null) => void;
   setTests: (tests: TestCase[]) => void;
@@ -67,7 +66,6 @@ interface DeltaState {
   setStartId: (id: string | null) => void;
   setEditorError: (error: ExecutionError | null) => void;
 
-  // The Mega-Action
   syncFromFlow: (nodes: Node[], edges: Edge[], startId: string | null) => void;
 }
 
