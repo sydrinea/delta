@@ -98,14 +98,16 @@ export function DeltaEditor() {
       monaco.editor.setModelMarkers(
         model,
         "delta-runtime",
-        editorErrors.map((editorError) => ({
-          startLineNumber: editorError.line,
-          startColumn: editorError.column,
-          endLineNumber: editorError.line,
-          endColumn: model.getLineMaxColumn(editorError.line),
-          message: editorError.message,
-          severity: monaco.MarkerSeverity.Error,
-        })),
+        editorErrors
+          .filter((editorError) => editorError.line !== 0)
+          .map((editorError) => ({
+            startLineNumber: editorError.line,
+            startColumn: editorError.column,
+            endLineNumber: editorError.line,
+            endColumn: model.getLineMaxColumn(editorError.line),
+            message: editorError.message,
+            severity: monaco.MarkerSeverity.Error,
+          })),
       );
     } else {
       monaco.editor.setModelMarkers(model, "delta-runtime", []);
