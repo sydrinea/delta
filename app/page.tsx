@@ -47,9 +47,9 @@ function NFAPage() {
     if (machineId) {
       fetch(`${SHARE_URL}/anf/${machineId}`)
         .then((res) => res.json() as Promise<{ anf: string; code: string }>)
-        .then(({ anf, code }) => {
-          setAnf(anf);
+        .then(({ code }) => {
           setEditorValue(code);
+          runCode(code, setAnf, setEditorErrors);
         })
         .catch(() => {})
         .finally(() => {
