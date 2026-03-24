@@ -69,10 +69,8 @@ export function DeltaEditor() {
 
         if (tsErrors.length > 0) return;
 
-        setEditorErrors(null);
         runCode(editor.getValue(), setAnf, setEditorErrors);
       } catch (err) {
-        setEditorErrors(null);
         runCode(editor.getValue(), setAnf, setEditorErrors);
       }
     });
@@ -112,7 +110,7 @@ export function DeltaEditor() {
     } else {
       monaco.editor.setModelMarkers(model, "delta-runtime", []);
     }
-  }, [monaco, editorErrors]);
+  }, [monaco, editorErrors, editorRef?.current]);
 
   return (
     <div className="relative w-full h-full">

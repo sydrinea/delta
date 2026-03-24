@@ -15,6 +15,8 @@ import { nfaToCode } from "@/lib/compiler/nfaToCode";
 import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
 import { ReactFlowProvider } from "reactflow";
+import { ConfirmModal } from "./components/ConfirmModal";
+import { containsCustomLogicOrComments } from "./lib/detect-custom-logic";
 
 export default function Home() {
   return (
@@ -167,25 +169,48 @@ type LeftTab = "editor" | "canvas" | "visualizer";
 
 function LeftPanel() {
   const [activeTab, setActiveTab] = useState<LeftTab>("editor");
+  const [showWarning, setShowWarning] = useState(false);
+  const [pendingTab, setPendingTab] = useState<LeftTab | null>(null);
 
   const machine = useDeltaStore((s) => s.machine);
   const setNodes = useDeltaStore((s) => s.setNodes);
   const setEdges = useDeltaStore((s) => s.setEdges);
   const setStartId = useDeltaStore((s) => s.setStartId);
+  const editorValue = useDeltaStore((s) => s.editorValue);
+  const setEditorErrors = useDeltaStore((s) => s.setEditorErrors);
 
-  const handleTabChange = (tab: LeftTab) => {
+  const requestTabChange = (tab: LeftTab) => {
     if (
-      (activeTab === "editor" || activeTab === "visualizer") &&
-      tab === "canvas"
+      tab === "canvas" &&
+      activeTab !== "canvas" &&
+      containsCustomLogicOrComments(editorValue)
     ) {
-      if (machine) {
-        const { nodes, edges } = nfaToFlow(machine);
-        setNodes(nodes);
-        setEdges(edges);
-        setStartId(machine.startState);
-      }
+      setPendingTab(tab);
+      setShowWarning(true);
+      return;
     }
+
     setActiveTab(tab);
+  };
+
+  const confirmTabChange = () => {
+    if (pendingTab === "canvas" && machine) {
+      const { nodes, edges } = nfaToFlow(machine);
+      setNodes(nodes);
+      setEdges(edges);
+      setStartId(machine.startState);
+    }
+    if (pendingTab) {
+      setEditorErrors(null);
+      setActiveTab(pendingTab);
+    }
+    setShowWarning(false);
+    setPendingTab(null);
+  };
+
+  const cancelTabChange = () => {
+    setShowWarning(false);
+    setPendingTab(null);
   };
 
   return (
@@ -194,7 +219,7 @@ function LeftPanel() {
         {(["editor", "canvas", "visualizer"] as LeftTab[]).map((tab) => (
           <button
             key={tab}
-            onClick={() => handleTabChange(tab)}
+            onClick={() => requestTabChange(tab)}
             className={`pb-2 text-xs transition-colors border-b-2 cursor-pointer ${
               activeTab === tab
                 ? "text-ctp-text border-ctp-mauve"
@@ -217,6 +242,16 @@ function LeftPanel() {
           </ReactFlowProvider>
         )}
       </div>
+
+      <ConfirmModal
+        isOpen={showWarning}
+        title="Switching to Canvas"
+        message="Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?"
+        confirmText="Convert to Canvas"
+        cancelText="Stay in Editor"
+        onConfirm={confirmTabChange}
+        onCancel={cancelTabChange}
+      />
     </div>
   );
 }
