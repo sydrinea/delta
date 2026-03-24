@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 import type { Node, Edge } from "reactflow";
 import type { NFA } from "@/lib/compiler/nfa";
 import { deserialize } from "@/lib/compiler/serialize";
@@ -80,6 +80,24 @@ const initialMachine = (() => {
   }
 })();
 
+const hybridStorage: StateStorage = {
+  getItem: (name: string): string | null => {
+    const sessionValue = sessionStorage.getItem(name);
+    if (sessionValue) return sessionValue;
+    return localStorage.getItem(name);
+  },
+
+  setItem: (name: string, value: string): void => {
+    sessionStorage.setItem(name, value);
+    localStorage.setItem(name, value);
+  },
+
+  removeItem: (name: string): void => {
+    sessionStorage.removeItem(name);
+    localStorage.removeItem(name);
+  },
+};
+
 export const useDeltaStore = create<DeltaState>()(
   persist(
     (set, get) => ({
@@ -135,7 +153,7 @@ export const useDeltaStore = create<DeltaState>()(
     }),
     {
       name: "delta-store",
-      storage: createJSONStorage(() => sessionStorage),
+      storage: createJSONStorage(() => hybridStorage),
       partialize: (state) => ({
         editorValue: state.editorValue,
         lastSeenVersion: state.lastSeenVersion,
