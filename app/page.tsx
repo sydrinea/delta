@@ -10,14 +10,13 @@ import { Tooltip } from "@/components/Tooltip";
 import { runCode } from "./runCode";
 import { FlowEditor } from "@/components/editor/FlowEditor";
 import { nfaToFlow } from "@/lib/compiler/toFlow";
-import { deserialize } from "@/lib/compiler/serialize";
-import { nfaToCode } from "@/lib/compiler/nfaToCode";
 import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
 import { ReactFlowProvider } from "reactflow";
 import { ConfirmModal } from "./components/ConfirmModal";
 import { containsCustomLogicOrComments } from "./lib/detect-custom-logic";
 import { WhatsNewModal } from "./components/WhatsNewModal";
+import { Alert } from "./components/Alert";
 
 export default function Home() {
   return (
@@ -39,11 +38,11 @@ function NFAPage() {
   const setEditorValue = useDeltaStore((s) => s.setEditorValue);
 
   const [copied, setCopied] = useState(false);
+  const [showShareError, setShowShareError] = useState(false);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const machineId = params.get("m");
-    const anfParam = params.get("anf");
 
     const SHARE_URL = window.location.hostname.includes("comptheory.tools")
       ? "https://share.comptheory.tools"
@@ -60,13 +59,6 @@ function NFAPage() {
         .finally(() => {
           window.history.replaceState({}, "", window.location.pathname);
         });
-    } else if (anfParam) {
-      setAnf(anfParam);
-      try {
-        const m = deserialize(anfParam);
-        setEditorValue(nfaToCode(m));
-      } catch {}
-      window.history.replaceState({}, "", window.location.pathname);
     }
   }, [setAnf, setEditorValue]);
 
@@ -89,16 +81,20 @@ function NFAPage() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // fallback to ANF in URL
-      const url = `${window.location.origin}?anf=${encodeURIComponent(anf)}`;
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      setShowShareError(true);
     }
   };
 
   return (
     <div className="flex flex-col md:flex-row flex-1 md:overflow-hidden">
+      <Alert
+        isOpen={showShareError}
+        title="Share Failed"
+        message="Could not generate a share link right now. Please try again later."
+        confirmText="OK"
+        onConfirm={() => setShowShareError(false)}
+        onClose={() => setShowShareError(false)}
+      />
       <div className="hidden md:flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
         <LeftPanel />
       </div>
