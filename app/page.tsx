@@ -17,11 +17,13 @@ import { Share } from "@/icons/Share";
 import { ReactFlowProvider } from "reactflow";
 import { ConfirmModal } from "./components/ConfirmModal";
 import { containsCustomLogicOrComments } from "./lib/detect-custom-logic";
+import { WhatsNewModal } from "./components/WhatsNewModal";
 
 export default function Home() {
   return (
     <section className="flex md:flex-col md:h-screen md:overflow-hidden">
       <NFAPage />
+      <WhatsNewModal />
     </section>
   );
 }

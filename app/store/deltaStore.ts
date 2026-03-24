@@ -5,6 +5,7 @@ import type { NFA } from "@/lib/compiler/nfa";
 import { deserialize } from "@/lib/compiler/serialize";
 import { flowToCode } from "@/lib/compiler/fromFlow";
 import { runCode, type ExecutionError } from "../runCode";
+import { version } from "../../package.json";
 
 export interface TestCase {
   id: string;
@@ -52,6 +53,7 @@ interface DeltaState {
   nodes: Node[];
   edges: Edge[];
   startId: string | null;
+  lastSeenVersion: string;
 
   // volatile
   machine: NFA | null;
@@ -65,6 +67,7 @@ interface DeltaState {
   setEdges: (edges: Edge[]) => void;
   setStartId: (id: string | null) => void;
   setEditorErrors: (errors: ExecutionError[] | null) => void;
+  setLastSeenVersion: (version: string) => void;
 
   syncFromFlow: (nodes: Node[], edges: Edge[], startId: string | null) => void;
 }
@@ -86,6 +89,7 @@ export const useDeltaStore = create<DeltaState>()(
       nodes: [],
       edges: [],
       startId: null,
+      lastSeenVersion: version,
 
       machine: initialMachine,
       machineError: null,
@@ -115,6 +119,7 @@ export const useDeltaStore = create<DeltaState>()(
       setEdges: (edges) => set({ edges }),
       setStartId: (startId) => set({ startId }),
       setEditorErrors: (editorErrors) => set({ editorErrors }),
+      setLastSeenVersion: (version) => set({ lastSeenVersion: version }),
 
       syncFromFlow: (nodes, edges, startId) => {
         const code = flowToCode(nodes, edges, startId);
@@ -133,6 +138,7 @@ export const useDeltaStore = create<DeltaState>()(
       storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         editorValue: state.editorValue,
+        lastSeenVersion: state.lastSeenVersion,
         anf: state.anf,
         tests: state.tests,
         nodes: state.nodes,
