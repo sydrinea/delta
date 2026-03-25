@@ -246,7 +246,7 @@ function LeftPanel() {
         title="Switching to Canvas"
         message="Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?"
         confirmText="Convert to Canvas"
-        cancelText="Stay in Editor"
+        cancelText={`Stay in ${activeTab.replace(/^[a-z]/, (s) => s.toUpperCase())}`}
         onConfirm={confirmTabChange}
         onCancel={cancelTabChange}
       />
