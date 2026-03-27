@@ -3,9 +3,9 @@ import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 import type { Node, Edge } from "reactflow";
 import type { NFA } from "@delta/build";
 import type { TuringMachine } from "@delta/build";
-import { flowToCode } from "@/lib/fromFlow";
-import { runCode, type ExecutionError } from "@/app/runCode";
-import { MachineTypes } from "../../../../packages/proto/src";
+import { flowToCode } from "@/lib/flow/fromFlow";
+import { runCode, type ExecutionError } from "@/lib/runCode";
+import { MachineTypes } from "@/lib/worker/protocol";
 import { version } from "../../../../package.json";
 
 export interface TestCase {

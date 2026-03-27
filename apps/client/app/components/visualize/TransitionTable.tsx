@@ -6,7 +6,7 @@ import {
   activeTupleFromTapes,
   buildTMTransitionRows,
   formatReadTuple,
-} from "@/lib/metadata";
+} from "@/components/visualize/metadata";
 
 interface TransitionTableCurrentStep {
   states: Set<string>;

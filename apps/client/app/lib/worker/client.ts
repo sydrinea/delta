@@ -4,7 +4,7 @@ import {
   isWorkerResponse,
   type WorkerRequest,
   type WorkerResponse,
-} from "../../../../../packages/proto/src";
+} from "./protocol";
 
 export class WorkerTimeoutError extends Error {
   constructor(message: string) {

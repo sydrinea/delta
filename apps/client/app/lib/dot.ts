@@ -1,5 +1,5 @@
 import { NFA, TuringMachine, EPSILON } from "@delta/build";
-import { buildTMTransitionRows, formatReadTuple } from "./metadata";
+import { buildTMTransitionRows, formatReadTuple } from "../components/visualize/metadata";
 
 // Catppuccin Latte
 const COLORS = {

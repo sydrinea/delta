@@ -1,8 +1,8 @@
-import { dispatch } from "./worker/dispatcher";
+import { dispatch } from "./dispatcher";
 import {
   WorkerErrorCodes,
   isWorkerRequest,
-} from "../../../../packages/proto/src";
+} from "./protocol";
 
 self.onmessage = async (event: MessageEvent<unknown>) => {
   const incoming = event.data;

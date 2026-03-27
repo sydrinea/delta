@@ -6,12 +6,11 @@ import {
   MachineTypes,
   WorkerErrorCodes,
   type WorkerRequest,
-} from "@delta/proto";
+} from "../app/lib/worker/protocol";
 import { dispatch } from "@/lib/worker/dispatcher";
 import { sendWorkerRequest, WorkerTimeoutError } from "@/lib/worker/client";
 import { compileHandler } from "@/lib/worker/handlers/compile";
 
-// Mock the compile handler to isolate the dispatcher functionality
 vi.mock("@/lib/worker/handlers/compile", () => ({
   compileHandler: vi.fn(),
 }));

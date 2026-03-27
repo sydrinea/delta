@@ -12,7 +12,7 @@ import {
   type MachineType,
   type CompileErrorDetail,
   type CompileSuccessData,
-} from "../../../packages/proto/src";
+} from "@/lib/worker/protocol";
 
 const MessageSchema = z.object({
   content: z.string(),
@@ -79,7 +79,7 @@ export const runCode = async <M extends NFA | TuringMachine>(
   onValidMachine: (machine: M) => void,
   onError: (errors: ExecutionError[] | null) => void,
 ) => {
-  const worker = new Worker(new URL("./lib/worker.ts", import.meta.url), {
+  const worker = new Worker(new URL("./worker/index.ts", import.meta.url), {
     type: "module",
   });
 

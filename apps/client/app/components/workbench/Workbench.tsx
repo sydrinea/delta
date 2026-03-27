@@ -10,9 +10,9 @@ import {
 } from "@headlessui/react";
 import { ReactFlowProvider } from "reactflow";
 import { useDeltaStore } from "@/store/deltaStore";
-import { MachineTypes, type MachineType } from "@delta/proto";
+import { MachineTypes, type MachineType } from "../../lib/worker/protocol";
 import { type NFA, type TuringMachine } from "@delta/build";
-import { nfaToFlow } from "@/lib/toFlow";
+import { nfaToFlow } from "@/lib/flow/toFlow";
 import { containsCustomLogicOrComments } from "@/lib/detect-custom-logic";
 import { DeltaEditor } from "@/components/editor/DeltaEditor";
 import { FlowEditor } from "@/components/editor/FlowEditor";
@@ -31,7 +31,7 @@ import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
 import { simulate as simulateNFA, simulateTM } from "@delta/simulator";
 import { useCompile } from "@/hooks/useCompile";
-import { recipes } from "../../recipes";
+import { recipes } from "../../lib/recipes";
 import { toDot, toDotTM } from "@/lib/dot";
 
 type TabId = "editor" | "canvas" | "visualizer";

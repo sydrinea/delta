@@ -20,7 +20,7 @@ import {
   type CompileParams,
   type CompileSuccessData,
   type ExecutionErrorPayload,
-} from "@delta/proto";
+} from "../protocol";
 
 const api = {
   nfa,

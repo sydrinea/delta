@@ -6,7 +6,7 @@ import * as MonacoEditor from "monaco-editor";
 import defineTheme from "./defineTheme";
 import { useDeltaStore } from "@/store/deltaStore";
 import { useCompile } from "@/hooks/useCompile";
-import DELTA_D_TS from "@/lib/delta-runtime";
+import DELTA_D_TS from "@/lib/editor-types";
 import { Caution } from "@/icons/Caution";
 
 interface DeltaEditorProps {

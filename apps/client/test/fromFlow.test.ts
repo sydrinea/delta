@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { Node, Edge } from "reactflow";
-import { flowToCode } from "@/lib/fromFlow";
+import { flowToCode } from "@/lib/flow/fromFlow";
 
 describe("fromFlow", () => {
   it("handles empty flow", () => {

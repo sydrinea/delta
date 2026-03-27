@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { MachineType } from "../../../../packages/proto/src";
+import type { MachineType } from "@/lib/worker/protocol";
 
 interface UseMachineShareOptions {
   machineType: MachineType;

@@ -11,7 +11,7 @@ import {
 import { remark } from "remark";
 import html from "remark-html";
 import { useDeltaStore } from "@/store/deltaStore";
-import { APP_VERSION, CHANGELOG } from "../changelog";
+import { APP_VERSION, CHANGELOG } from "@/lib/changelog";
 
 function MarkdownBlock({ content }: { content: string }) {
   const [parsedHtml, setParsedHtml] = useState("");

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { runCode, type ExecutionError } from "@/app/runCode";
+import { runCode, type ExecutionError } from "@/lib/runCode";
 import type { NFA, TuringMachine } from "@delta/build";
 import { useDeltaStore } from "@/store/deltaStore";
 

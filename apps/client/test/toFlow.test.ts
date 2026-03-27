@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { MarkerType } from "reactflow";
 import { nfa, EPSILON } from "@delta/build";
-import { nfaToFlow } from "@/lib/toFlow";
+import { nfaToFlow } from "@/lib/flow/toFlow";
 
 describe("toFlow", () => {
   it("converts an NFA to a reactflow layout", () => {

@@ -6,7 +6,7 @@ import {
   type CompileSuccessData,
   type WorkerRequest,
   type WorkerResponse,
-} from "../../../../../packages/proto/src";
+} from "./protocol";
 import { compileHandler } from "./handlers/compile";
 
 type DispatchResponse = WorkerResponse<CompileSuccessData, CompileErrorDetail>;

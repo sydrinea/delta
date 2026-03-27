@@ -1,4 +1,4 @@
-import { version } from "../../../package.json";
+import { version } from "@/app/../package.json";
 
 export const APP_VERSION = version;
 
