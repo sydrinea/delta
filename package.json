@@ -3,10 +3,9 @@
   "version": "0.2.0-beta.1",
   "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "test": "turbo test",
-    "dev": "pnpm --filter @delta/client dev",
-    "build": "pnpm --filter @delta/client build",
-    "start": "pnpm --filter @delta/client start"
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test"
   },
   "devDependencies": {
     "turbo": "^2.8.20"

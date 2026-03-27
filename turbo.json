@@ -4,6 +4,10 @@
     "test": {
       "dependsOn": ["^test"]
     },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
     "dev": {
       "persistent": true,
       "cache": false
