@@ -1,8 +1,10 @@
 {
+  "extends": "../tsconfig/base.json",
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "node"
+    "paths": {
+      "@delta/shared": ["../shared/src/index.ts"],
+      "@delta/build": ["../build/src/index.ts"],
+      "@delta/transform": ["../transform/src/index.ts"]
+    }
   }
 }
