@@ -1,33 +1,96 @@
+<div align="center">
+
+<img src="https://github.com/sydrinea/delta/blob/dev/apps/client/public/android-chrome-512x512.png?raw=true" width="96" alt="Delta logo" />
+
 # Delta
 
-An interactive, code-first environment to design, test, and visualize automata (DFAs & NFAs with more to come)
+**An interactive, code-first environment to design, test, and visualize automata**
 
-## Tech Demo
+[![Live App](https://img.shields.io/badge/try%20it-delta.sydneyn.dev-blue?style=flat-square)](https://delta.sydneyn.dev)
+&nbsp;
+[![Demo](https://img.shields.io/badge/watch-demo-red?style=flat-square&logo=youtube)](https://www.youtube.com/watch?v=zOM9aVSUVi0)
 
-[click image to load]
+</div>
 
-[![YouTube demonstration of Delta](https://img.youtube.com/vi/zOM9aVSUVi0/maxresdefault.jpg)](https://www.youtube.com/watch?v=zOM9aVSUVi0)
+---
 
-## Key Features
+Delta lets you define DFAs, NFAs, and Turing Machines as TypeScript code using a readable fluent API, then immediately run test suites against them, visualize execution, and share your work with a URL.
 
-**Declarative Fluent API**: Define complex DFAs and NFAs using a [readable, chainable JavaScript API](docs/api.md) — click to view docs
+## Getting Started
 
-**Integrated Test Suites**: Treat automata as software by running batteries of test inputs with instant feedback
+The fastest way to use Delta is the hosted version — no setup required:
 
-**Thompson’s Construction Sandbox**: A dedicated stack-based API for building NFAs from regular expressions using union, concatenation, and kleene star operations
+**[delta.sydneyn.dev](https://delta.sydneyn.dev)**
 
-**Subset Construction**: Seamlessly convert NFAs to DFAs with options to preserve state naming, providing a clear view of the power set construction
+To run it locally:
 
-**Sharing**: Shareable URLs let you easily save progress and send automata to others
+```bash
+git clone https://github.com/sydrinea/delta
+cd delta
+pnpm install
+pnpm run dev
+```
 
-## Future Work
+> **Note:** `@delta/build` is not yet published to npm. It's available as a workspace package within this monorepo.
 
-I plan to expand to PDAs and Turing Machines with the same visualization tools and fluent API that I've developed for NFAs and DFAs, focusing on streamlining common patterns like tape rewinding and complex state transitions
+## Features
 
-## Build & Run
+### Declarative Fluent API
 
-The codebase is a straightforward Node.js project:
+Machines are defined in code using `@delta/build`, a chainable builder library. DFAs, NFAs, and Turing Machines each have their own builder with validation baked in — errors surface at build time, not at runtime.
 
-1. Clone the repository
-2. Install dependencies with `npm install`
-3. Run the development environment using `npm run dev`
+```ts
+import { nfa, EPS } from "@delta/build";
+
+const machine = nfa("ends in ab")
+  .alphabet("a", "b")
+  .states("q0", "q1", "q2")
+  .start("q0")
+  .accept("q2")
+  .transition("q0", "a", "q0")
+  .transition("q0", "b", "q0")
+  .transition("q0", "a", "q1")
+  .transition("q1", "b", "q2")
+  .build();
+```
+
+### Integrated Test Suites
+
+Declare a battery of test cases. Delta runs them all and reports pass/fail inline so you can see exactly where and how your automata are failing.
+
+### Thompson's Construction
+
+A dedicated stack-based API for building NFAs directly from regular expression structure — pushing character machines and combining them with `.union()`, `.concat()`, and `.star()`. Each operation corresponds precisely to the Thompson construction rules.
+
+### Subset Construction (NFA → DFA)
+
+Convert any NFA to an equivalent DFA via `convertToDFA` from `@delta/transform`. The power set construction runs automatically, with an option to preserve human-readable state names.
+
+```ts
+import { convertToDFA } from "@delta/transform";
+
+const deterministic = convertToDFA(myNFA, {
+  name: "my DFA",
+  preserveNames: false,
+});
+```
+
+### Shareable URLs
+
+Every machine and its state can be encoded into a URL, so you can save your work or send it to someone without any accounts or exports.
+
+## Documentation
+
+A work in progress! In the meantime, check out the examples [for NFAs](/examples/nfa) and [for Turing Machines](/examples/tm).
+
+## Roadmap
+
+- [ ] PDAs
+- [ ] Regular Grammars
+- [ ] Context-Free Grammars
+  - [ ] Chomsky Normal Form
+  - [ ] Greibach Normal Form
+
+## License
+
+AGPL-3.0
