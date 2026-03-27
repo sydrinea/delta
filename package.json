@@ -1,40 +1,14 @@
 {
   "name": "delta",
   "version": "0.2.0-beta.1",
-  "private": true,
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "test": "vitest",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "@headlessui/react": "^2.2.9",
-    "@monaco-editor/react": "^4.7.0",
-    "@viz-js/viz": "^3.25.0",
-    "monaco-editor": "^0.55.1",
-    "next": "16.1.7",
-    "react": "19.2.3",
-    "react-dom": "19.2.3",
-    "reactflow": "^11.11.4",
-    "remark": "^15.0.1",
-    "remark-html": "^16.0.1",
-    "zod": "^4.3.6",
-    "zustand": "^5.0.12"
+    "test": "turbo test",
+    "dev": "pnpm --filter @delta/client dev",
+    "build": "pnpm --filter @delta/client build",
+    "start": "pnpm --filter @delta/client start"
   },
   "devDependencies": {
-    "@catppuccin/tailwindcss": "^1.0.0",
-    "@tailwindcss/postcss": "^4",
-    "@tailwindcss/typography": "^0.5.19",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "@vitest/coverage-v8": "^4.1.1",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.7",
-    "tailwindcss": "^4",
-    "typescript": "^5",
-    "vitest": "^4.1.0"
+    "turbo": "^2.8.20"
   }
 }
