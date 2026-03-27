@@ -101,4 +101,7 @@ Also be sure to check out the examples [for NFAs](/examples/nfa) and [for Turing
 
 ## License
 
-AGPL-3.0
+The packages in this repository are licensed as follows:
+
+- **`apps/client`** — [AGPL-3.0](apps/client/LICENSE)
+- **Everything else** — [MIT](LICENSE)
