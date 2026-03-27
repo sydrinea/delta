@@ -12,6 +12,7 @@
   "dependencies": {
     "@babel/parser": "^7.29.2",
     "@delta/build": "workspace:*",
+    "@delta/examples": "workspace:*",
     "@delta/simulator": "workspace:*",
     "@delta/transform": "workspace:*",
     "@headlessui/react": "^2.2.9",

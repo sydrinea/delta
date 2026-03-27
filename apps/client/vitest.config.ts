@@ -8,6 +8,7 @@ export default defineConfig({
       "@delta/build": "../../packages/build/src/index.ts",
       "@delta/simulator": "../../packages/simulator/src/index.ts",
       "@delta/transform": "../../packages/transform/src/index.ts",
+      "@delta/examples": "../../examples/generated/index.ts",
     },
   },
 });

@@ -1,0 +1,22 @@
+{
+  "name": "@delta/examples",
+  "private": true,
+  "types": "./generated/index.ts",
+  "scripts": {
+    "build:index": "tsx scripts/build.ts"
+  },
+  "dependencies": {
+    "@delta/build": "workspace:*",
+    "@delta/transform": "workspace:*"
+  },
+  "devDependencies": {
+    "@babel/generator": "^7.29.1",
+    "@babel/parser": "^7.29.2",
+    "@babel/traverse": "^7.29.0",
+    "@babel/types": "^7.29.0",
+    "@types/babel__generator": "^7.27.0",
+    "@types/babel__traverse": "^7.28.0",
+    "@types/node": "^25.5.0",
+    "tsx": "^4.7.1"
+  }
+}

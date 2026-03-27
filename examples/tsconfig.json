@@ -1,0 +1,9 @@
+{
+  "extends": "../packages/tsconfig/base.json",
+  "compilerOptions": {
+    "paths": {
+      "@delta/build": ["../build/src/index.ts"],
+      "@delta/transform": ["../transform/src/index.ts"]
+    }
+  }
+}

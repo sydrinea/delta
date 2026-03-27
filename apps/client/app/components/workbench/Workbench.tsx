@@ -31,7 +31,7 @@ import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
 import { simulate as simulateNFA, simulateTM } from "@delta/simulator";
 import { useCompile } from "@/hooks/useCompile";
-import { recipes } from "../../lib/recipes";
+import recipes from "../../lib/recipes";
 import { toDot, toDotTM } from "@/lib/dot";
 
 type TabId = "editor" | "canvas" | "visualizer";
@@ -151,7 +151,7 @@ export function Workbench<M>({
 
       setActiveTab("editor"); // it gets really weird to switch recipes from the canvas
       setTests(testsWithFreshIds);
-      setEditorValue(fetchedCode.replace("//@ts-nocheck\n", "").trim());
+      setEditorValue(fetchedCode.replace("//@ts-nocheck", "").trim());
       setEditorErrors(null);
       compile(fetchedCode);
     } catch (error) {
