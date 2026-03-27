@@ -1,6 +1,6 @@
 {
-  "name": "share",
-  "version": "0.1.0-beta.1",
+  "name": "@delta/share",
+  "version": "0.2.0-beta.1",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
