@@ -81,7 +81,15 @@ Every machine and its state can be encoded into a URL, so you can save your work
 
 ## Documentation
 
-A work in progress! In the meantime, check out the examples [for NFAs](/examples/nfa) and [for Turing Machines](/examples/tm).
+| Guide                                       | Description                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------ |
+| [Quick Start](docs/quick-start.md)          | Builder lifecycle, shared methods, and the `q()` helper                  |
+| [NFAs](docs/nfa.md)                         | Epsilon transitions, shorthand methods, state scoping, batch transitions |
+| [DFAs](docs/dfa.md)                         | Determinism constraints, total transition function, `.increment()`       |
+| [Turing Machines](docs/tm.md)               | Tape alphabet, single-tape and multi-tape builders, `.seek()`            |
+| [Thompson's Construction](docs/thompson.md) | Stack model, primitives, operators, machine composition                  |
+
+Also be sure to check out the examples [for NFAs](/examples/nfa) and [for Turing Machines](/examples/tm).
 
 ## Roadmap
 
