@@ -3,7 +3,7 @@ import { thompson, convertToDFA } from "delta:lib";
 
 const zeroOne = thompson("01*").char("0").char("1").star().concat().build();
 
-const nfa = thompson("1*(01*01*01*)*")
+const machine = thompson("1*(01*01*01*)*")
   .char("1")
   .star()
   .machine(zeroOne)
@@ -15,10 +15,9 @@ const nfa = thompson("1*(01*01*01*)*")
   .concat()
   .build();
 
-const dfa = convertToDFA(nfa, {
+const deterministic = convertToDFA(machine, {
   name: "1*(01*01*01*)* (as DFA)",
   preserveNames: false,
 });
 
-export default dfa;
-// export default nfa;
+export default deterministic;

@@ -1,144 +1,777 @@
 import { describe, expect, it } from "vitest";
-import tm from "@/lib/compiler/tm";
+import tm, { multitape, TMBuildError, TMMessages } from "@/lib/compiler/tm";
 import { simulate } from "@/lib/simulator/tm";
+import { getBuildError } from "../utils";
 
-const palindromes = () =>
+const minimalTM = () =>
   tm("test")
     .alphabet("0", "1")
-    .tape("X", "Y", "_")
+    .tape("_")
     .blank("_")
-    .states("q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8")
+    .states("q0", "qAccept")
     .start("q0")
-    .accept("q6")
-    .transition({ from: "q0", read: ["_"], move: ["R"], to: "q1" })
-    .state("q1", (s) =>
-      s
-        .on(["0"], "R", "q2", "X")
-        .on(["1"], "R", "q7", "Y")
-        .on(["X", "Y"], "R", "q5")
-        .on(["_"], "R", "q6"),
-    )
-    .state("q2", (s) =>
-      s.on(["0", "1", "X", "Y"], "R", "q2").on(["_"], "L", "q3"),
-    )
-    .state("q3", (s) =>
-      s
-        .on(["X", "Y"], "L", "q3")
-        .on(["_"], "R", "q5")
-        .on(["0"], "L", "q4", "X"),
-    )
-    .state("q7", (s) =>
-      s.on(["0", "1", "X", "Y"], "R", "q7").on(["_"], "L", "q8"),
-    )
-    .state("q8", (s) =>
-      s
-        .on(["X", "Y"], "L", "q8")
-        .on(["_"], "R", "q5")
-        .on(["1"], "L", "q4", "Y"),
-    )
-    .state("q4", (s) => s.on(["0", "1"], "L", "q4").on(["X", "Y"], "R", "q1"))
-    .state("q5", (s) => s.on(["X", "Y"], "R", "q5").on(["_"], "R", "q6"));
+    .accept("qAccept");
 
-describe("TMBuilder", () => {
-  describe("valid construction", () => {
-    it("builds a valid TM with no messages", () => {
-      expect(() => palindromes().build()).not.toThrow();
+describe("TMBuilder – builder methods", () => {
+  describe("alphabet()", () => {
+    it("adds symbols to the input alphabet", () => {
+      const b = tm("t").alphabet("0", "1").tape("_").blank("_");
+      expect(b.alpha).toEqual(expect.arrayContaining(["0", "1"]));
+    });
+
+    it("automatically adds alphabet symbols to the tape alphabet when blank is not yet set", () => {
+      const b = tm("t")
+        .states("q0", "q1")
+        .start("q0")
+        .accept("q1")
+        .alphabet("0", "1")
+        .tape("_")
+        .blank("_")
+        .state("q0", (s) => s.on("0", "R", "q1"));
+      expect(() => b.build()).not.toThrow();
+    });
+
+    it("rejects the blank symbol from the alphabet when blank is already set", () => {
+      const b = tm("t")
+        .tape("0", "_")
+        .blank("_")
+        .alphabet("0", "_");
+
+      expect(b.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.blankSymbolInAlphabet("_"),
+        }),
+      );
     });
   });
 
-  describe("simulation test suite", () => {
-    const machine = palindromes().build();
-
-    it("accepts empty input", () => {
-      expect(simulate(machine, "").accepted).toBe(true);
+  describe("tape()", () => {
+    it("adds symbols to the tape alphabet", () => {
+      const b = minimalTM().state("q0", (s) => s.on("_", "S", "qAccept"));
+      const m = b.build();
+      expect(m.tapeAlphabet).toContain("0");
+      expect(m.tapeAlphabet).toContain("1");
+      expect(m.tapeAlphabet).toContain("_");
     });
 
-    it("accepts single symbol 0 (odd edge)", () => {
-      expect(simulate(machine, "0").accepted).toBe(true);
+    it("rejects ε from the tape alphabet", () => {
+      const b = tm("t").tape("ε");
+      expect(b.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.epsilonInTapeAlphabet,
+        }),
+      );
+    });
+  });
+
+  describe("blank()", () => {
+    it("sets the blank symbol when already in the tape alphabet", () => {
+      const b = minimalTM().state("q0", (s) => s.on("_", "S", "qAccept"));
+      const m = b.build();
+      expect(m.blankSymbol).toBe("_");
     });
 
-    it("accepts single symbol 1 (odd edge)", () => {
-      expect(simulate(machine, "1").accepted).toBe(true);
+    it("errors when blank symbol is not yet in the tape alphabet", () => {
+      const b = tm("t").blank("_");
+      expect(b.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.blankSymbolNotInTape("_"),
+        }),
+      );
     });
 
-    it("accepts 00 (even edge)", () => {
-      expect(simulate(machine, "00").accepted).toBe(true);
+    it("errors when blank symbol is also in the input alphabet", () => {
+      const b = tm("t").alphabet("_").tape("_").blank("_");
+      expect(b.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.blankSymbolInAlphabet("_"),
+        }),
+      );
     });
 
-    it("accepts 11 (even edge)", () => {
-      expect(simulate(machine, "11").accepted).toBe(true);
+    it("errors when tape() is called before blank(), leaving blank undeclared at blank() time", () => {
+      const b = tm("t").blank("_").tape("_");
+      expect(b.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.blankSymbolNotInTape("_"),
+        }),
+      );
     });
 
-    it("rejects 01 (even edge non-palindrome)", () => {
-      expect(simulate(machine, "01").accepted).toBe(false);
+    it("succeeds when tape() precedes blank()", () => {
+      const b = tm("t")
+        .alphabet("0", "1")
+        .tape("_")
+        .blank("_")
+        .states("q0", "qA")
+        .start("q0")
+        .accept("qA")
+        .state("q0", (s) => s.on("_", "S", "qA"));
+      expect(() => b.build()).not.toThrow();
+    });
+  });
+
+  describe("states()", () => {
+    it("registers multiple states in one call", () => {
+      const b = minimalTM().state("q0", (s) => s.on("_", "S", "qAccept"));
+      const m = b.build();
+      expect(m.states.has("q0")).toBe(true);
+      expect(m.states.has("qAccept")).toBe(true);
+    });
+  });
+
+  describe("start()", () => {
+    it("records an error for an undeclared start state", () => {
+      const b = tm("t")
+        .alphabet("0")
+        .tape("_")
+        .blank("_")
+        .states("q0")
+        .start("undeclared");
+      expect(b.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.startStateNotDeclared("undeclared"),
+        }),
+      );
+    });
+  });
+
+  describe("accept()", () => {
+    it("records an error for an undeclared accept state", () => {
+      const b = tm("t")
+        .alphabet("0")
+        .tape("_")
+        .blank("_")
+        .states("q0")
+        .start("q0")
+        .accept("undeclared");
+      expect(b.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.acceptStateNotDeclared("undeclared"),
+        }),
+      );
+    });
+  });
+
+  describe("build()", () => {
+    it("throws TMBuildError when there are accumulated errors", () => {
+      const b = tm("t").alphabet("0").tape("_"); // no blank, no states, etc.
+      const err = getBuildError(TMBuildError, () => b.build());
+      expect(err).toBeInstanceOf(TMBuildError);
+      expect(err.messages.some((m) => m.severity === "error")).toBe(true);
     });
 
-    it("rejects 10 (even edge non-palindrome)", () => {
-      expect(simulate(machine, "10").accepted).toBe(false);
+    it("throws if build() is called a second time", () => {
+      const b = minimalTM().state("q0", (s) => s.on("_", "S", "qAccept"));
+      b.build();
+      expect(() => b.build()).toThrow(TMMessages.alreadyBuilt);
     });
 
-    it("accepts 010 (odd palindrome)", () => {
-      expect(simulate(machine, "010").accepted).toBe(true);
+    it("returns a TM with correct structural properties", () => {
+      const m = minimalTM()
+        .state("q0", (s) => s.on("_", "S", "qAccept"))
+        .build();
+      expect(m.name).toBe("test");
+      expect(m.tapeCount).toBe(1);
+      expect(m.blankSymbol).toBe("_");
+      expect(m.startState).toBe("q0");
+      expect(m.acceptStates.has("qAccept")).toBe(true);
     });
 
-    it("accepts 101 (odd palindrome)", () => {
-      expect(simulate(machine, "101").accepted).toBe(true);
+    it("errors when no blank symbol is defined", () => {
+      const b = tm("t")
+        .alphabet("0")
+        .tape("0")
+        .states("q0")
+        .start("q0")
+        .accept("q0");
+      const err = getBuildError(TMBuildError, () => b.build());
+      expect(err.messages).toContainEqual(
+        expect.objectContaining({
+          severity: "error",
+          content: TMMessages.noBlankSymbol,
+        }),
+      );
     });
+  });
+});
 
-    it("rejects 001 (odd non-palindrome)", () => {
-      expect(simulate(machine, "001").accepted).toBe(false);
-    });
+describe("TMBuilder – .transition() call signatures", () => {
+  const base = () =>
+    tm("sig")
+      .alphabet("0", "1")
+      .tape("_")
+      .blank("_")
+      .states("q0", "q1", "q2", "qA")
+      .start("q0")
+      .accept("qA");
 
-    it("rejects 110 (odd non-palindrome)", () => {
-      expect(simulate(machine, "110").accepted).toBe(false);
-    });
+  it("object form with scalar read/move/write strings", () => {
+    const m = base()
+      .transition({ from: "q0", read: "0", move: "R", to: "q1" })
+      .transition({ from: "q1", read: "_", move: "S", to: "qA" })
+      .build();
 
-    it("accepts 0110 (even palindrome)", () => {
-      expect(simulate(machine, "0110").accepted).toBe(true);
-    });
+    const q0Map = m.transitions.get("q0");
+    expect(q0Map).toBeDefined();
+    const t = q0Map!.values().next().value!;
+    expect(t.toState).toBe("q1");
+    expect(t.directions[0]).toBe("R");
+  });
 
-    it("accepts 1001 (even palindrome)", () => {
-      expect(simulate(machine, "1001").accepted).toBe(true);
-    });
+  it("object form with single-element array read/move", () => {
+    const m = base()
+      .transition({ from: "q0", read: ["0"], move: ["R"], to: "q1" })
+      .transition({ from: "q1", read: ["_"], move: ["S"], to: "qA" })
+      .build();
 
-    it("rejects 0101 (even non-palindrome)", () => {
-      expect(simulate(machine, "0101").accepted).toBe(false);
-    });
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.readSymbols[0]).toBe("0");
+    expect(t.directions[0]).toBe("R");
+  });
 
-    it("rejects 1010 (even non-palindrome)", () => {
-      expect(simulate(machine, "1010").accepted).toBe(false);
-    });
+  it("object form with write symbol specified", () => {
+    const m = base()
+      .transition({ from: "q0", read: "0", move: "R", to: "q1", write: "1" })
+      .transition({ from: "q1", read: "_", move: "S", to: "qA" })
+      .build();
 
-    it("accepts 00100 (odd palindrome)", () => {
-      expect(simulate(machine, "00100").accepted).toBe(true);
-    });
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.writeSymbols[0]).toBe("1");
+  });
 
-    it("accepts 11011 (odd palindrome)", () => {
-      expect(simulate(machine, "11011").accepted).toBe(true);
-    });
+  it("object form with write as single-element array", () => {
+    const m = base()
+      .transition({
+        from: "q0",
+        read: ["0"],
+        move: ["R"],
+        to: "q1",
+        write: ["1"],
+      })
+      .transition({ from: "q1", read: ["_"], move: ["S"], to: "qA" })
+      .build();
 
-    it("rejects 00110 (odd non-palindrome)", () => {
-      expect(simulate(machine, "00110").accepted).toBe(false);
-    });
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.writeSymbols[0]).toBe("1");
+  });
 
-    it("rejects 11001 (odd non-palindrome)", () => {
-      expect(simulate(machine, "11001").accepted).toBe(false);
-    });
+  it("duplicate transition (same state + read) accumulates an error", () => {
+    const b = base()
+      .transition({ from: "q0", read: "0", move: "R", to: "q1" })
+      .transition({ from: "q0", read: "0", move: "L", to: "q2" }); // duplicate
 
-    it("accepts 011110 (even palindrome)", () => {
-      expect(simulate(machine, "011110").accepted).toBe(true);
-    });
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({ severity: "error" }),
+    );
+  });
 
-    it("accepts 100001 (even palindrome)", () => {
-      expect(simulate(machine, "100001").accepted).toBe(true);
+  it("transition referencing undeclared source state accumulates an error", () => {
+    const b = base().transition({
+      from: "ghost",
+      read: "0",
+      move: "R",
+      to: "q1",
     });
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: TMMessages.transitionSourceNotDeclared("ghost"),
+      }),
+    );
+  });
 
-    it("rejects 011010 (even non-palindrome)", () => {
-      expect(simulate(machine, "011010").accepted).toBe(false);
+  it("transition referencing undeclared target state accumulates an error", () => {
+    const b = base().transition({
+      from: "q0",
+      read: "0",
+      move: "R",
+      to: "ghost",
     });
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: TMMessages.transitionTargetNotDeclared("ghost"),
+      }),
+    );
+  });
 
-    it("rejects 100011 (even non-palindrome)", () => {
-      expect(simulate(machine, "100011").accepted).toBe(false);
+  it("transition reading undeclared tape symbol accumulates an error", () => {
+    const b = base().transition({
+      from: "q0",
+      read: "X",
+      move: "R",
+      to: "q1",
     });
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: TMMessages.tapeSymbolNotDeclared("X"),
+      }),
+    );
+  });
+});
+
+describe("TMBuilder – .state() scope and .on() signatures", () => {
+  const base = () =>
+    tm("scope")
+      .alphabet("0", "1")
+      .tape("_")
+      .blank("_")
+      .states("q0", "q1", "q2", "qA")
+      .start("q0")
+      .accept("qA");
+
+  it("scalar read + scalar move (no write)", () => {
+    const m = base()
+      .state("q0", (s) => s.on("0", "R", "q1"))
+      .state("q1", (s) => s.on("_", "S", "qA"))
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.toState).toBe("q1");
+    expect(t.readSymbols[0]).toBe("0");
+    expect(t.directions[0]).toBe("R");
+  });
+
+  it("scalar read + scalar move + scalar write", () => {
+    const m = base()
+      .state("q0", (s) => s.on("0", "R", "q1", "1"))
+      .state("q1", (s) => s.on("_", "S", "qA"))
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.writeSymbols[0]).toBe("1");
+  });
+
+  it("array read (multi-symbol shorthand) expands into one transition per symbol", () => {
+    const m = base()
+      .state("q0", (s) => s.on(["0", "1"], "R", "q1"))
+      .state("q1", (s) => s.on("_", "S", "qA"))
+      .build();
+
+    const q0Map = m.transitions.get("q0")!;
+    expect(q0Map.size).toBe(2);
+  });
+
+  it("[array]-wrapped single read is treated as a single symbol", () => {
+    const m = base()
+      .state("q0", (s) => s.on(["0"], "R", "q1"))
+      .state("q1", (s) => s.on("_", "S", "qA"))
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.readSymbols[0]).toBe("0");
+  });
+
+  it("single-element tuple read + move + write (array wrappers)", () => {
+    const m = base()
+      .state("q0", (s) => s.on(["0"], ["R"], "q1", ["1"]))
+      .state("q1", (s) => s.on(["_"], ["S"], "qA"))
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.readSymbols[0]).toBe("0");
+    expect(t.directions[0]).toBe("R");
+    expect(t.writeSymbols[0]).toBe("1");
+  });
+
+  it("transition write defaults to read symbol when omitted", () => {
+    const m = base()
+      .state("q0", (s) => s.on("0", "R", "q1"))
+      .state("q1", (s) => s.on("_", "S", "qA"))
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.writeSymbols[0]).toBe("0");
+  });
+
+  it("scope .transition() object form works inside .state()", () => {
+    const m = base()
+      .state("q0", (s) =>
+        s
+          .transition({ read: ["0"], move: ["R"], to: "q1" })
+          .transition({ read: ["_"], move: ["S"], to: "qA" }),
+      )
+      .build();
+
+    const q0Map = m.transitions.get("q0")!;
+    expect(q0Map.size).toBe(2);
+  });
+
+  it(".done() returns the builder enabling chaining", () => {
+    const result = tm("t")
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .state("q0", (s) => {
+        s.on("_", "S", "qA").done();
+      });
+    expect(result).toBeDefined();
+  });
+});
+
+describe("TMBuilder – seek() on a single-tape machine", () => {
+  it("seek() auto-expands into loop + terminal transitions on the single tape", () => {
+    const m = tm("seek-test")
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("qInit", "qScan", "qDone")
+      .start("qInit")
+      .accept("qDone")
+      .state("qInit", (s) => s.on("_", "R", "qScan"))
+      .state("qScan", (s) => s.seek(0, "0", "_", "R", "qDone"))
+      .build();
+
+    expect(simulate(m, "000").accepted).toBe(true);
+    expect(simulate(m, "").accepted).toBe(true);
+  });
+
+  it("seek() with writeTarget rewrites the found symbol", () => {
+    const m = tm("seek-write")
+      .alphabet("0")
+      .tape("1", "_")
+      .blank("_")
+      .states("qInit", "qScan", "qDone")
+      .start("qInit")
+      .accept("qDone")
+      .state("qInit", (s) => s.on("_", "R", "qScan"))
+      .state("qScan", (s) => s.seek(0, "0", "_", "R", "qDone", "_", "1"))
+      .build();
+
+    const result = simulate(m, "00");
+    expect(result.accepted).toBe(true);
+    const lastTape = result.trace[result.trace.length - 1].tapes[0];
+    const flat = lastTape.map((s) => s.replace(/\[|\]/g, "")).join("");
+    expect(flat).toContain("1");
+  });
+});
+
+describe("MultiTMBuilder – multitape() factory and transitions", () => {
+  it("throws on non-positive tape count", () => {
+    expect(() => multitape("t", 0)).toThrow(
+      TMMessages.invalidTapeCount(0),
+    );
+    expect(() => multitape("t", -1)).toThrow(
+      TMMessages.invalidTapeCount(-1),
+    );
+  });
+
+  it("returns a machine with the correct tapeCount", () => {
+    const m = multitape("t", 3)
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .state("q0", (s) => s.on(["_", "_", "_"], ["S", "S", "S"], "qA"))
+      .build();
+    expect(m.tapeCount).toBe(3);
+  });
+
+  it("object .transition() with full tuple read/move/write (2 tapes)", () => {
+    const m = multitape("t", 2)
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({
+        from: "q0",
+        read: ["_", "_"],
+        move: ["R", "S"],
+        to: "qA",
+        write: ["_", "_"],
+      })
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.readSymbols).toEqual(["_", "_"]);
+    expect(t.directions).toEqual(["R", "S"]);
+    expect(t.writeSymbols).toEqual(["_", "_"]);
+    expect(t.toState).toBe("qA");
+  });
+
+  it("multi-symbol read array per tape expands into all Cartesian-product tuples", () => {
+    const m = multitape("t", 2)
+      .alphabet("0", "1")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({
+        from: "q0",
+        read: [["0", "1"], ["0", "1"]],
+        move: ["R", "R"],
+        to: "qA",
+      })
+      .build();
+
+    const q0Map = m.transitions.get("q0")!;
+    expect(q0Map.size).toBe(4);
+  });
+
+  it("tuple write symbols default to read symbols when omitted (2 tapes)", () => {
+    const m = multitape("t", 2)
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({
+        from: "q0",
+        read: ["0", "_"],
+        move: ["R", "S"],
+        to: "qA",
+      })
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t.writeSymbols[0]).toBe("0");
+    expect(t.writeSymbols[1]).toBe("_");
+  });
+
+  it("errors when tuple length doesn't match tape count", () => {
+    const b = multitape("t", 3)
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({
+        from: "q0",
+        read: ["0", "_"] as any,
+        move: ["R", "S"] as any,
+        to: "qA",
+      });
+
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: TMMessages.invalidTupleLength(3, 2),
+      }),
+    );
+  });
+
+  it("duplicate tuple transition accumulates an error", () => {
+    const b = multitape("t", 2)
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "q1", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({ from: "q0", read: ["0", "_"], move: ["R", "S"], to: "q1" })
+      .transition({ from: "q0", read: ["0", "_"], move: ["L", "S"], to: "qA" }); // dup
+
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({ severity: "error" }),
+    );
+  });
+
+  it("seek() on a multi-tape builder targets the designated tape index", () => {
+    const m = multitape("t", 2)
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qScan", "qA")
+      .start("q0")
+      .accept("qA")
+      .state("q0", (s) =>
+        s.on(["_", "_"], ["R", "S"], "qScan"),
+      )
+      .state("qScan", (s) => s.seek(0, "0", "_", "R", "qA"))
+      .build();
+
+    const scanMap = m.transitions.get("qScan")!;
+    expect(scanMap.size).toBeGreaterThan(0);
+  });
+});
+
+describe("transition map structure", () => {
+  it("each state entry is a Map keyed by the joined read-symbol tuple", () => {
+    const m = minimalTM()
+      .state("q0", (s) => s.on("_", "S", "qAccept"))
+      .build();
+
+    const q0Map = m.transitions.get("q0")!;
+    expect(q0Map).toBeInstanceOf(Map);
+    const key = "_";
+    expect(q0Map.has(key)).toBe(true);
+  });
+
+  it("multi-symbol read expands into separate map entries (one per symbol)", () => {
+    const m = tm("t")
+      .alphabet("0", "1")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .state("q0", (s) => s.on(["0", "1", "_"], "S", "qA"))
+      .build();
+
+    const q0Map = m.transitions.get("q0")!;
+    expect(q0Map.has("0")).toBe(true);
+    expect(q0Map.has("1")).toBe(true);
+    expect(q0Map.has("_")).toBe(true);
+  });
+
+  it("2-tape tuple key uses \\u001F separator", () => {
+    const m = multitape("t", 2)
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({ from: "q0", read: ["0", "_"], move: ["R", "S"], to: "qA" })
+      .build();
+
+    const q0Map = m.transitions.get("q0")!;
+    const separator = "\u001F";
+    expect(q0Map.has(`0${separator}_`)).toBe(true);
+  });
+
+  it("TMTupleTransition has correct shape", () => {
+    const m = tm("t")
+      .alphabet("0")
+      .tape("1", "_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({ from: "q0", read: "0", move: "L", to: "qA", write: "1" })
+      .build();
+
+    const t = m.transitions.get("q0")!.values().next().value!;
+    expect(t).toMatchObject({
+      toState: "qA",
+      readSymbols: ["0"],
+      writeSymbols: ["1"],
+      directions: ["L"],
+    });
+  });
+});
+
+describe("builder call ordering", () => {
+  it("alphabet() before tape() and blank()", () => {
+    const b = tm("order")
+      .alphabet("0", "1")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .state("q0", (s) => s.on("_", "S", "qA"));
+    expect(() => b.build()).not.toThrow();
+    const m = b.build === undefined ? null : b;
+    void m;
+  });
+
+  it("tape() before blank() (typical happy path)", () => {
+    const b = tm("order")
+      .tape("0", "1", "_")
+      .blank("_")
+      .alphabet("0", "1")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .state("q0", (s) => s.on("_", "S", "qA"));
+    expect(() => b.build()).not.toThrow();
+  });
+
+  it("blank() BEFORE tape() records an error immediately", () => {
+    const b = tm("order").blank("_").tape("_");
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({
+        severity: "error",
+        content: TMMessages.blankSymbolNotInTape("_"),
+      }),
+    );
+  });
+
+  it("states() before start()/accept() works fine", () => {
+    const b = tm("order")
+      .tape("_")
+      .blank("_")
+      .alphabet("0")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .state("q0", (s) => s.on("_", "S", "qA"));
+    expect(() => b.build()).not.toThrow();
+  });
+
+  it("start() after accept() still works", () => {
+    const b = tm("order")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .accept("qA")
+      .start("q0")
+      .state("q0", (s) => s.on("_", "S", "qA"));
+    expect(() => b.build()).not.toThrow();
+  });
+
+  it("state() definition interleaved with alphabet/tape/blank declarations", () => {
+    const b = tm("order")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .alphabet("0", "1")
+      .tape("_")
+      .blank("_")
+      .state("q0", (s) => s.on("_", "S", "qA"));
+    expect(() => b.build()).not.toThrow();
+  });
+});
+
+describe("error accumulation", () => {
+  it("accumulates multiple independent errors before build()", () => {
+    const b = tm("errs")
+      .alphabet("0")
+      .tape("_")
+      .states("q0")
+      .start("undeclaredStart")
+      .accept("undeclaredAccept");
+
+    const err = getBuildError(TMBuildError, () => b.build());
+    expect(err.messages.filter((m) => m.severity === "error").length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("keeps going after a bad transition so subsequent transitions can also be checked", () => {
+    const b = tm("errs")
+      .alphabet("0")
+      .tape("_")
+      .blank("_")
+      .states("q0", "qA")
+      .start("q0")
+      .accept("qA")
+      .transition({ from: "ghost1", read: "0", move: "R", to: "qA" }) // bad source
+      .transition({ from: "q0",    read: "0", move: "R", to: "ghost2" }); // bad target
+
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({ content: TMMessages.transitionSourceNotDeclared("ghost1") }),
+    );
+    expect(b.messages).toContainEqual(
+      expect.objectContaining({ content: TMMessages.transitionTargetNotDeclared("ghost2") }),
+    );
   });
 });
