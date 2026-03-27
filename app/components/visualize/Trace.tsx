@@ -1,94 +1,161 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { useDeltaStore } from "@/store/deltaStore";
-import { simulate } from "@/lib/simulator/nfa";
-import { AutomataViewer } from "./AutomataViewer";
-import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { Fragment, useState, useMemo, useRef, type ReactNode } from "react";
+import { GraphvizViewer } from "./GraphvizViewer";
+import { useStepNavigation } from "@/hooks/useStepNavigation";
+import { type TestCase } from "@/store/deltaStore";
+import {
+  Listbox,
+  ListboxButton,
+  ListboxOption,
+  ListboxOptions,
+  Transition,
+} from "@headlessui/react";
 
-export function Trace() {
-  const { machine, tests } = useDeltaStore();
+interface TraceStep {
+  states: Set<string>;
+  tapes?: string[][];
+}
+
+interface TraceSimulationResult {
+  accepted: boolean;
+  trace: TraceStep[];
+}
+
+interface VisualMachine {
+  name: string;
+}
+
+interface TraceInputArgs {
+  input: string;
+  current: TraceStep;
+  step: number;
+  maxStep: number;
+  isLast: boolean;
+}
+
+interface TraceInputToken {
+  key: string;
+  text: string;
+  className: string;
+  row?: number;
+}
+
+interface TraceProps<M extends VisualMachine> {
+  machine: M | null;
+  tests: TestCase[];
+  simulate: (machine: M, input: string) => TraceSimulationResult;
+  getDot: (machine: M, states: Set<string>) => string;
+  inputFilter?: (value: string) => string | null;
+  getInputTokens: (args: TraceInputArgs) => TraceInputToken[];
+  bottomPanel?: (context: TraceBottomPanelContext<M>) => ReactNode;
+}
+
+export interface TraceBottomPanelContext<M extends VisualMachine> {
+  machine: M;
+  current: TraceStep;
+  step: number;
+  maxStep: number;
+  isLast: boolean;
+  input: string;
+  accepted: boolean;
+  dot: string;
+  hoveredEdgeId: string | null;
+  setHoveredEdgeId: (edgeId: string | null) => void;
+}
+
+export function Trace<M extends VisualMachine>({
+  machine,
+  tests,
+  simulate,
+  getDot,
+  getInputTokens,
+  bottomPanel,
+}: TraceProps<M>) {
   const [input, setInput] = useState("");
-  const [step, setStep] = useState(0);
-  const [trace, setTrace] = useState<ReturnType<typeof simulate>["trace"]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef<number | null>(null);
-  const [focused, setFocused] = useState(false);
   const [selectedTest, setSelectedTest] = useState("");
+  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
 
-  // recompute trace when input or machine changes
-  useEffect(() => {
-    if (!machine) return;
-    const { trace } = simulate(machine, input);
-    setTrace(trace);
-    setStep(0);
-  }, [input, machine]);
+  const simulation = useMemo(() => {
+    if (!machine) return null;
+    return simulate(machine, input);
+  }, [input, machine, simulate]);
 
-  const current = trace[step];
-  const isLast = step === trace.length - 1;
-  const accepted =
-    isLast && current
-      ? [...current.states].some((s) => machine?.acceptStates.has(s))
-      : null;
+  const trace = simulation?.trace ?? [];
+  const maxStep = Math.max(0, trace.length - 1);
 
-  // empty string — show result immediately
+  const { step, focused, onFocus, onBlur, onTouchStart, onTouchEnd } =
+    useStepNavigation({
+      maxStep,
+      resetDeps: [input, machine],
+      focusRequiredForKeys: true,
+      enableSwipe: true,
+    });
+
+  const safeStep = Math.min(step, maxStep);
+  const current = trace[safeStep];
+  const dot = useMemo(() => {
+    if (!machine || !current) return null;
+    return getDot(machine, current.states);
+  }, [machine, current, getDot]);
+
   const isEmpty = input === "";
+  const isLast = safeStep === maxStep;
+  const accepted = simulation?.accepted ?? false;
 
-  useKeyboardShortcut([
-    {
-      key: "ArrowRight",
-      preventDefault: true,
-      handler: () => {
-        if (!focused) return;
-        setStep((s) => Math.min(s + 1, trace.length - 1));
-      },
-    },
-    {
-      key: "ArrowLeft",
-      preventDefault: true,
-      handler: () => {
-        if (!focused) return;
-        setStep((s) => Math.max(s - 1, 0));
-      },
-    },
-  ]);
-
-  const handleTestSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedTest(e.target.value);
-    const selected = tests.find((t) => t.id === e.target.value);
+  const handleTestSelect = (testId: string) => {
+    setSelectedTest(testId);
+    const selected = tests.find((t) => t.id === testId);
     if (selected) setInput(selected.input);
   };
 
-  // reset dropdown when user types manually
+  const selectedTestCase = tests.find((t) => t.id === selectedTest);
+
+  const tokenRows = useMemo(() => {
+    const tokens =
+      getInputTokens({
+        input,
+        current: current ?? { states: new Set<string>(), tapes: [] },
+        step: safeStep,
+        maxStep,
+        isLast,
+      }) ?? [];
+
+    const rows = new Map<number, TraceInputToken[]>();
+    tokens.forEach((token) => {
+      const row = token.row ?? 0;
+      const existing = rows.get(row) ?? [];
+      existing.push(token);
+      rows.set(row, existing);
+    });
+
+    return [...rows.entries()].sort((a, b) => a[0] - b[0]);
+  }, [getInputTokens, input, current, safeStep, maxStep, isLast]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInput(value);
-    const match = tests.find((t) => t.input === value);
+    const nextValue = e.target.value;
+    setInput(nextValue);
+    const match = tests.find((t) => t.input === nextValue);
     setSelectedTest(match?.id ?? "");
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const delta = e.changedTouches[0].clientX - touchStartX.current;
-    touchStartX.current = null;
-    if (Math.abs(delta) < 40) return; // ignore small nudges
-    if (delta < 0)
-      setStep((s) => Math.min(s + 1, trace.length - 1)); // swipe left → forward
-    else setStep((s) => Math.max(s - 1, 0)); // swipe right → back
-  };
+  if (!machine) {
+    return (
+      <div className="h-full flex items-center justify-center text-sm text-ctp-subtext0">
+        Compile a machine to visualize execution.
+      </div>
+    );
+  }
 
   return (
     <div
       ref={containerRef}
       tabIndex={0}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
+      onFocus={onFocus}
+      onBlur={onBlur}
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
       className="flex flex-col gap-4 md:p-4 h-full overflow-y-scroll focus:outline-none"
     >
       {/* input + test picker */}
@@ -100,76 +167,107 @@ export function Trace() {
           placeholder="input string"
           className="flex-1 w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
         />
-        <div className="relative w-full md:w-auto">
-          <select
-            onChange={handleTestSelect}
-            value={selectedTest}
-            className="appearance-none w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-7 py-1.5 text-sm text-ctp-text focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
-          >
-            <option value="" disabled>
-              pick test
-            </option>
-            {tests.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.input === "" ? "ε" : t.input} —{" "}
-                {t.expected ? "accept" : "reject"}
-              </option>
-            ))}
-          </select>
-          <svg
-            className="absolute right-2 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none"
-            viewBox="0 0 12 12"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <path d="M2 4L6 8L10 4" />
-          </svg>
-        </div>
+        <Listbox value={selectedTest} onChange={handleTestSelect}>
+          <div className="relative w-full md:w-auto">
+            <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1.5 text-sm text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve">
+              <span className={selectedTestCase ? "" : "text-ctp-subtext1"}>
+                {selectedTestCase
+                  ? `${selectedTestCase.input === "" ? "ε" : selectedTestCase.input} - ${selectedTestCase.expected ? "accept" : "reject"}`
+                  : "pick test"}
+              </span>
+            </ListboxButton>
+
+            <svg
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M2 4L6 8L10 4" />
+            </svg>
+
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="opacity-0 scale-95"
+              enterTo="opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="opacity-100 scale-100"
+              leaveTo="opacity-0 scale-95"
+            >
+              <ListboxOptions className="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-ctp-surface1 bg-ctp-mantle py-1 text-sm shadow-lg focus:outline-none">
+                {tests.map((t) => (
+                  <ListboxOption
+                    key={t.id}
+                    value={t.id}
+                    className="cursor-pointer select-none px-3 py-1.5 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text"
+                  >
+                    {t.input === "" ? "ε" : t.input} -{" "}
+                    {t.expected ? "accept" : "reject"}
+                  </ListboxOption>
+                ))}
+              </ListboxOptions>
+            </Transition>
+          </div>
+        </Listbox>
       </div>
 
-      {/* graph */}
-      {machine && current && (
-        <AutomataViewer
-          nfa={machine}
-          activeStates={isEmpty ? current.states : trace[step]?.states}
-        />
+      {/* graph + optional bottom panel */}
+      {machine && current && dot && (
+        <div className="flex flex-col gap-3">
+          <div className="w-full">
+            <GraphvizViewer
+              dot={dot}
+              machineName={machine.name}
+              showExportActions
+              onEdgeHover={bottomPanel ? setHoveredEdgeId : undefined}
+            />
+          </div>
+          {bottomPanel?.({
+            machine,
+            current,
+            step: safeStep,
+            maxStep,
+            isLast,
+            input,
+            accepted,
+            dot,
+            hoveredEdgeId,
+            setHoveredEdgeId,
+          })}
+        </div>
       )}
 
-      {/* input trace */}
-      {!isEmpty && (
+      {!isEmpty && current && (
         <div className="flex flex-col items-center gap-2">
-          <div className="flex gap-2 text-lg tracking-widest">
-            {input.split("").map((symbol, i) => {
-              const isActive = !isLast && i === step;
-              const isPast = isLast || i < step;
-              return (
-                <span
-                  key={i}
-                  className={
-                    isActive
-                      ? "text-ctp-mauve font-bold underline underline-offset-4"
-                      : isPast
-                        ? "text-ctp-surface2 line-through"
-                        : "text-ctp-subtext1"
-                  }
-                >
-                  {symbol}
-                </span>
-              );
-            })}
+          <div className="flex flex-col gap-1 text-lg tracking-widest w-full">
+            {tokenRows.map(([row, tokens]) => (
+              <div key={row} className="flex items-center gap-2 justify-center">
+                {tokenRows.length > 1 && (
+                  <span className="text-xs text-ctp-subtext1 min-w-12 text-right">
+                    T{row + 1}:
+                  </span>
+                )}
+                {tokens.map((token) => (
+                  <span key={token.key} className={token.className}>
+                    {token.text}
+                  </span>
+                ))}
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 text-sm text-ctp-subtext0">
             <span>
-              step <span className="text-ctp-text font-bold">{step}</span> /{" "}
-              {trace.length - 1}
+              step <span className="text-ctp-text font-bold">{safeStep}</span> /{" "}
+              {maxStep}
             </span>
             <span className="hidden md:inline">·</span>
             <span>
               active{" "}
               <span className="text-ctp-mauve font-bold">
-                {`{${[...(current?.states ?? [])].join(", ")}}`}
+                {`{${[...current.states].join(", ")}}`}
               </span>
             </span>
           </div>
@@ -177,7 +275,7 @@ export function Trace() {
       )}
 
       {/* result */}
-      {(isEmpty || isLast) && accepted !== null && (
+      {(isEmpty || isLast) && (
         <p
           className={`text-sm font-bold text-center ${accepted ? "text-ctp-green" : "text-ctp-red"}`}
         >

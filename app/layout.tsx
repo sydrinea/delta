@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { AlertProvider } from "@/components/AlertProvider";
+import { Loader } from "@/components/Loader";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +47,18 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
+function Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <AlertProvider>
+      <main className="relative h-dvh flex flex-col font-mono">
+        <Loader />
+        <Navbar />
+        {children}
+      </main>
+    </AlertProvider>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -55,10 +69,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <main className="h-dvh flex flex-col font-mono">
-          <Navbar />
-          {children}
-        </main>
+        <Layout>{children}</Layout>
       </body>
     </html>
   );

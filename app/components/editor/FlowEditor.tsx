@@ -25,7 +25,6 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import { useDeltaStore } from "@/store/deltaStore";
 import { getFlowElementsFromDot } from "./layoutNFA";
-import { deserialize } from "@/lib/compiler/serialize";
 import { toDot } from "@/lib/compiler/dot";
 
 function AutomataEdge({
@@ -44,10 +43,10 @@ function AutomataEdge({
   const [label, setLabel] = useState(data?.label ?? "a");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const nodes = useDeltaStore((s) => s.nodes);
-  const edges = useDeltaStore((s) => s.edges);
-  const startId = useDeltaStore((s) => s.startId);
-  const syncFromFlow = useDeltaStore((s) => s.syncFromFlow);
+  const nodes = useDeltaStore((s) => s.nfa.nodes);
+  const edges = useDeltaStore((s) => s.nfa.edges);
+  const startId = useDeltaStore((s) => s.nfa.startId);
+  const syncFromFlow = useDeltaStore((s) => s.actions.syncNfaFromFlow);
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -180,12 +179,12 @@ const nodeTypes = { state: StateNode };
 const edgeTypes = { automata: AutomataEdge };
 
 export function FlowEditor() {
-  const anf = useDeltaStore((s) => s.anf);
-  const storeNodes = useDeltaStore((s) => s.nodes);
-  const storeEdges = useDeltaStore((s) => s.edges);
-  const startId = useDeltaStore((s) => s.startId);
-  const setStartId = useDeltaStore((s) => s.setStartId);
-  const syncFromFlow = useDeltaStore((s) => s.syncFromFlow);
+  const machine = useDeltaStore((s) => s.nfa.machine);
+  const storeNodes = useDeltaStore((s) => s.nfa.nodes);
+  const storeEdges = useDeltaStore((s) => s.nfa.edges);
+  const startId = useDeltaStore((s) => s.nfa.startId);
+  const setNfa = useDeltaStore((s) => s.actions.setNfa);
+  const syncFromFlow = useDeltaStore((s) => s.actions.syncNfaFromFlow);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
@@ -230,9 +229,9 @@ export function FlowEditor() {
       if (!pendingStateRef.current) {
         const state = useDeltaStore.getState();
         pendingStateRef.current = {
-          nodes: state.nodes,
-          edges: state.edges,
-          startId: state.startId,
+          nodes: state.nfa.nodes,
+          edges: state.nfa.edges,
+          startId: state.nfa.startId,
         };
       }
 
@@ -258,8 +257,8 @@ export function FlowEditor() {
 
   useEffect(() => {
     async function initializeLayout() {
-      if (anf) {
-        const dotString = toDot(deserialize(anf));
+      if (machine) {
+        const dotString = toDot(machine);
         const { nodes: layoutedNodes, edges: layoutedEdges } =
           await getFlowElementsFromDot(dotString);
 
@@ -276,11 +275,20 @@ export function FlowEditor() {
       setNodes(storeNodes);
       setEdges(storeEdges);
     }
-  }, [storeNodes, storeEdges, hasInitialLayout]);
+  }, [
+    machine,
+    storeNodes,
+    storeEdges,
+    hasInitialLayout,
+    setNodes,
+    setEdges,
+    syncFromFlow,
+    startId,
+  ]);
 
   const onNodeDragStop = useCallback(() => {
     const globalState = useDeltaStore.getState();
-    syncFromFlow(getNodes(), globalState.edges, globalState.startId);
+    syncFromFlow(getNodes(), globalState.nfa.edges, globalState.nfa.startId);
   }, [getNodes, syncFromFlow]);
 
   const handleNodesChange = useCallback(
@@ -324,8 +332,8 @@ export function FlowEditor() {
         });
       } else {
         const state = useDeltaStore.getState();
-        const nextNodes = applyNodeChanges(changes, state.nodes);
-        syncFromFlow(nextNodes, state.edges, state.startId);
+        const nextNodes = applyNodeChanges(changes, state.nfa.nodes);
+        syncFromFlow(nextNodes, state.nfa.edges, state.nfa.startId);
       }
     },
     [onNodesChange, batchStoreUpdate, syncFromFlow],
@@ -344,8 +352,8 @@ export function FlowEditor() {
         });
       } else {
         const state = useDeltaStore.getState();
-        const nextEdges = applyEdgeChanges(changes, state.edges);
-        syncFromFlow(state.nodes, nextEdges, state.startId);
+        const nextEdges = applyEdgeChanges(changes, state.nfa.edges);
+        syncFromFlow(state.nfa.nodes, nextEdges, state.nfa.startId);
       }
     },
     [onEdgesChange, batchStoreUpdate, syncFromFlow],
@@ -391,11 +399,11 @@ export function FlowEditor() {
     const newNodes = [...nodes, newNode];
     const newStartId = startId ?? id;
 
-    if (!startId) setStartId(id);
+    if (!startId) setNfa({ startId: id });
 
     setInUseStates((prev) => [...prev, smallestGap]);
     syncFromFlow(newNodes, edges, newStartId);
-  }, [inUseStates, nodes, edges, startId, setStartId, syncFromFlow]);
+  }, [inUseStates, nodes, edges, startId, setNfa, syncFromFlow]);
 
   const toggleAccept = useCallback(() => {
     const newNodes = nodes.map((n) =>

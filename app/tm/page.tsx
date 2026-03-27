@@ -1,11 +1,21 @@
 "use client";
 
+import { simulate } from "@/lib/simulator/tm";
+import { Workbench } from "@/components/workbench/Workbench";
+import type { TuringMachine } from "@/lib/compiler/tm";
+
 export default function TMPage() {
   return (
-    <main className="h-screen bg-ctp-base flex flex-col overflow-hidden font-mono">
-      <div className="flex-1 flex items-center justify-center">
-        <p className="text-ctp-subtext0 text-sm">TM — coming soon</p>
-      </div>
-    </main>
+    <section className="flex md:flex-col md:h-screen md:overflow-hidden">
+      <Workbench<TuringMachine>
+        simulate={(machine, input) => simulate(machine, input).accepted}
+        storeScope="tm"
+        enabledTabs={{
+          editor: true,
+          canvas: false,
+          visualizer: true,
+        }}
+      />
+    </section>
   );
 }

@@ -1,12 +1,17 @@
-import { NFABuildError } from "@/lib/compiler/nfa";
 import { expect } from "vitest";
 
-export function getBuildError(fn: () => void): NFABuildError {
+export function getBuildError<E extends Error>(
+  ErrorType: new (...args: any[]) => E,
+  fn: () => void,
+): E {
   try {
     fn();
-    expect.fail("Expected function to throw NFABuildError, but it succeeded.");
+    expect.fail("Expected function to throw, but it succeeded.");
   } catch (err) {
-    expect(err).toBeInstanceOf(NFABuildError);
-    return err as NFABuildError;
+    expect(err).toBeInstanceOf(ErrorType);
+    if (!(err instanceof ErrorType)) {
+      throw err;
+    }
+    return err;
   }
 }

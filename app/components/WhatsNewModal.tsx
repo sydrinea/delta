@@ -34,8 +34,8 @@ function MarkdownBlock({ content }: { content: string }) {
 
 export function WhatsNewModal() {
   const [isOpen, setIsOpen] = useState(false);
-  const lastSeenVersion = useDeltaStore((s) => s.lastSeenVersion);
-  const setLastSeenVersion = useDeltaStore((s) => s.setLastSeenVersion);
+  const lastSeenVersion = useDeltaStore((s) => s.app.lastSeenVersion);
+  const setApp = useDeltaStore((s) => s.actions.setApp);
 
   const endIndex = CHANGELOG.findIndex(
     (log) => log.version === lastSeenVersion,
@@ -48,12 +48,12 @@ export function WhatsNewModal() {
     if (lastSeenVersion !== APP_VERSION) {
       setIsOpen(true);
     }
-  }, [lastSeenVersion, setLastSeenVersion]);
+  }, [lastSeenVersion]);
 
   const handleClose = () => {
     setIsOpen(false);
     setTimeout(() => {
-      setLastSeenVersion(APP_VERSION);
+      setApp({ lastSeenVersion: APP_VERSION });
     }, 2000);
   };
 

@@ -11,23 +11,34 @@ export default {
       return new Response(null, { headers: cors });
     }
 
-    // POST /anf — store ANF+code, return short id
-    if (request.method === "POST" && url.pathname === "/anf") {
-      const { anf, code } = await request.json<{ anf: string; code: string }>();
-      if (!anf)
-        return new Response("missing anf", { status: 400, headers: cors });
+    // POST /machine — store machineType+code, return short id
+    if (request.method === "POST" && url.pathname === "/machine") {
+      const { machineType, code } = await request.json<{
+        machineType: "nfa" | "tm";
+        code: string;
+      }>();
+      if (!machineType)
+        return new Response("missing machineType", {
+          status: 400,
+          headers: cors,
+        });
+      if (machineType !== "nfa" && machineType !== "tm")
+        return new Response("invalid machineType", {
+          status: 400,
+          headers: cors,
+        });
       if (!code)
         return new Response("missing code", { status: 400, headers: cors });
 
       const id = crypto.randomUUID().slice(0, 8);
-      await env.DELTA_SHARE.put(id, JSON.stringify({ anf, code }), {
+      await env.DELTA_SHARE.put(id, JSON.stringify({ machineType, code }), {
         expirationTtl: 60 * 60 * 24 * 90,
       }); // 90 days
       return Response.json({ id }, { headers: cors });
     }
 
-    // GET /anf/:id — retrieve ANF+code
-    if (request.method === "GET" && url.pathname.startsWith("/anf")) {
+    // GET /machine/:id — retrieve machineType+code
+    if (request.method === "GET" && url.pathname.startsWith("/machine")) {
       const id = url.pathname.split("/").pop();
       if (!id)
         return new Response("missing id", { status: 400, headers: cors });
@@ -36,9 +47,12 @@ export default {
       if (!raw)
         return new Response("not found", { status: 404, headers: cors });
 
-      const { anf, code } = JSON.parse(raw);
+      const { machineType, code } = JSON.parse(raw) as {
+        machineType: "nfa" | "tm";
+        code: string;
+      };
 
-      return Response.json({ anf, code }, { headers: cors });
+      return Response.json({ machineType, code }, { headers: cors });
     }
 
     return new Response("not found", { status: 404, headers: cors });

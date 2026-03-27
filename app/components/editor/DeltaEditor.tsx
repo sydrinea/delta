@@ -1,31 +1,49 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Editor, { OnMount, useMonaco } from "@monaco-editor/react";
+import Editor, { OnChange, OnMount, useMonaco } from "@monaco-editor/react";
 import * as MonacoEditor from "monaco-editor";
 import defineTheme from "./defineTheme";
 import { useDeltaStore } from "@/store/deltaStore";
-import { runCode } from "../../runCode";
+import { useCompile } from "@/hooks/useCompile";
 import DELTA_D_TS from "@/lib/delta-runtime";
 import { Caution } from "@/icons/Caution";
 
-export function DeltaEditor() {
+interface DeltaEditorProps {
+  scope?: "nfa" | "tm";
+}
+
+export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
   const editorRef = useRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(
     null,
   );
 
-  const editorValue = useDeltaStore((s) => s.editorValue);
-  const setEditorValue = useDeltaStore((s) => s.setEditorValue);
-  const editorErrors = useDeltaStore((s) => s.editorErrors);
-  const setEditorErrors = useDeltaStore((s) => s.setEditorErrors);
-  const setAnf = useDeltaStore((s) => s.setAnf);
+  const setNfa = useDeltaStore((s) => s.actions.setNfa);
+  const setTm = useDeltaStore((s) => s.actions.setTm);
+  const editorValue = {
+    nfa: useDeltaStore((s) => s.nfa.editorValue),
+    tm: useDeltaStore((s) => s.tm.editorValue),
+  }[scope];
+  const editorErrors = {
+    nfa: useDeltaStore((s) => s.nfa.editorErrors),
+    tm: useDeltaStore((s) => s.tm.editorErrors),
+  }[scope];
+  const editorPath = {
+    nfa: "file:///main.nfa.ts",
+    tm: "file:///main.tm.ts",
+  }[scope];
 
   const monaco = useMonaco();
+  const compile = useCompile(scope);
 
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor;
 
-    runCode(editorRef.current.getValue(), setAnf, setEditorErrors);
+    if (editor.getValue() !== editorValue) {
+      editor.setValue(editorValue);
+    }
+
+    compile(editorValue);
 
     defineTheme(monaco);
     monaco.editor.setTheme("catppuccin-latte");
@@ -65,13 +83,13 @@ export function DeltaEditor() {
         );
         const allDiagnostics = [...syntactic, ...semantic];
 
-        const tsErrors = allDiagnostics.filter((d: any) => d.category === 1);
+        const tsErrors = allDiagnostics.filter((d) => d.category === 1);
 
         if (tsErrors.length > 0) return;
 
-        runCode(editor.getValue(), setAnf, setEditorErrors);
-      } catch (err) {
-        runCode(editor.getValue(), setAnf, setEditorErrors);
+        compile(editor.getValue());
+      } catch {
+        compile(editor.getValue());
       }
     });
   };
@@ -81,9 +99,10 @@ export function DeltaEditor() {
       const current = editorRef.current.getValue();
       if (current !== editorValue) {
         editorRef.current.setValue(editorValue);
+        compile(editorValue);
       }
     }
-  }, [editorValue, editorRef.current]);
+  }, [editorValue, editorRef?.current]);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -112,17 +131,25 @@ export function DeltaEditor() {
     }
   }, [monaco, editorErrors, editorRef?.current]);
 
+  const handleChange: OnChange = (value) => {
+    const set = {
+      tm: setTm,
+      nfa: setNfa,
+    };
+    set[scope]({ editorValue: value ?? "" });
+  };
+
   return (
     <div className="relative w-full h-full">
       <Editor
         theme="catppuccin-latte"
-        path="file:///main.ts"
+        path={editorPath}
         height="100%"
         width="100%"
         defaultLanguage="typescript"
         defaultValue={editorValue}
         onMount={handleMount}
-        onChange={(value) => setEditorValue(value ?? "")}
+        onChange={handleChange}
         options={{
           minimap: { enabled: false },
           padding: { top: 12, bottom: 12 },

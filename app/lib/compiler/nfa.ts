@@ -1,73 +1,30 @@
 import { EPS, EPSILON } from "./constants";
+import {
+  Automata,
+  AutomataMessages,
+  type AutomataModel,
+  type Message,
+} from "./automata";
+export type { Message } from "./automata";
 
-/**
- * Represents an NFA of the 5-tuple (Q, Σ, 𝛿, q0, F)
- */
-export interface NFA {
-  /**
-   * A label for the NFA
-   */
-  name: string;
-  /**
-   * The alphabet of the NFA (Σ)
-   */
-  alphabet: Set<string>;
-  /**
-   * The states of the NFA (Q)
-   */
-  states: Set<string>;
-  /**
-   * The starting state of the NFA (q0 ∈ Q)
-   */
-  startState: string;
-  /**
-   * The accepting state(s) of the NFA (F ⊆ Q)
-   */
-  acceptStates: Set<string>;
+export interface NFA extends AutomataModel {
   /**
    * The transition function of the NFA (𝛿)
    */
   transitions: Map<string, Map<string, Set<string>>>;
-  /**
-   * Warnings and errors that occured in the construction of the NFA
-   */
-  messages: Message[];
-}
-
-/**
- * Represents a construction warning or error
- */
-export interface Message {
-  content: string;
-  severity: "warning" | "error";
 }
 
 /**
  * Everything that may fail when constructing the NFA
  */
 export const NFAMessages = {
-  startStateNotDeclared: (state: string) =>
-    `Start state '${state}' is not a declared state`,
-  acceptStateNotDeclared: (state: string) =>
-    `Accept state '${state}' is not a declared state`,
-  transitionSourceNotDeclared: (state: string) =>
-    `Transition source '${state}' is not a declared state`,
-  transitionTargetNotDeclared: (state: string) =>
-    `Transition target '${state}' is not a declared state`,
+  ...AutomataMessages,
   transitionSymbolNotInAlphabet: (symbol: string) =>
     `Transition symbol '${symbol}' is not in the alphabet`,
   missingTransition: (state: string, symbol: string) =>
     `State '${state}' has no transition for symbol '${symbol}'`,
   epsilonInAlphabet: `${EPS} cannot be declared as part of the alphabet`,
-  noStartState: "No start state defined",
-  alreadyBuilt: "build() already called",
 } as const;
-
-export interface Message {
-  content: string;
-  severity: "warning" | "error";
-  stack?: string;
-}
 
 export class NFABuildError extends Error {
   constructor(public messages: Message[]) {
@@ -77,17 +34,8 @@ export class NFABuildError extends Error {
   }
 }
 
-/**
- * Constructs a new NFA with validation
- */
-export class NFABuilder {
-  protected readonly _name: string;
-  protected _alphabet: Set<string> = new Set();
-  protected _states: Set<string> = new Set();
-  protected _startState: string | null = null;
-  protected _acceptStates: Set<string> = new Set();
+export class NFABuilder extends Automata {
   protected _transitions: Map<string, Map<string, Set<string>>> = new Map();
-  protected _messages: Message[] = [];
   protected _built = false;
 
   /**
@@ -95,17 +43,15 @@ export class NFABuilder {
    * @param name a name for the {@link NFA}
    */
   constructor(name: string) {
-    this._name = name;
+    super(name);
   }
 
-  /**
-   * Records a {@link Message} for the {@link NFA}
-   * @param severity
-   * @param content
-   */
-  protected message(severity: Message["severity"], content: string): void {
-    const stack = new Error().stack;
-    this._messages.push({ severity, content, stack });
+  protected override startStateNotDeclaredMessage(state: string): string {
+    return NFAMessages.startStateNotDeclared(state);
+  }
+
+  protected override acceptStateNotDeclaredMessage(state: string): string {
+    return NFAMessages.acceptStateNotDeclared(state);
   }
 
   /**
@@ -115,10 +61,11 @@ export class NFABuilder {
    */
   public alphabet(...symbols: string[]): this {
     symbols.forEach((symbol) => {
-      if (symbol === EPS) this.message("error", NFAMessages.epsilonInAlphabet);
-      this._alphabet.add(symbol);
+      if (symbol === EPS) {
+        this.message("error", NFAMessages.epsilonInAlphabet);
+      }
     });
-    return this;
+    return super.alphabet(...symbols);
   }
 
   /**
@@ -127,39 +74,9 @@ export class NFABuilder {
    * @returns a modified {@link NFABuilder} object
    */
   public states(...states: string[]): this {
+    super.states(...states);
     states.forEach((state) => {
-      this._states.add(state);
       this._transitions.set(state, new Map());
-    });
-    return this;
-  }
-
-  /**
-   * Assign the start state in the {@link NFA}
-   * @param state the starting state (q0)
-   * @returns a modified {@link NFABuilder} object
-   */
-  public start(state: string): this {
-    // We want to fail instead of silently adding the state because of potential typos
-    if (!this._states.has(state)) {
-      this.message("error", NFAMessages.startStateNotDeclared(state));
-    }
-    this._startState = state;
-    return this;
-  }
-
-  /**
-   * Assign the accepting states in the {@link NFA}
-   * @param states the accepting state(s) (F ⊆ Q)
-   * @returns a modified {@link NFABuilder} object
-   */
-  public accept(...states: string[]): this {
-    states.forEach((state) => {
-      // We want to fail instead of silently adding the state because of potential typos
-      if (!this._states.has(state)) {
-        this.message("error", NFAMessages.acceptStateNotDeclared(state));
-      }
-      this._acceptStates.add(state);
     });
     return this;
   }
@@ -298,22 +215,6 @@ export class NFABuilder {
    */
   public star(from: string, symbol: string, to: string): this {
     return this.transition(from, symbol, from).plus(from, symbol, to);
-  }
-
-  /**
-   * Retrieve all messages
-   * @return a list of messages
-   */
-  public get messages(): readonly Message[] {
-    return this._messages;
-  }
-
-  /**
-   * Retrieve the current alphabet
-   * @return the alphabet
-   */
-  public get alpha(): readonly string[] {
-    return [...this._alphabet];
   }
 
   /**

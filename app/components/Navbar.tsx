@@ -3,6 +3,10 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import {
+  shouldAnimateLoader,
+  shouldTriggerNavigationLoader,
+} from "@/lib/navigation-loader-config";
 import { Heart } from "./icons/Heart";
 import { version } from "../../package.json";
 
@@ -26,6 +30,20 @@ const MadeBy = () => (
 export default function Navbar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const handleNavigationStart = (href: string) => {
+    if (pathname === href) return;
+    if (!shouldTriggerNavigationLoader(href)) return;
+
+    window.dispatchEvent(
+      new CustomEvent("delta:navigation-start", {
+        detail: {
+          to: href,
+          animate: shouldAnimateLoader(href),
+        },
+      }),
+    );
+  };
 
   return (
     <>
@@ -66,6 +84,7 @@ export default function Navbar() {
                 <Link
                   key={tab.href}
                   href={tab.href}
+                  onClick={() => handleNavigationStart(tab.href)}
                   className={`relative px-3 py-1.5 text-xs rounded-lg transition-all duration-200 ${
                     isActive
                       ? "text-ctp-text"
@@ -123,7 +142,10 @@ export default function Navbar() {
                 <Link
                   key={tab.href}
                   href={tab.href}
-                  onClick={() => setOpen(false)}
+                  onClick={() => {
+                    handleNavigationStart(tab.href);
+                    setOpen(false);
+                  }}
                   className={`px-4 py-3 rounded-lg text-sm transition-colors ${
                     isActive
                       ? "bg-ctp-surface0/80 text-ctp-text"

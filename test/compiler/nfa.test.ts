@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import nfa, { NFAMessages } from "@/lib/compiler/nfa";
+import nfa, { NFABuildError, NFAMessages } from "@/lib/compiler/nfa";
 import { getBuildError } from "../utils";
 import { EPS } from "@/lib/compiler/constants";
 
@@ -69,7 +69,7 @@ describe("NFABuilder", () => {
     });
 
     it("throws if no start state defined", () => {
-      const err = getBuildError(() =>
+      const err = getBuildError(NFABuildError, () =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -88,7 +88,7 @@ describe("NFABuilder", () => {
 
   describe("start()", () => {
     it("throws if start state not declared", () => {
-      const err = getBuildError(() =>
+      const err = getBuildError(NFABuildError, () =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -122,7 +122,7 @@ describe("NFABuilder", () => {
         }),
       );
 
-      const err = getBuildError(() => builder.build());
+      const err = getBuildError(NFABuildError, () => builder.build());
       expect(err.messages).toContainEqual(
         expect.objectContaining({
           severity: "error",
@@ -134,7 +134,7 @@ describe("NFABuilder", () => {
 
   describe("accept()", () => {
     it("throws if accept state not declared", () => {
-      const err = getBuildError(() =>
+      const err = getBuildError(NFABuildError, () =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -172,7 +172,7 @@ describe("NFABuilder", () => {
         }),
       );
 
-      const err = getBuildError(() => builder.build());
+      const err = getBuildError(NFABuildError, () => builder.build());
       expect(err.messages).toContainEqual(
         expect.objectContaining({
           severity: "error",
@@ -184,7 +184,7 @@ describe("NFABuilder", () => {
 
   describe("transition()", () => {
     it("throws if from state not declared", () => {
-      const err = getBuildError(() =>
+      const err = getBuildError(NFABuildError, () =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -202,7 +202,7 @@ describe("NFABuilder", () => {
     });
 
     it("throws if to state not declared", () => {
-      const err = getBuildError(() =>
+      const err = getBuildError(NFABuildError, () =>
         nfa("test")
           .alphabet("0")
           .states("q0")
@@ -281,7 +281,7 @@ describe("NFABuilder", () => {
         }),
       );
 
-      const err = getBuildError(() => builder.build());
+      const err = getBuildError(NFABuildError, () => builder.build());
       expect(err.messages).toContainEqual(
         expect.objectContaining({
           severity: "error",

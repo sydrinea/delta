@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import dfa, { DFAMessages } from "@/lib/compiler/dfa";
 import { getBuildError } from "../utils";
+import { NFABuildError } from "@/lib/compiler/nfa";
 
 describe("DFABuilder", () => {
   describe("nondeterministic transitions", () => {
@@ -20,7 +21,7 @@ describe("DFABuilder", () => {
         }),
       );
 
-      const err = getBuildError(() => builder.build());
+      const err = getBuildError(NFABuildError, () => builder.build());
       expect(err.messages).toContainEqual(
         expect.objectContaining({
           severity: "error",
@@ -47,7 +48,7 @@ describe("DFABuilder", () => {
 
   describe("missing transitions", () => {
     it("throws on missing transition for a symbol", () => {
-      const err = getBuildError(() =>
+      const err = getBuildError(NFABuildError, () =>
         dfa("test")
           .alphabet("0", "1")
           .states("q0", "q1")
@@ -77,7 +78,7 @@ describe("DFABuilder", () => {
         .transition("q0", "0", "q1");
       // missing q0 --1--> and both q1 transitions
 
-      const err = getBuildError(() => builder.build());
+      const err = getBuildError(NFABuildError, () => builder.build());
 
       expect(err.messages).toContainEqual(
         expect.objectContaining({
@@ -117,7 +118,7 @@ describe("DFABuilder", () => {
         }),
       );
 
-      const err = getBuildError(() => builder.build());
+      const err = getBuildError(NFABuildError, () => builder.build());
 
       expect(err.messages).toContainEqual(
         expect.objectContaining({

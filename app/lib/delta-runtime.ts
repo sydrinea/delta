@@ -10,6 +10,111 @@ declare module "delta:lib" {
     messages: Message[];
   }
 
+  interface TMTupleTransition<N extends number = number> {
+    toState: string;
+    readSymbols: FixedLengthArray<string, N>;
+    writeSymbols: FixedLengthArray<string, N>;
+    directions: FixedLengthArray<MoveDirection, N>;
+  }
+
+  type MoveDirection = "L" | "R" | "S";
+
+  type BuildTuple<T, N extends number, R extends T[] = []> = R["length"] extends N
+    ? R
+    : BuildTuple<T, N, [...R, T]>;
+
+  type FixedLengthArray<T, N extends number> = number extends N
+    ? T[]
+    : BuildTuple<T, N>;
+
+  interface MultiTMTransitionSpec<N extends number> {
+    from: string;
+    to: string;
+    read: FixedLengthArray<string | string[], N>;
+    move: FixedLengthArray<MoveDirection, N>;
+    write?: FixedLengthArray<string | undefined, N>;
+  }
+
+  type SingleTapeRead = string | string[] | [string | string[]];
+  type SingleTapeMove = MoveDirection | [MoveDirection];
+  type SingleTapeWrite = string | undefined | [string | undefined];
+
+  interface TMTransitionSpec {
+    from: string;
+    to: string;
+    read: SingleTapeRead;
+    move: SingleTapeMove;
+    write?: SingleTapeWrite;
+  }
+
+  type ScopedRead<N extends number> = [N] extends [1]
+    ? string | string[] | FixedLengthArray<string | string[], N>
+    : FixedLengthArray<string | string[], N>;
+
+  type ScopedMove<N extends number> = [N] extends [1]
+    ? MoveDirection | FixedLengthArray<MoveDirection, N>
+    : FixedLengthArray<MoveDirection, N>;
+
+  type ScopedWrite<N extends number> = [N] extends [1]
+    ? string | undefined | FixedLengthArray<string | undefined, N>
+    : FixedLengthArray<string | undefined, N>;
+
+  interface MultiTMStateScope<N extends number> {
+    /** Transition from this state using an object specification. */
+    transition(
+      spec: Omit<MultiTMTransitionSpec<N>, "from"> & {
+        read: ScopedRead<N>;
+        move: ScopedMove<N>;
+        write?: ScopedWrite<N>;
+      },
+    ): this;
+
+    /**
+     * Positional shorthand for a multi-tape transition.
+     * @example .on(["1", "0", "_"], ["L", "L", "L"], "q3", ["1", "0", "1"])
+     */
+    on(
+      read: ScopedRead<N>,
+      move: ScopedMove<N>,
+      to: string,
+      write?: ScopedWrite<N>
+    ): this;
+
+    /**
+     * Scans \`tapeIndex\` in \`direction\` looping on \`skipSymbols\`.
+     * Transitions to \`toState\` when \`targetSymbol\` is encountered.
+     * Other tapes remain stationary and read \`otherTapesContext\` (defaults to blank).
+     */
+    seek(
+      tapeIndex: number,
+      skipSymbols: string | string[],
+      targetSymbol: string | string[],
+      direction: MoveDirection,
+      toState: string,
+      otherTapesContext?: string | string[],
+      writeTarget?: string,
+    ): this;
+
+    /** Return to the builder to continue chaining. */
+    done(): MultiTMBuilder<N>;
+  }
+
+  interface TuringMachine<N extends number = number> {
+    name: string;
+    alphabet: Set<string>;
+    states: Set<string>;
+    startState: string;
+    acceptStates: Set<string>;
+    tapeCount: N;
+    tapeAlphabet: Set<string>;
+    blankSymbol: string;
+    transitions: Map<string, Map<string, TMTupleTransition<N>>>;
+    messages: Message[];
+  }
+
+  type TM = TuringMachine<1>;
+  type MultiTM<N extends number = number> = TuringMachine<N>;
+
   interface Message {
     content: string;
     severity: "warning" | "error";
@@ -106,11 +211,46 @@ declare module "delta:lib" {
 
   class DFABuilder extends NFABuilder {}
 
+  class TMBuilder extends MultiTMBuilder<1> {
+    transition(spec: TMTransitionSpec): this;
+    transition(spec: MultiTMTransitionSpec<1>): this;
+    build(): TM;
+  }
+
+  class MultiTMBuilder<N extends number> {
+    alphabet(...symbols: string[]): this;
+    tape(...symbols: string[]): this;
+    blank(symbol: string): this;
+    states(...states: string[]): this;
+    start(state: string): this;
+    accept(...states: string[]): this;
+
+    transition(spec: MultiTMTransitionSpec<N>): this;
+
+    /** Scope operations to a single from-state using a callback block. 
+     * @example .state("q0", (s) => s.on(["0", "_"], ["R", "S"], "q1"))
+     */
+    state(state: string, build: (s: MultiTMStateScope<N>) => void): this;
+
+    build(): MultiTM<N>;
+
+    get tapeCount(): number;
+    get messages(): readonly Message[];
+  }
+
   /** Build an NFA. @example const machine = Delta.nfa("myNFA").alphabet(...).build() */
   function nfa(name: string): NFABuilder;
 
   /** Build a DFA. @example const machine = Delta.dfa("myDFA").alphabet(...).build() */
   function dfa(name: string): DFABuilder;
+
+  /** Build a multi-tape TM with compile-time checked tape arity.
+   * @example const machine = Delta.multitape("myMultiTM", 2).states("q0", "q1").build()
+   */
+  function multitape<const N extends number>(name: string, tapeCount: N): MultiTMBuilder<N>;
+
+  /** Build a single-tape TM wrapper over multitape(…, 1). */
+  function tm(name: string): TMBuilder;
 
   /** Build an NFA using Thompson's construction (RPN stack-based builder). 
    * @example const machine = Delta.thompson("myNFA").char("a").star().build() 
@@ -209,6 +349,8 @@ declare module "delta:lib" {
   interface Delta {
     nfa: typeof nfa;
     dfa: typeof dfa;
+    tm: typeof tm;
+    multitape: typeof multitape;
     thompson: typeof thompson;
     convertToDFA: typeof convertToDFA;
     q: typeof q;
@@ -223,6 +365,8 @@ declare module "delta:lib" {
 
   export const nfa: typeof nfa;
   export const dfa: typeof dfa;
+  export const tm: typeof tm;
+  export const multitape: typeof multitape;
   export const thompson: typeof thompson;
   export const convertToDFA: typeof convertToDFA;
   export const q: typeof q;

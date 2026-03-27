@@ -2,9 +2,10 @@ import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 import type { Node, Edge } from "reactflow";
 import type { NFA } from "@/lib/compiler/nfa";
-import { deserialize } from "@/lib/compiler/serialize";
+import type { TuringMachine } from "@/lib/compiler/tm";
 import { flowToCode } from "@/lib/compiler/fromFlow";
 import { runCode, type ExecutionError } from "../runCode";
+import { MachineTypes } from "@/lib/worker/protocol";
 import { version } from "../../package.json";
 
 export interface TestCase {
@@ -12,9 +13,6 @@ export interface TestCase {
   input: string;
   expected: boolean;
 }
-
-const DEFAULT_ANF =
-  "%23%20of%20a's%20divisible%20by%202%20or%203|q0;q1;q2;q3;q4;q5|a;b|q0|q0;q2;q3;q4|q0>a>q1;q0>b>q0;q1>a>q2;q1>b>q1;q2>a>q3;q2>b>q2;q3>a>q4;q3>b>q3;q4>a>q5;q4>b>q4;q5>a>q0;q5>b>q5";
 
 const DEFAULT_VALUE = `//---
 // Welcome to Delta! This is the code editor. If you'd like to use 
@@ -45,40 +43,118 @@ const DEFAULT_TESTS = [
   { id: crypto.randomUUID(), input: "abababbaa", expected: false },
 ];
 
-interface DeltaState {
-  // persisted
+const DEFAULT_TM_TESTS = [
+  { id: "empty", input: "", expected: true },
+  { id: "single-0", input: "0", expected: true },
+  { id: "single-1", input: "1", expected: true },
+  { id: "double-00", input: "00", expected: true },
+  { id: "double-11", input: "11", expected: true },
+  { id: "even-bad", input: "01", expected: false },
+  { id: "odd-good", input: "010", expected: true },
+  { id: "odd-bad", input: "001", expected: false },
+  { id: "long-good", input: "011110", expected: true },
+  { id: "long-bad", input: "011010", expected: false },
+];
+
+const DEFAULT_TM_VALUE = `import * as Delta from "delta:lib";
+
+const machine = Delta.tm("binary palindrome")
+  .alphabet("0", "1")
+  .tape("X", "Y", "_")
+  .blank("_")
+  .states("q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8")
+  .start("q0")
+  .accept("q6")
+  // Step 1: Start by moving right (skipping the initial blank if tape is standard)
+  .state("q0", (s) => s.on("_", "R", "q1"))
+  // Step 2: Read the leftmost unmarked character and mark it (X for 0, Y for 1)
+  .state("q1", (s) => s
+    .on("0", "R", "q2", "X")
+    .on("1", "R", "q7", "Y")
+    .on(["X", "Y"], "R", "q5") // Hit marks: even length palindrome center reached
+    .on("_", "R", "q6")        // Hit blank: empty string / done
+  )
+  // Step 3a: 0-Branch - Scan right to the end of unmarked characters
+  .state("q2", (s) => s
+    .on(["0", "1"], "R", "q2")
+    .on(["_", "X", "Y"], "L", "q3") // Reached boundary, step left
+  )
+  // Step 4a: 0-Branch - Verify the rightmost unmarked character is a '0'
+  .state("q3", (s) => s
+    .on(["X", "Y"], "L", "q3") // Rewind past marked characters
+    .on("0", "L", "q4", "X") // Match found! Mark it and head back
+    .on(["_"], ["R"], "q5")        // No match found, hit left bound (odd length middle)
+  )
+  // Step 3b: 1-Branch - Scan right to the end of unmarked characters
+  .state("q7", (s) => s
+    .on([["0", "1"]], ["R"], "q7")
+    .on([["_", "X", "Y"]], ["L"], "q8") // Reached boundary, step left
+  )
+  // Step 4b: 1-Branch - Verify the rightmost unmarked character is a '1'
+  .state("q8", (s) => s
+    .on(["X", "Y"], "L", "q8") // Rewind past marked characters
+    .on("1", "L", "q4", "Y") // Match found! Mark it and head back
+    .on("_", "R", "q5")        // No match found, hit left bound (odd length middle)
+  )
+  // Step 5: Rewind left back to the leftmost boundary
+  .state("q4", (s) => s
+    .on(["0", "1"], "L", "q4")       // Rewind unmarked
+    .on(["X", "Y", "_"], "R", "q1")  // Hit left boundary, step right to restart loop
+  )
+  // Step 6: Verify remaining tape is fully marked (cleanup/accept phase)
+  .state("q5", (s) => s
+    .on(["X", "Y"], "R", "q5")
+    .on("_", "R", "q6") // Everything is matched, accept!
+  )
+  .build();
+
+export default machine;`;
+
+interface AppSlice {
+  lastSeenVersion: string;
+}
+
+interface NfaSlice {
   editorValue: string;
-  anf: string | null;
   tests: TestCase[];
   nodes: Node[];
   edges: Edge[];
   startId: string | null;
-  lastSeenVersion: string;
-
-  // volatile
   machine: NFA | null;
-  machineError: string | null;
   editorErrors: ExecutionError[] | null;
-
-  setEditorValue: (value: string) => void;
-  setAnf: (anf: string | null) => void;
-  setTests: (tests: TestCase[]) => void;
-  setNodes: (nodes: Node[]) => void;
-  setEdges: (edges: Edge[]) => void;
-  setStartId: (id: string | null) => void;
-  setEditorErrors: (errors: ExecutionError[] | null) => void;
-  setLastSeenVersion: (version: string) => void;
-
-  syncFromFlow: (nodes: Node[], edges: Edge[], startId: string | null) => void;
 }
 
-const initialMachine = (() => {
-  try {
-    return deserialize(DEFAULT_ANF);
-  } catch {
-    return null;
-  }
-})();
+interface TmSlice {
+  editorValue: string;
+  tests: TestCase[];
+  machine: TuringMachine | null;
+  editorErrors: ExecutionError[] | null;
+}
+
+type SlicePatch<T> = Partial<T> | ((slice: T) => Partial<T>);
+
+function applyPatch<T extends object>(slice: T, patch: SlicePatch<T>): T {
+  const nextPatch = typeof patch === "function" ? patch(slice) : patch;
+  return { ...slice, ...nextPatch };
+}
+
+interface DeltaActions {
+  setApp: (patch: SlicePatch<AppSlice>) => void;
+  setNfa: (patch: SlicePatch<NfaSlice>) => void;
+  setTm: (patch: SlicePatch<TmSlice>) => void;
+  syncNfaFromFlow: (
+    nodes: Node[],
+    edges: Edge[],
+    startId: string | null,
+  ) => void;
+}
+
+interface DeltaState {
+  app: AppSlice;
+  nfa: NfaSlice;
+  tm: TmSlice;
+  actions: DeltaActions;
+}
 
 const hybridStorage: StateStorage = {
   getItem: (name: string): string | null => {
@@ -100,68 +176,85 @@ const hybridStorage: StateStorage = {
 
 export const useDeltaStore = create<DeltaState>()(
   persist(
-    (set, get) => ({
-      editorValue: DEFAULT_VALUE,
-      anf: DEFAULT_ANF,
-      tests: DEFAULT_TESTS,
-      nodes: [],
-      edges: [],
-      startId: null,
-      lastSeenVersion: version,
-
-      machine: initialMachine,
-      machineError: null,
-      editorErrors: [],
-
-      setEditorValue: (editorValue) => set({ editorValue }),
-
-      setAnf: (anf) => {
-        if (!anf) {
-          set({ anf, machine: null, machineError: null });
-          return;
-        }
-        try {
-          const m = deserialize(anf);
-          set({ anf, machine: m, machineError: null });
-        } catch (e) {
-          set({
-            anf,
-            machine: null,
-            machineError: `✗ ${String(e).split("\n").join("; ")}`,
-          });
-        }
+    (set) => ({
+      app: {
+        lastSeenVersion: version,
+      },
+      nfa: {
+        editorValue: DEFAULT_VALUE,
+        tests: DEFAULT_TESTS,
+        nodes: [],
+        edges: [],
+        startId: null,
+        machine: null,
+        editorErrors: [],
+      },
+      tm: {
+        editorValue: DEFAULT_TM_VALUE,
+        tests: DEFAULT_TM_TESTS,
+        machine: null,
+        editorErrors: [],
       },
 
-      setTests: (tests) => set({ tests }),
-      setNodes: (nodes) => set({ nodes }),
-      setEdges: (edges) => set({ edges }),
-      setStartId: (startId) => set({ startId }),
-      setEditorErrors: (editorErrors) => set({ editorErrors }),
-      setLastSeenVersion: (version) => set({ lastSeenVersion: version }),
+      actions: {
+        setApp: (patch) =>
+          set((state) => ({
+            app: applyPatch(state.app, patch),
+          })),
+        setNfa: (patch) =>
+          set((state) => ({
+            nfa: applyPatch(state.nfa, patch),
+          })),
+        setTm: (patch) =>
+          set((state) => ({
+            tm: applyPatch(state.tm, patch),
+          })),
+        syncNfaFromFlow: (nodes, edges, startId) => {
+          const code = flowToCode(nodes, edges, startId);
 
-      syncFromFlow: (nodes, edges, startId) => {
-        const code = flowToCode(nodes, edges, startId);
+          set((state) => ({
+            nfa: {
+              ...state.nfa,
+              nodes,
+              edges,
+              startId,
+              editorValue: code,
+            },
+          }));
 
-        set({ nodes, edges, startId, editorValue: code });
-
-        runCode(
-          code,
-          (anf) => get().setAnf(anf),
-          (err) => set({ editorErrors: err }),
-        );
+          runCode<NFA>(
+            code,
+            MachineTypes.NFA,
+            (machine) =>
+              set((state) => ({
+                nfa: { ...state.nfa, machine },
+              })),
+            (err) =>
+              set((state) => ({
+                nfa: { ...state.nfa, editorErrors: err },
+              })),
+          );
+        },
       },
     }),
     {
       name: "delta-store",
       storage: createJSONStorage(() => hybridStorage),
       partialize: (state) => ({
-        editorValue: state.editorValue,
-        lastSeenVersion: state.lastSeenVersion,
-        anf: state.anf,
-        tests: state.tests,
-        nodes: state.nodes,
-        edges: state.edges,
-        startId: state.startId,
+        app: {
+          lastSeenVersion: state.app.lastSeenVersion,
+        },
+        nfa: {
+          editorValue: state.nfa.editorValue,
+          tests: state.nfa.tests,
+          nodes: state.nfa.nodes,
+          edges: state.nfa.edges,
+          startId: state.nfa.startId,
+        },
+        tm: {
+          editorValue: state.tm.editorValue,
+          tests: state.tm.tests,
+        },
       }),
     },
   ),

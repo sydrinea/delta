@@ -49,3 +49,26 @@ input[type="range"]::-moz-range-thumb {
   --tw-prose-th-borders: var(--color-ctp-lavender);
   --tw-prose-td-borders: var(--color-ctp-lavender);
 }
+
+.workbench-loader-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 9999px;
+  opacity: 0.2;
+  animation: workbenchDotFade 660ms infinite ease-in-out;
+}
+
+@keyframes workbenchDotFade {
+  0% {
+    opacity: 0.2;
+  }
+
+  40% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.2;
+  }
+}

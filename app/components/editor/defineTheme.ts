@@ -1,7 +1,11 @@
 import * as MonacoEditor from "monaco-editor";
 
+/**
+ * Define Catppuccin Latte for use in Monaco
+ * @param monaco The editor
+ */
 export default function defineTheme(monaco: typeof MonacoEditor) {
-  // Catppuccin Latte
+  // The color palette
   const latte = {
     rosewater: "dc8a78",
     flamingo: "dd7878",

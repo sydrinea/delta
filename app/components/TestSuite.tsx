@@ -1,11 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { simulate } from "@/lib/simulator/nfa";
-import type { NFA } from "@/lib/compiler/nfa";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
-import { useDeltaStore } from "@/store/deltaStore";
 import { Tooltip } from "./Tooltip";
+import { useAlert } from "./AlertProvider";
 import z from "zod";
 
 const TestCaseSchema = z.array(
@@ -15,7 +13,7 @@ const TestCaseSchema = z.array(
   }),
 );
 
-interface TestCase {
+export interface TestCase {
   id: string;
   input: string;
   expected: boolean;
@@ -31,14 +29,39 @@ const TESTS_PER_PAGE = 6;
 const ROW_HEIGHT = 36;
 
 interface TestSuiteProps {
-  machine: NFA | null;
+  tests: TestCase[];
+  setTests: (tests: TestCase[]) => void;
+  evaluateInput?: (input: string) => boolean;
+  machineName?: string;
+  resetKeys?: unknown[];
+  inputPlaceholder?: string;
 }
 
-export function TestSuite({ machine }: TestSuiteProps) {
+export function TestSuite({
+  tests,
+  setTests,
+  evaluateInput,
+  machineName = "delta",
+  resetKeys,
+  inputPlaceholder = "input string",
+}: TestSuiteProps) {
   const [results, setResults] = useState<Record<string, TestResult>>({});
+  const { showAlert } = useAlert();
 
-  const tests = useDeltaStore((s) => s.tests);
-  const setTests = useDeltaStore((s) => s.setTests);
+  const runTests = () => {
+    if (!evaluateInput) return;
+
+    const newResults: Record<string, TestResult> = {};
+    for (const test of tests) {
+      const actual = evaluateInput(test.input);
+      newResults[test.id] = {
+        id: test.id,
+        passed: actual === test.expected,
+        actual,
+      };
+    }
+    setResults(newResults);
+  };
 
   useKeyboardShortcut([
     {
@@ -57,21 +80,7 @@ export function TestSuite({ machine }: TestSuiteProps) {
 
   useEffect(() => {
     setResults({});
-  }, [machine]);
-
-  const runTests = () => {
-    if (!machine) return;
-    const newResults: Record<string, TestResult> = {};
-    for (const test of tests) {
-      const { accepted } = simulate(machine, test.input);
-      newResults[test.id] = {
-        id: test.id,
-        passed: accepted === test.expected,
-        actual: accepted,
-      };
-    }
-    setResults(newResults);
-  };
+  }, resetKeys);
 
   const handleTestImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,16 +92,21 @@ export function TestSuite({ machine }: TestSuiteProps) {
         const parsed = JSON.parse(event.target?.result as string);
         const result = TestCaseSchema.safeParse(parsed);
         if (!result.success) {
-          alert(
-            `Invalid test format. Expected an array of { input: string, expected: boolean }.\n\n${result.error.issues.map((i) => i.message).join("\n")}`,
-          );
+          showAlert({
+            title: "Invalid Test Format",
+            message: `Expected an array of { input: string, expected: boolean }.\n\n${result.error.issues.map((i) => i.message).join("\n")}`,
+          });
           return;
         }
         setTests(result.data.map((t) => ({ ...t, id: crypto.randomUUID() })));
       } catch {
-        alert("Invalid JSON file.");
+        showAlert({
+          title: "Invalid JSON",
+          message: "The selected file is not valid JSON.",
+        });
       }
     };
+
     reader.readAsText(file);
     e.target.value = "";
   };
@@ -112,11 +126,10 @@ export function TestSuite({ machine }: TestSuiteProps) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `${machine?.name || "delta"}_tests.json`;
+    link.download = `${machineName || "delta"}_tests.json`;
 
     document.body.appendChild(link);
     link.click();
-
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
@@ -140,6 +153,7 @@ export function TestSuite({ machine }: TestSuiteProps) {
             </span>
           )}
         </div>
+
         <div className="flex flex-wrap items-center gap-2">
           <Tooltip label="Import tests from JSON">
             <label className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors cursor-pointer flex items-center justify-center">
@@ -152,6 +166,7 @@ export function TestSuite({ machine }: TestSuiteProps) {
               />
             </label>
           </Tooltip>
+
           <Tooltip label="Export tests to JSON">
             <button
               onClick={handleTestExport}
@@ -161,10 +176,11 @@ export function TestSuite({ machine }: TestSuiteProps) {
               export
             </button>
           </Tooltip>
+
           <Tooltip label="shift+cmd+t">
             <button
               onClick={runTests}
-              disabled={!machine || tests.length === 0}
+              disabled={!evaluateInput || tests.length === 0}
               className="text-xs px-3 py-1 rounded-lg bg-ctp-green/20 border border-ctp-green text-ctp-green hover:bg-ctp-green/30 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
             >
               run tests
@@ -188,6 +204,7 @@ export function TestSuite({ machine }: TestSuiteProps) {
       />
 
       <NewTestForm
+        inputPlaceholder={inputPlaceholder}
         onSubmit={(input, expected) => {
           const id = crypto.randomUUID();
           setTests([...tests, { id, input, expected }]);
@@ -198,7 +215,7 @@ export function TestSuite({ machine }: TestSuiteProps) {
 }
 
 interface TestProps {
-  result: TestResult;
+  result?: TestResult;
   test: TestCase;
   onRemove: (id: string) => void;
 }
@@ -242,9 +259,10 @@ function Test({ result, test, onRemove }: TestProps) {
 
 interface NewTestFormProps {
   onSubmit: (input: string, expected: boolean) => void;
+  inputPlaceholder: string;
 }
 
-function NewTestForm({ onSubmit }: NewTestFormProps) {
+function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
   const [input, setInput] = useState("");
   const [expected, setExpected] = useState(true);
 
@@ -260,7 +278,7 @@ function NewTestForm({ onSubmit }: NewTestFormProps) {
         value={input}
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-        placeholder="input string"
+        placeholder={inputPlaceholder}
         className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
       />
       <button
