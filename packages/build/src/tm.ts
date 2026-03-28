@@ -66,8 +66,6 @@ export const TMMessages = {
   ...AutomataMessages,
   tapeSymbolNotDeclared: (symbol: string) =>
     `Tape symbol '${symbol}' is not in the tape alphabet`,
-  duplicateTransition: (state: string, symbol: string) =>
-    `TM transition from '${state}' on '${symbol}' is already defined`,
   blankSymbolNotInTape: (symbol: string) =>
     `Blank symbol '${symbol}' must be part of the tape alphabet`,
   blankSymbolInAlphabet: (symbol: string) =>
@@ -78,8 +76,6 @@ export const TMMessages = {
     `Tape count must be a positive integer. Received '${count}'`,
   invalidTupleLength: (expected: number, received: number) =>
     `Transition tuples must have exactly length ${expected}. Received ${received}`,
-  invalidHeadIndex: (index: number, tapeCount: number) =>
-    `Head index '${index}' is out of range for tape count '${tapeCount}'. Expected 0..${tapeCount - 1}`,
   duplicateReadTupleTransition: (state: string, tuple: string) =>
     `TM transition from '${state}' on tuple '${tuple}' is already defined`,
 } as const;
