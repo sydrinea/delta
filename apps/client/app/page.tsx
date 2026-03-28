@@ -62,7 +62,7 @@ const blocks: FeatureBlock[] = [
   {
     title: "Demo",
     description:
-      "A five-minute walkthrough of the full feature set — from writing a DFA to stepping through a multitape Turing machine.",
+      "A five-minute walkthrough of the main features — writing machines, stepping through execution, and building on the canvas.",
     bg: "bg-ctp-peach/10",
     bgHover: "hover:bg-ctp-peach/20",
     border: "border-ctp-peach/25",
