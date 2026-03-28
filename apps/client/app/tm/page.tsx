@@ -8,7 +8,11 @@ export default function TMPage() {
   return (
     <section className="flex md:flex-col md:h-screen md:overflow-hidden">
       <Workbench<TuringMachine>
-        simulate={(machine, input) => simulateTM(machine, input).accepted}
+        simulate={(machine, input) =>
+          simulateTM(machine, input, {
+            maxSteps: Math.max(1000, input.length * 100),
+          }).accepted
+        }
         storeScope="tm"
         enabledTabs={{
           editor: true,

@@ -269,7 +269,9 @@ export function Workbench<M>({
       machine: tm.machine as TraceMachine | null,
       tests: tm.tests,
       simulate: (machine: TraceMachine, input: string) =>
-        simulateTM(machine as TuringMachine, input),
+        simulateTM(machine as TuringMachine, input, {
+          maxSteps: Math.max(1000, input.length * 100),
+        }),
       getDot: (machine: TraceMachine, states: Set<string>) =>
         toDotTM(machine as TuringMachine, states),
       getInputTokens: ({ current }: { current: { tapes?: string[][] } }) => {
