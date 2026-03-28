@@ -6,8 +6,7 @@ export * from "./helpers";
 export * from "./nfa";
 export * from "./thompson";
 export * from "./tm";
-export * from "./examples";
-export * from "./validators";
+export * from "./schemas";
 
 export { default as dfa } from "./dfa";
 export { default as nfa } from "./nfa";

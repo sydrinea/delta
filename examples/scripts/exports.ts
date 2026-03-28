@@ -8,10 +8,15 @@ function toCamelCase(str: string): string {
 async function main() {
   const rootDir = process.cwd();
   const dirs = ["nfa", "tm"];
-  const lines: string[] = ["// GENERATED FILE - DO NOT EDIT", ""];
+  const lines: string[] = [
+    "// GENERATED FILE - DO NOT EDIT",
+    "",
+    'export * from "../src/schemas";',
+    "",
+  ];
 
   for (const dir of dirs) {
-    const entries = await readdir(join(rootDir, dir));
+    const entries = await readdir(join(rootDir, "src", dir));
     const stems = new Set(
       entries
         .filter((f) => f.endsWith(".ts") && !f.includes("/"))
@@ -24,10 +29,10 @@ async function main() {
 
     for (const stem of machines) {
       const key = toCamelCase(stem);
-      lines.push(`export { default as ${key} } from "../${dir}/${stem}";`);
+      lines.push(`export { default as ${key} } from "../src/${dir}/${stem}";`);
       if (stems.has(`${stem}.meta`)) {
         lines.push(
-          `export { default as ${key}Meta } from "../${dir}/${stem}.meta";`,
+          `export { default as ${key}Meta } from "../src/${dir}/${stem}.meta";`,
         );
       }
     }

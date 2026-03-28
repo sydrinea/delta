@@ -4,20 +4,7 @@ import { useEffect, useState } from "react";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { Tooltip } from "./Tooltip";
 import { useAlert } from "./AlertProvider";
-import z from "zod";
-
-const TestCaseSchema = z.array(
-  z.object({
-    input: z.string(),
-    expected: z.boolean(),
-  }),
-);
-
-export interface TestCase {
-  id: string;
-  input: string;
-  expected: boolean;
-}
+import { TestCase, TestCaseArraySchema, TestCaseSchema } from "@delta/examples";
 
 interface TestResult {
   id: string;
@@ -90,7 +77,7 @@ export function TestSuite({
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
-        const result = TestCaseSchema.safeParse(parsed);
+        const result = TestCaseArraySchema.safeParse(parsed);
         if (!result.success) {
           showAlert({
             title: "Invalid Test Format",

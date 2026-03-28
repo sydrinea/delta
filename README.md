@@ -89,7 +89,7 @@ Every machine and its state can be encoded into a URL, so you can save your work
 | [Turing Machines](docs/tm.md)               | Tape alphabet, single-tape and multi-tape builders, `.seek()`            |
 | [Thompson's Construction](docs/thompson.md) | Stack model, primitives, operators, machine composition                  |
 
-Also be sure to check out the examples [for NFAs](/examples/nfa) and [for Turing Machines](/examples/tm).
+Also be sure to check out the examples [for NFAs](/examples/src/nfa) and [for Turing Machines](/examples/src/tm).
 
 ## Roadmap
 

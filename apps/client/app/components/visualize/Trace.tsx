@@ -3,7 +3,7 @@
 import { Fragment, useState, useMemo, useRef, type ReactNode } from "react";
 import { GraphvizViewer } from "./GraphvizViewer";
 import { useStepNavigation } from "@/hooks/useStepNavigation";
-import { type TestCase } from "@/store/deltaStore";
+import { type TestCase } from "@delta/examples";
 import {
   Listbox,
   ListboxButton,

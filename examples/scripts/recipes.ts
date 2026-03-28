@@ -99,15 +99,14 @@ async function transformImports(filePath: string): Promise<string> {
 
 async function main() {
   const rootDir = process.cwd();
-  const allFiles = await walk(rootDir);
+  const allFiles = await walk(join(rootDir, "src"));
 
   const metaFiles = allFiles.filter((f) => f.endsWith(".meta.ts"));
   const tsFiles = allFiles.filter(
     (f) =>
       f.endsWith(".ts") &&
       !f.endsWith(".meta.ts") &&
-      !f.includes("/scripts/") &&
-      !f.includes("/generated/"),
+      (f.includes("/src/nfa/") || f.includes("/src/tm/")),
   );
 
   const entries: {
@@ -120,7 +119,7 @@ async function main() {
 
   for (const metaFile of metaFiles) {
     const relativeMetaPath = relative(rootDir, metaFile);
-    const type = relativeMetaPath.split(sep)[0];
+    const type = relativeMetaPath.split(sep)[1];
     const baseName = basename(metaFile, ".meta.ts");
     const key = toCamelCase(baseName);
     const publicPath = `/examples/${type}/${baseName}.ts`;
@@ -158,7 +157,7 @@ async function main() {
   await mkdir(publicExamplesDir, { recursive: true });
 
   for (const tsFile of tsFiles) {
-    const relativePath = relative(rootDir, tsFile);
+    const relativePath = relative(join(rootDir, "src"), tsFile);
     const dest = join(publicExamplesDir, relativePath);
     await mkdir(dirname(dest), { recursive: true });
 

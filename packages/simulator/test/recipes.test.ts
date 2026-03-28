@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import * as examples from "@delta/examples";
-import { NFASchema, TMSchema, ExampleMetaSchema } from "@delta/build";
+import { NFASchema, TMSchema } from "@delta/build";
+import { ExampleMetaSchema } from "@delta/examples";
 import { simulate, simulateTM } from "../src";
 
 type SimulateFn = (machine: any, input: string) => { accepted: boolean };

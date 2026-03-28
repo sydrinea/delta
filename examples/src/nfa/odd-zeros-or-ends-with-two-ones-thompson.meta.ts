@@ -1,4 +1,4 @@
-import type { ExampleMeta } from "@delta/build";
+import { ExampleMeta } from "../schemas";
 
 export default {
   label: "Odd Zeros or Ends With Two Ones (Thompson)",

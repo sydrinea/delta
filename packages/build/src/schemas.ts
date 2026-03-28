@@ -27,20 +27,3 @@ export const TMSchema = z.strictObject({
   transitions: z.instanceof(Map<string, Map<string, unknown>>),
   messages: z.array(MessageSchema),
 });
-
-export const TestCaseSchema = z.object({
-  id: z.string(),
-  input: z.string(),
-  expected: z.boolean(),
-});
-
-export const ExampleMetaSchema = z.object({
-  label: z.string(),
-  type: z.enum(["nfa", "tm"]),
-  tests: z.array(TestCaseSchema).optional(),
-});
-
-export const ExampleSchema = ExampleMetaSchema.extend({
-  key: z.string(),
-  path: z.string(),
-});

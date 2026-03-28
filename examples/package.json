@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@delta/build": "workspace:*",
-    "@delta/transform": "workspace:*"
+    "@delta/transform": "workspace:*",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@babel/generator": "^7.29.1",

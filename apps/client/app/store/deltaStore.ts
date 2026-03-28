@@ -7,12 +7,7 @@ import { flowToCode } from "@/lib/flow/fromFlow";
 import { runCode, type ExecutionError } from "@/lib/runCode";
 import { MachineTypes } from "@/lib/worker/protocol";
 import { version } from "../../../../package.json";
-
-export interface TestCase {
-  id: string;
-  input: string;
-  expected: boolean;
-}
+import { TestCase } from "@delta/examples";
 
 const DEFAULT_VALUE = `//---
 // Welcome to Delta! This is the code editor. If you'd like to use 

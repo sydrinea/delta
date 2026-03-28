@@ -1,4 +1,4 @@
-import type { ExampleMeta } from "@delta/build";
+import { ExampleMeta } from "../schemas";
 
 export default {
   label: "# of A's divisible by 2 or 3",
