@@ -62,7 +62,7 @@ export function useMachineShare({
         body: JSON.stringify({ machineType, code }),
       });
       const { id } = (await res.json()) as { id: string };
-      const url = `${window.location.origin}?m=${id}`;
+      const url = `${window.location.origin}/${machineType}?m=${id}`;
       navigator.clipboard.writeText(url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
