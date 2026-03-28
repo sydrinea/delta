@@ -1,6 +1,10 @@
 import { z } from "zod";
-import type { NFA } from "@delta/build";
-import type { TuringMachine } from "@delta/build";
+import {
+  type NFA,
+  type TuringMachine,
+  TMSchema,
+  NFASchema,
+} from "@delta/build";
 import {
   createWorkerRequestId,
   sendWorkerRequest,
@@ -13,35 +17,6 @@ import {
   type CompileErrorDetail,
   type CompileSuccessData,
 } from "@/lib/worker/protocol";
-
-const MessageSchema = z.object({
-  content: z.string(),
-  severity: z.enum(["warning", "error"]),
-});
-
-export const NFASchema = z.object({
-  name: z.string(),
-  alphabet: z.instanceof(Set),
-  states: z.instanceof(Set),
-  startState: z.string(),
-  acceptStates: z.instanceof(Set),
-  transitions: z.instanceof(Map),
-  messages: z.array(MessageSchema),
-});
-
-export const TMSchema = z
-  .object({
-    name: z.string(),
-    alphabet: z.instanceof(Set),
-    states: z.instanceof(Set),
-    startState: z.string(),
-    acceptStates: z.instanceof(Set),
-    tapeAlphabet: z.instanceof(Set),
-    blankSymbol: z.string(),
-    transitions: z.instanceof(Map),
-    messages: z.array(MessageSchema),
-  })
-  .passthrough();
 
 export interface ExecutionError {
   message: string;

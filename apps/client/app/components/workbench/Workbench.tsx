@@ -31,7 +31,7 @@ import { Check } from "@/icons/Check";
 import { Share } from "@/icons/Share";
 import { simulate as simulateNFA, simulateTM } from "@delta/simulator";
 import { useCompile } from "@/hooks/useCompile";
-import recipes from "../../lib/recipes";
+import { recipes } from "@delta/examples/recipes";
 import { toDot, toDotTM } from "@/lib/dot";
 
 type TabId = "editor" | "canvas" | "visualizer";

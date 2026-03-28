@@ -4,7 +4,9 @@
   "types": "./generated/index.ts",
   "license": "MIT",
   "scripts": {
-    "build:index": "tsx scripts/build.ts"
+    "generate:recipes": "tsx scripts/recipes.ts",
+    "generate:exports": "tsx scripts/exports.ts",
+    "generate": "pnpm run generate:recipes && pnpm run generate:exports"
   },
   "dependencies": {
     "@delta/build": "workspace:*",
@@ -19,5 +21,9 @@
     "@types/babel__traverse": "^7.28.0",
     "@types/node": "^25.5.0",
     "tsx": "^4.7.1"
+  },
+  "exports": {
+    ".": "./generated/index.ts",
+    "./recipes": "./generated/recipes.ts"
   }
 }

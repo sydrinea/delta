@@ -2,20 +2,24 @@
   "$schema": "https://turborepo.dev/schema.json",
   "tasks": {
     "test": {
-      "dependsOn": ["^test", "^build:index"]
+      "dependsOn": ["^test", "^generate"]
     },
     "build": {
-      "dependsOn": ["^build", "^build:index"],
+      "dependsOn": ["^build", "^generate"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "dev": {
-      "dependsOn": ["^build:index"],
+      "dependsOn": ["^generate"],
       "persistent": true,
       "cache": false
     },
-    "build:index": {
+    "generate": {
       "inputs": ["nfa/**/*.meta.ts", "tm/**/*.meta.ts"],
-      "outputs": ["generated/index.ts", "../apps/client/public/examples/**"]
+      "outputs": [
+        "generated/index.ts",
+        "generated/recipes.ts",
+        "../apps/client/public/examples/**"
+      ]
     }
   }
 }

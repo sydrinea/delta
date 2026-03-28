@@ -11,6 +11,7 @@
     "@delta/build": "workspace:*",
     "@delta/shared": "workspace:*",
     "@delta/transform": "workspace:*",
+    "@delta/examples": "workspace:*",
     "reactflow": "^11.11.4",
     "vitest": "^4.1.2"
   }

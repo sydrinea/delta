@@ -4,7 +4,8 @@
     "paths": {
       "@delta/shared": ["../shared/src/index.ts"],
       "@delta/build": ["../build/src/index.ts"],
-      "@delta/transform": ["../transform/src/index.ts"]
+      "@delta/transform": ["../transform/src/index.ts"],
+      "@delta/examples": ["../../examples/generated/index.ts"]
     }
   }
 }
