@@ -28,8 +28,6 @@ Calling `.transition(from, EPS, to)` on a DFA builder is an error.
 
 Every declared state must have **exactly one** outgoing transition for every symbol in the alphabet. Missing or duplicate transitions are both errors — `.build()` will throw if either condition is violated.
 
-This means you must account for every symbol in every state, including "dead" or sink states:
-
 ```ts
 // If q1 is a dead state, it still needs all transitions defined
 .transition("q1", "a", "q1")

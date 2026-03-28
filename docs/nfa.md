@@ -32,8 +32,6 @@ The core transition method. Unlike a DFA, you can add multiple transitions from 
 
 ### Shorthand Methods
 
-These cover common patterns and reduce repetition:
-
 | Method                                    | Behavior                                                                     |
 | ----------------------------------------- | ---------------------------------------------------------------------------- |
 | `.loop(state, ...symbols)` via StateProxy | Self-transition on the given symbols                                         |

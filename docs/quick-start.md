@@ -2,8 +2,6 @@
 
 `@delta/build` is a fluent TypeScript library for constructing formal automata — DFAs, NFAs, and Turing Machines. Every machine is built by chaining method calls on a builder, then calling `.build()` to produce a validated, immutable model.
 
-## Installation
-
 The build package lives in the monorepo workspace. Import from `@delta/build`:
 
 ```ts

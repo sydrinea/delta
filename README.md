@@ -18,9 +18,7 @@ Delta lets you define DFAs, NFAs, and Turing Machines as TypeScript code using a
 
 ## Getting Started
 
-The fastest way to use Delta is the hosted version — no setup required:
-
-**[delta.sydneyn.dev](https://delta.sydneyn.dev)**
+No setup required: **[delta.sydneyn.dev](https://delta.sydneyn.dev)**
 
 To run it locally:
 
@@ -40,7 +38,7 @@ pnpm run dev
 Machines are defined in code using `@delta/build`, a chainable builder library. DFAs, NFAs, and Turing Machines each have their own builder with validation baked in — errors surface at build time, not at runtime.
 
 ```ts
-import { nfa, EPS } from "@delta/build";
+import { nfa } from "@delta/build";
 
 const machine = nfa("ends in ab")
   .alphabet("a", "b")
@@ -56,15 +54,15 @@ const machine = nfa("ends in ab")
 
 ### Integrated Test Suites
 
-Declare a battery of test cases. Delta runs them all and reports pass/fail inline so you can see exactly where and how your automata are failing.
+Pair any machine with a test suite. Delta runs them all and reports pass/fail inline.
 
 ### Thompson's Construction
 
-A dedicated stack-based API for building NFAs directly from regular expression structure — pushing character machines and combining them with `.union()`, `.concat()`, and `.star()`. Each operation corresponds precisely to the Thompson construction rules.
+A stack-based API for building NFAs from regular expressions using union, concatenation, and Kleene star — directly mirroring Thompson's construction.
 
 ### Subset Construction (NFA → DFA)
 
-Convert any NFA to an equivalent DFA via `convertToDFA` from `@delta/transform`. The power set construction runs automatically, with an option to preserve human-readable state names.
+Convert any NFA to an equivalent DFA via `convertToDFA` from `@delta/transform`, with an option to preserve human-readable state names.
 
 ```ts
 import { convertToDFA } from "@delta/transform";
@@ -96,12 +94,10 @@ Also be sure to check out the examples [for NFAs](/examples/src/nfa) and [for Tu
 - [ ] PDAs
 - [ ] Regular Grammars
 - [ ] Context-Free Grammars
-  - [ ] Chomsky Normal Form
-  - [ ] Greibach Normal Form
 
 ## License
 
 The packages in this repository are licensed as follows:
 
 - **`apps/client`** — [AGPL-3.0](apps/client/LICENSE)
-- **Everything else** — [MIT](LICENSE)
+- **Everything else** — [MIT](LICENSE-MIT)
