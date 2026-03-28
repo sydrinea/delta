@@ -33,8 +33,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/android-chrome-192x192.png",
-        width: 192,
-        height: 192,
+        width: 64,
+        height: 64,
       },
     ],
   },
