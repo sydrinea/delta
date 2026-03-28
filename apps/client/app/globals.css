@@ -1,5 +1,17 @@
 @import "tailwindcss";
 
+@theme {
+  --font-sans: var(--font-syne);
+  --font-mono: var(--font-recursive-mono);
+}
+
+@layer utilities {
+  .font-sans {
+    font-family: var(--font-sans);
+    font-size: 12pt;
+  }
+}
+
 @import "@catppuccin/tailwindcss/mocha.css";
 @plugin "@tailwindcss/typography";
 

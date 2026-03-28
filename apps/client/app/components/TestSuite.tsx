@@ -219,7 +219,7 @@ function Test({ result, test, onRemove }: TestProps) {
           : "bg-ctp-mantle border-ctp-surface1"
       }`}
     >
-      <span className="flex-1 font-mono text-ctp-text truncate">
+      <span className="flex-1 text-ctp-text truncate">
         {test.input || <span className="text-ctp-overlay0">ε</span>}
       </span>
       <span
@@ -266,7 +266,7 @@ function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
         onChange={(e) => setInput(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
         placeholder={inputPlaceholder}
-        className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
+        className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
       />
       <button
         onClick={() => setExpected((e) => !e)}

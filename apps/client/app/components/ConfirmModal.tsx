@@ -43,7 +43,7 @@ export function ConfirmModal({
           <div className="fixed inset-0 bg-ctp-crust/60 backdrop-blur-sm transition-opacity" />
         </TransitionChild>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="fixed inset-0 z-10 overflow-y-auto font-sans">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as={Fragment}
@@ -56,7 +56,7 @@ export function ConfirmModal({
             >
               <DialogPanel className="relative w-full max-w-md transform overflow-hidden bg-ctp-base border border-ctp-surface0 p-6 text-left align-middle rounded-2xl shadow-xl transition-all flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  <DialogTitle className="text-lg font-bold text-ctp-text">
+                  <DialogTitle className="text-lg font-bold text-ctp-text font-mono">
                     {title}
                   </DialogTitle>
                   <p className="text-sm text-ctp-subtext0 leading-relaxed">

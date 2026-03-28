@@ -165,7 +165,7 @@ export function Trace<M extends VisualMachine>({
           value={input}
           onChange={handleInputChange}
           placeholder="input string"
-          className="flex-1 w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve font-mono"
+          className="flex-1 w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
         />
         <Listbox value={selectedTest} onChange={handleTestSelect}>
           <div className="relative w-full md:w-auto">

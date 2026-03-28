@@ -256,7 +256,7 @@ export function GraphvizViewer({
   ] as const;
 
   if (error) {
-    return <div className="text-ctp-red text-sm font-mono p-4">{error}</div>;
+    return <div className="text-ctp-red text-sm p-4">{error}</div>;
   }
 
   const renderViewerContent = (fullscreenMode: boolean) => (
@@ -274,7 +274,7 @@ export function GraphvizViewer({
                 <Tooltip label={label}>
                   <button
                     onClick={handler}
-                    className={`shrink-0 p-1.5 rounded-full text-ctp-overlay0 ${color} hover:bg-ctp-surface0 transition-colors flex items-center justify-center w-7 h-7`}
+                    className={`shrink-0 hover:cursor-pointer p-1.5 rounded-full text-ctp-overlay0 ${color} hover:bg-ctp-surface0 transition-colors flex items-center justify-center w-7 h-7`}
                   >
                     {actionState === id ? <Check /> : <Icon />}
                   </button>
@@ -293,7 +293,7 @@ export function GraphvizViewer({
         <Tooltip label={fullscreenMode ? "Exit Fullscreen" : "Fullscreen"}>
           <button
             onClick={() => setIsFullscreen((value) => !value)}
-            className="shrink-0 p-1.5 rounded-full text-ctp-overlay0 hover:text-ctp-mauve hover:bg-ctp-surface0 transition-colors flex items-center justify-center w-7 h-7"
+            className="shrink-0 hover:cursor-pointer p-1.5 rounded-full text-ctp-overlay0 hover:text-ctp-mauve hover:bg-ctp-surface0 transition-colors flex items-center justify-center w-7 h-7"
           >
             {isFullscreen ? <Minimize /> : <Fullscreen />}
           </button>

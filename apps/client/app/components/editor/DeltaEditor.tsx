@@ -168,7 +168,7 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
                 Build Failed
               </span>
 
-              <span className="font-mono text-xs mt-1 text-ctp-red/90 leading-relaxed">
+              <span className="text-xs mt-1 text-ctp-red/90 leading-relaxed">
                 {editorErrors.find((err) => err.line === 0)!.message}
               </span>
             </div>

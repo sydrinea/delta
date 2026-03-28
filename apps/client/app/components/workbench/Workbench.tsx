@@ -374,7 +374,7 @@ export function Workbench<M>({
                 <button
                   key={tab.id}
                   onClick={() => requestTabChange(tab.id)}
-                  className={`pb-2 text-xs transition-colors border-b-2 cursor-pointer ${activeTab === tab.id ? "text-ctp-text border-ctp-mauve" : "text-ctp-subtext0 border-transparent hover:text-ctp-text"}`}
+                  className={`tracking-wide pb-2 text-xs transition-colors border-b-2 cursor-pointer ${activeTab === tab.id ? "text-ctp-text border-ctp-mauve" : "text-ctp-subtext0 border-transparent hover:text-ctp-text"}`}
                 >
                   {tab.id}
                 </button>
@@ -456,7 +456,7 @@ export function Workbench<M>({
               <Tooltip label="cmd+s">
                 <button
                   onClick={() => compile(editorValue)}
-                  className="text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                  className="hover:cursor-pointer text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   compile
                 </button>

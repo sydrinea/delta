@@ -109,7 +109,7 @@ function AutomataEdge({
                     updateEdges();
                   }
                 }}
-                className="w-16 text-xs text-center bg-transparent border-b border-ctp-surface1 font-mono text-ctp-text focus:outline-none"
+                className="w-16 text-xs text-center bg-transparent border-b border-ctp-surface1 text-ctp-text focus:outline-none"
               />
               <input
                 type="range"
@@ -126,7 +126,7 @@ function AutomataEdge({
           ) : (
             <span
               onDoubleClick={() => setEditing(true)}
-              className="text-xs font-mono text-ctp-text bg-ctp-mantle/80 px-1.5 py-0.5 rounded cursor-pointer hover:bg-ctp-surface0 transition-colors"
+              className="text-xs text-ctp-text bg-ctp-mantle/80 px-1.5 py-0.5 rounded cursor-pointer hover:bg-ctp-surface0 transition-colors"
             >
               {label}
             </span>
@@ -140,7 +140,7 @@ function AutomataEdge({
 function StateNode({ data, selected }: NodeProps) {
   return (
     <div
-      className={`relative w-12 h-12 rounded-full flex items-center justify-center font-mono text-sm transition-colors ${
+      className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm transition-colors ${
         data.isAccept
           ? "border-4 border-double border-ctp-text bg-ctp-mantle text-ctp-text"
           : "border-2 border-ctp-text bg-ctp-mantle text-ctp-text"

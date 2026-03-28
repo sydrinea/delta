@@ -11,7 +11,7 @@ import { Heart } from "./icons/Heart";
 import { version } from "../../package.json";
 
 const TABS = [
-  { label: "NFA / DFA", href: "/" },
+  { label: "NFA / DFA", href: "/nfa" },
   { label: "PDA", href: "/pda" },
   { label: "TM", href: "/tm" },
 ] as const;
@@ -73,9 +73,11 @@ export default function Navbar() {
 
         {/* desktop — delta + tabs */}
         <div className="hidden md:flex items-center gap-6">
-          <h1 className="text-ctp-text text-sm font-bold tracking-widest uppercase">
-            delta
-          </h1>
+          <Link href="/">
+            <h1 className="text-ctp-text text-sm font-bold tracking-widest uppercase">
+              delta
+            </h1>
+          </Link>
 
           <nav className="flex items-center gap-1">
             {TABS.map((tab) => {
@@ -109,9 +111,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-1.5">
           <MadeBy />
           <span className="text-ctp-overlay1 text-xs">·</span>
-          <span className="text-ctp-overlay0 text-xs font-mono">
-            v{version}
-          </span>
+          <span className="text-ctp-overlay0 text-xs">v{version}</span>
         </div>
       </header>
 
@@ -161,7 +161,7 @@ export default function Navbar() {
           <div className="mt-12 flex flex-col gap-1">
             <MadeBy />
             <span
-              className="text-ctp-overlay0 font-mono text-sm"
+              className="text-ctp-overlay0 text-sm"
               style={{ fontSize: "0.65rem" }}
             >
               v{version}
