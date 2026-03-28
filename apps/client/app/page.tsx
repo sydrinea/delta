@@ -11,8 +11,11 @@ import { GitHub } from "@/icons/GitHub";
 interface FeatureBlock {
   title: string;
   description: string;
-  gradient: string;
-  hoverColor: string;
+  bg: string;
+  labelColor: string;
+  bgHover: string;
+  border: string;
+  shadow: string;
   href: string;
   label: string;
   external?: boolean;
@@ -23,8 +26,11 @@ const blocks: FeatureBlock[] = [
     title: "NFA / DFA",
     description:
       "Build nondeterministic and deterministic finite automata with a fluent API. Step through execution, run test suites, and edit machines visually on the canvas.",
-    gradient: "from-ctp-mauve/20 to-ctp-blue/10",
-    hoverColor: "var(--catppuccin-color-mauve)",
+    bg: "bg-ctp-mauve/10",
+    bgHover: "hover:bg-ctp-mauve/20",
+    border: "border-ctp-mauve/25",
+    shadow: "shadow-ctp-mauve/10",
+    labelColor: "text-ctp-mauve",
     href: "/nfa",
     label: "open →",
   },
@@ -32,8 +38,11 @@ const blocks: FeatureBlock[] = [
     title: "Turing Machines",
     description:
       "Single and multitape Turing machines with full step-through visualization. The transition table highlights the active rule at every step.",
-    gradient: "from-ctp-blue/20 to-ctp-teal/10",
-    hoverColor: "var(--catppuccin-color-blue)",
+    bg: "bg-ctp-blue/10",
+    bgHover: "hover:bg-ctp-blue/20",
+    border: "border-ctp-blue/25",
+    shadow: "shadow-ctp-blue/10",
+    labelColor: "text-ctp-blue",
     href: "/tm",
     label: "open →",
   },
@@ -41,8 +50,11 @@ const blocks: FeatureBlock[] = [
     title: "Quick Start",
     description:
       "Builder lifecycle, shared methods, the q() helper, and everything you need to write your first machine in under five minutes.",
-    gradient: "from-ctp-green/20 to-ctp-teal/10",
-    hoverColor: "var(--catppuccin-color-green)",
+    bg: "bg-ctp-green/10",
+    bgHover: "hover:bg-ctp-green/20",
+    border: "border-ctp-green/25",
+    shadow: "shadow-ctp-green/10",
+    labelColor: "text-ctp-green",
     href: "https://github.com/sydrinea/delta/blob/main/docs/quick-start.md",
     label: "read →",
     external: true,
@@ -51,8 +63,11 @@ const blocks: FeatureBlock[] = [
     title: "Demo",
     description:
       "A five-minute walkthrough of the full feature set — from writing a DFA to stepping through a multitape Turing machine.",
-    gradient: "from-ctp-peach/20 to-ctp-yellow/10",
-    hoverColor: "var(--catppuccin-color-peach)",
+    bg: "bg-ctp-peach/10",
+    bgHover: "hover:bg-ctp-peach/20",
+    border: "border-ctp-peach/25",
+    shadow: "shadow-ctp-peach/10",
+    labelColor: "text-ctp-peach",
     href: "https://www.youtube.com/watch?v=zOM9aVSUVi0",
     label: "watch →",
     external: true,
@@ -99,37 +114,24 @@ export default function Home() {
             href={block.href}
             onClick={() => block.external || handleNavigationStart(block.href)}
             className={`
-              group relative rounded-xl border border-ctp-surface1 bg-ctp-mantle
-              p-5 transition-all duration-300 hover:border-ctp-surface2
-              overflow-hidden
+              group relative rounded-xl border p-5
+              transition-all duration-300 overflow-hidden
+              shadow-lg
+              ${block.bg} ${block.bgHover} ${block.border} ${block.shadow} ${block.labelColor}
             `}
           >
-            {/* gradient overlay on hover */}
-            <div
-              className={`
-                absolute inset-0 bg-linear-to-br ${block.gradient}
-                opacity-0 group-hover:opacity-100 transition-opacity duration-300
-              `}
-            />
             <div className="relative z-10">
-              <div className="flex items-start justify-between mb-2 font-sans">
-                <h2 className="text-ctp-text text-sm font-semibold font-mono">
+              <div className="flex items-start justify-between mb-2">
+                <h2 className="text-sm font-semibold font-mono">
                   {block.title}
                 </h2>
                 <span
-                  className="text-ctp-overlay0 text-xs transition-colors duration-200"
-                  style={
-                    {
-                      "--hover-color": block.hoverColor,
-                    } as React.CSSProperties
-                  }
+                  className={`${block.labelColor} text-xs font-mono transition-colors duration-200`}
                 >
-                  <span className="group-hover:text-(--hover-color) transition-colors duration-200 font-mono text-sm">
-                    {block.label}
-                  </span>
+                  {block.label}
                 </span>
               </div>
-              <p className="font-sans text-ctp-subtext0 text-xs leading-relaxed">
+              <p className="font-sans text-ctp-subtext1 text-xs leading-relaxed">
                 {block.description}
               </p>
             </div>
