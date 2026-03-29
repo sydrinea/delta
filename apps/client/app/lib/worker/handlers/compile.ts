@@ -6,6 +6,7 @@ import {
   tm,
   multitape,
   thompson,
+  grammar,
   q,
   union,
   concat,
@@ -28,6 +29,7 @@ const api = {
   tm,
   multitape,
   thompson,
+  grammar,
   convertToDFA,
   EPS,
   q,
@@ -48,6 +50,7 @@ const virtualLibraryCode = `
   export const tm = api.tm;
   export const multitape = api.multitape;
   export const thompson = api.thompson;
+  export const grammar = api.grammar;
   export const convertToDFA = api.convertToDFA;
   export const EPS = api.EPS;
   export const q = api.q;
@@ -76,7 +79,11 @@ interface BuildErrorShape {
   messages?: BuildMessageShape[];
 }
 
-const BUILD_ERROR_NAMES = new Set(["NFABuildError", "TMBuildError"]);
+const BUILD_ERROR_NAMES = new Set([
+  "NFABuildError",
+  "TMBuildError",
+  "RegularGrammarBuildError",
+]);
 
 function isBuildErrorShape(value: unknown): value is BuildErrorShape {
   if (!value || typeof value !== "object") return false;

@@ -11,6 +11,8 @@ export { default as oddZerosOrEndsWithTwoOnes } from "../src/nfa/odd-zeros-or-en
 export { default as oddZerosOrEndsWithTwoOnesMeta } from "../src/nfa/odd-zeros-or-ends-with-two-ones.meta";
 export { default as oddZerosOrEndsWithTwoOnesThompson } from "../src/nfa/odd-zeros-or-ends-with-two-ones-thompson";
 export { default as oddZerosOrEndsWithTwoOnesThompsonMeta } from "../src/nfa/odd-zeros-or-ends-with-two-ones-thompson.meta";
+export { default as regularGrammar } from "../src/nfa/regular-grammar";
+export { default as regularGrammarMeta } from "../src/nfa/regular-grammar.meta";
 export { default as thompson } from "../src/nfa/thompson";
 export { default as thompsonMeta } from "../src/nfa/thompson.meta";
 

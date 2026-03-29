@@ -238,11 +238,47 @@ declare module "delta:lib" {
     get messages(): readonly Message[];
   }
 
+  interface GrammarRule {
+    from: string;
+    terminal: string;
+    to?: string;
+  }
+
+  class RegularGrammarBuildError extends Error {
+    errors: string[];
+    constructor(errors: string[]);
+  }
+
+  class RegularGrammarBuilder {
+    /** Declare the terminal symbols (alphabet). */
+    terminals(...symbols: string[]): this;
+
+    /** Declare the nonterminal symbols (states). */
+    nonTerminals(...symbols: string[]): this;
+
+    /** Set the start symbol. */
+    start(symbol: string): this;
+
+    /** * Add a production rule.
+     * A → aB (pass \`to\`)
+     * A → a  (omit \`to\`)
+     */
+    rule(from: string, terminal: string, to?: string): this;
+
+    /** Build into an NFA via the standard right-regular grammar conversion. */
+    build(): NFA;
+  }
+
   /** Build an NFA. @example const machine = Delta.nfa("myNFA").alphabet(...).build() */
   function nfa(name: string): NFABuilder;
 
   /** Build a DFA. @example const machine = Delta.dfa("myDFA").alphabet(...).build() */
   function dfa(name: string): DFABuilder;
+
+  /** Construct a regular grammar that compiles to an NFA.
+   * @example const machine = Delta.grammar("myGrammar").terminals("a").nonTerminals("S").start("S").rule("S", "a").build()
+   */
+  function grammar(name: string): RegularGrammarBuilder;
 
   /** Build a multi-tape TM with compile-time checked tape arity.
    * @example const machine = Delta.multitape("myMultiTM", 2).states("q0", "q1").build()
@@ -351,6 +387,7 @@ declare module "delta:lib" {
     dfa: typeof dfa;
     tm: typeof tm;
     multitape: typeof multitape;
+    grammar: typeof grammar;
     thompson: typeof thompson;
     convertToDFA: typeof convertToDFA;
     q: typeof q;
@@ -367,6 +404,7 @@ declare module "delta:lib" {
   export const dfa: typeof dfa;
   export const tm: typeof tm;
   export const multitape: typeof multitape;
+  export const grammar: typeof grammar;
   export const thompson: typeof thompson;
   export const convertToDFA: typeof convertToDFA;
   export const q: typeof q;
