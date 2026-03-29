@@ -26,6 +26,8 @@ import "reactflow/dist/style.css";
 import { useDeltaStore } from "@/store/deltaStore";
 import { getFlowElementsFromDot } from "./layoutNFA";
 import { toDot } from "@/lib/dot";
+import { themeNames } from "@/lib/theme";
+import { useTheme } from "next-themes";
 
 function AutomataEdge({
   id,
@@ -195,6 +197,8 @@ export function FlowEditor() {
   const { screenToFlowPosition, getNodes } = useReactFlow();
   const store = useStoreApi();
 
+  const { resolvedTheme } = useTheme();
+
   const getCenter = () => {
     const { domNode } = store.getState();
     if (!domNode) return { x: 0, y: 0 };
@@ -258,7 +262,7 @@ export function FlowEditor() {
   useEffect(() => {
     async function initializeLayout() {
       if (machine) {
-        const dotString = toDot(machine);
+        const dotString = toDot(machine, themeNames[resolvedTheme ?? "light"]);
         const { nodes: layoutedNodes, edges: layoutedEdges } =
           await getFlowElementsFromDot(dotString);
 

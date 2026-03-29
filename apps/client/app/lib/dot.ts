@@ -1,14 +1,27 @@
 import { NFA, TuringMachine, EPSILON } from "@delta/build";
-import { buildTMTransitionRows, formatReadTuple } from "../components/visualize/metadata";
+import {
+  buildTMTransitionRows,
+  formatReadTuple,
+} from "../components/visualize/metadata";
+import { Theme } from "./theme";
 
-// Catppuccin Latte
 const COLORS = {
-  active: "#8839ef", // ctp-mauve
-  activeFontColor: "#eff1f5", // ctp-base
-  default: "#4c4f69", // ctp-text
-  defaultFontColor: "#4c4f69", // ctp-text
-  edge: "#4c4f69", // ctp-text
-  background: "#e6e9ef", // ctp-mantle
+  latte: {
+    active: "#8839ef", // ctp-mauve
+    activeFontColor: "#eff1f5", // ctp-base
+    default: "#4c4f69", // ctp-text
+    defaultFontColor: "#4c4f69", // ctp-text
+    edge: "#4c4f69", // ctp-text
+    background: "#e6e9ef", // ctp-mantle
+  },
+  mocha: {
+    active: "#cba6f7", // ctp-mauve
+    activeFontColor: "#1e1e2e", // ctp-base
+    default: "#cdd6f4", // ctp-text
+    defaultFontColor: "#cdd6f4", // ctp-text
+    edge: "#cdd6f4", // ctp-text
+    background: "#181825", // ctp-mantle
+  },
 } as const;
 
 interface DotMachineBase {
@@ -21,17 +34,19 @@ interface DotMachineBase {
 function dotMachineStateStyle(
   state: string,
   machine: DotMachineBase,
+  theme: Theme,
   activeStates?: Set<string>,
 ): string {
   const isAccept = machine.acceptStates.has(state);
   const isActive = activeStates?.has(state) ?? false;
   const shape = isAccept ? "doublecircle" : "circle";
+  const palette = COLORS[theme];
 
   if (isActive) {
-    return `"${state}" [shape=${shape} style=filled fillcolor="${COLORS.active}" fontcolor="${COLORS.activeFontColor}" color="${COLORS.active}"]`;
+    return `"${state}" [shape=${shape} style=filled fillcolor="${palette.active}" fontcolor="${palette.activeFontColor}" color="${palette.active}"]`;
   }
 
-  return `"${state}" [shape=${shape} style=filled fillcolor="${COLORS.background}" fontcolor="${COLORS.defaultFontColor}" color="${COLORS.default}"]`;
+  return `"${state}" [shape=${shape} style=filled fillcolor="${palette.background}" fontcolor="${palette.defaultFontColor}" color="${palette.default}"]`;
 }
 
 function dotTransitions(nfa: NFA): string {
@@ -89,22 +104,25 @@ function dotTMTransitions(tm: TuringMachine<any>): string {
 function toDotWithStyle<T extends DotMachineBase>(
   machine: T,
   transitions: (machine: T) => string,
+  theme: Theme,
   activeStates?: Set<string>,
   graphAttributes: string[] = [],
 ): string {
+  const palette = COLORS[theme];
+
   const states = [...machine.states]
-    .map((s) => `  ${dotMachineStateStyle(s, machine, activeStates)}`)
+    .map((s) => `  ${dotMachineStateStyle(s, machine, theme, activeStates)}`)
     .join("\n");
 
-  const start = `  __start__ [shape=point fillcolor="${COLORS.default}" color="${COLORS.default}"]\n  __start__ -> "${machine.startState}" [color="${COLORS.edge}"]`;
+  const start = `  __start__ [shape=point fillcolor="${palette.default}" color="${palette.default}"]\n  __start__ -> "${machine.startState}" [color="${palette.edge}"]`;
   const attrs =
     graphAttributes.length > 0 ? `\n  ${graphAttributes.join("\n  ")}` : "";
 
   return `digraph "${machine.name}" {
   rankdir=LR${attrs}
-  bgcolor="${COLORS.background}"
+  bgcolor="${palette.background}"
   node [fontname="Helvetica" fontsize=12]
-  edge [fontname="Helvetica" fontsize=11 color="${COLORS.edge}" fontcolor="${COLORS.edge}"]
+  edge [fontname="Helvetica" fontsize=11 color="${palette.edge}" fontcolor="${palette.edge}"]
 
 ${start}
 
@@ -114,15 +132,20 @@ ${transitions(machine)}
 }`;
 }
 
-export function toDot(nfa: NFA, activeStates?: Set<string>): string {
-  return toDotWithStyle(nfa, dotTransitions, activeStates);
+export function toDot(
+  nfa: NFA,
+  theme: Theme,
+  activeStates?: Set<string>,
+): string {
+  return toDotWithStyle(nfa, dotTransitions, theme, activeStates);
 }
 
 export function toDotTM(
   tm: TuringMachine<any>,
+  theme: Theme,
   activeStates?: Set<string>,
 ): string {
-  return toDotWithStyle(tm, dotTMTransitions, activeStates, [
+  return toDotWithStyle(tm, dotTMTransitions, theme, activeStates, [
     "splines=true",
     "overlap=false",
     "concentrate=false",

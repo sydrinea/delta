@@ -33,6 +33,8 @@ import { simulate as simulateNFA, simulateTM } from "@delta/simulator";
 import { useCompile } from "@/hooks/useCompile";
 import { recipes } from "@delta/examples/recipes";
 import { toDot, toDotTM } from "@/lib/dot";
+import { useTheme } from "next-themes";
+import { themeNames } from "@/lib/theme";
 
 type TabId = "editor" | "canvas" | "visualizer";
 
@@ -81,6 +83,8 @@ export function Workbench<M>({
   const setNfa = useDeltaStore((s) => s.actions.setNfa);
   const setTm = useDeltaStore((s) => s.actions.setTm);
   const { showAlert } = useAlert();
+
+  const { resolvedTheme } = useTheme();
 
   const scopeConfig = {
     nfa: {
@@ -165,8 +169,8 @@ export function Workbench<M>({
   };
 
   const dotGenerators = {
-    nfa: (m: NFA) => toDot(m),
-    tm: (m: TuringMachine) => toDotTM(m),
+    nfa: (m: NFA) => toDot(m, themeNames[resolvedTheme ?? "light"]),
+    tm: (m: TuringMachine) => toDotTM(m, themeNames[resolvedTheme ?? "light"]),
   };
 
   const machineDot = useMemo(() => {
@@ -240,7 +244,7 @@ export function Workbench<M>({
       simulate: (machine: TraceMachine, input: string) =>
         simulateNFA(machine as NFA, input),
       getDot: (machine: TraceMachine, states: Set<string>) =>
-        toDot(machine as NFA, states),
+        toDot(machine as NFA, themeNames[resolvedTheme ?? "light"], states),
       getInputTokens: ({
         input,
         step,
@@ -273,7 +277,11 @@ export function Workbench<M>({
           maxSteps: Math.max(1000, input.length * 100),
         }),
       getDot: (machine: TraceMachine, states: Set<string>) =>
-        toDotTM(machine as TuringMachine, states),
+        toDotTM(
+          machine as TuringMachine,
+          themeNames[resolvedTheme ?? "light"],
+          states,
+        ),
       getInputTokens: ({ current }: { current: { tapes?: string[][] } }) => {
         const tapes = current.tapes ?? [];
         return tapes.flatMap((tape, row) => {

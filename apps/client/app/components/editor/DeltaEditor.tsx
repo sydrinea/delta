@@ -3,11 +3,13 @@
 import { useEffect, useRef } from "react";
 import Editor, { OnChange, OnMount, useMonaco } from "@monaco-editor/react";
 import * as MonacoEditor from "monaco-editor";
-import defineTheme from "./defineTheme";
+import defineThemes from "./defineTheme";
 import { useDeltaStore } from "@/store/deltaStore";
 import { useCompile } from "@/hooks/useCompile";
 import DELTA_D_TS from "@/lib/editor-types";
 import { Caution } from "@/icons/Caution";
+import { useTheme } from "next-themes";
+import { themeNames } from "@/lib/theme";
 
 interface DeltaEditorProps {
   scope?: "nfa" | "tm";
@@ -17,6 +19,7 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
   const editorRef = useRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(
     null,
   );
+  const { resolvedTheme } = useTheme();
 
   const setNfa = useDeltaStore((s) => s.actions.setNfa);
   const setTm = useDeltaStore((s) => s.actions.setTm);
@@ -45,8 +48,11 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
 
     compile(editorValue);
 
-    defineTheme(monaco);
-    monaco.editor.setTheme("catppuccin-latte");
+    defineThemes(monaco);
+
+    monaco.editor.setTheme(
+      `catppuccin-${themeNames[resolvedTheme ?? "light"]}`,
+    );
 
     monaco.typescript.typescriptDefaults.setCompilerOptions({
       target: monaco.typescript.ScriptTarget.ESNext,

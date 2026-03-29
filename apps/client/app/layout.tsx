@@ -1,9 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Syne, Recursive } from "next/font/google";
+import Layout from "@/components/Layout";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import { AlertProvider } from "@/components/AlertProvider";
-import { Loader } from "@/components/Loader";
+import { ThemeProvider } from "next-themes";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -47,18 +46,6 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <AlertProvider>
-      <main className="relative h-dvh flex flex-col font-mono">
-        <Loader />
-        <Navbar />
-        {children}
-      </main>
-    </AlertProvider>
-  );
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -66,11 +53,24 @@ export default function RootLayout({
 }>) {
   return (
     <html
+      suppressHydrationWarning
       lang="en"
-      className={`latte overscroll-none bg-ctp-base ${recursiveMono.variable} ${syne.variable} antialiased font-sans`}
+      className={`overscroll-none bg-ctp-base ${recursiveMono.variable} ${syne.variable} antialiased font-sans`}
     >
       <body>
-        <Layout>{children}</Layout>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+          value={{
+            light: "latte",
+            dark: "mocha",
+          }}
+        >
+          <div id="dark-mode-root">
+            <Layout>{children}</Layout>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   );

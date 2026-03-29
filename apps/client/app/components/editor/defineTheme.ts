@@ -1,200 +1,200 @@
 import * as MonacoEditor from "monaco-editor";
 
-/**
- * Define Catppuccin Latte for use in Monaco
- * @param monaco The editor
- */
-export default function defineTheme(monaco: typeof MonacoEditor) {
-  // The color palette
-  const latte = {
-    rosewater: "dc8a78",
-    flamingo: "dd7878",
-    pink: "ea76cb",
-    mauve: "8839ef",
-    red: "d20f39",
-    maroon: "e64553",
-    peach: "fe640b",
-    yellow: "df8e1d",
-    green: "40a02b",
-    teal: "179299",
-    sky: "04a5e5",
-    sapphire: "209fb5",
-    blue: "1e66f5",
-    lavender: "7287fd",
-    text: "4c4f69",
-    subtext1: "5c5f77",
-    subtext0: "6c6f85",
-    overlay2: "7c7f93",
-    overlay1: "8c8fa1",
-    overlay0: "9ca0b0",
-    surface2: "acb0be",
-    surface1: "bcc0cc",
-    surface0: "ccd0da",
-    base: "eff1f5",
-    mantle: "e6e9ef",
-    crust: "dce0e8",
-  };
+const themes = {
+  latte: {
+    baseVariant: "vs" as const,
+    palette: {
+      rosewater: "dc8a78",
+      flamingo: "dd7878",
+      pink: "ea76cb",
+      mauve: "8839ef",
+      red: "d20f39",
+      maroon: "e64553",
+      peach: "fe640b",
+      yellow: "df8e1d",
+      green: "40a02b",
+      teal: "179299",
+      sky: "04a5e5",
+      sapphire: "209fb5",
+      blue: "1e66f5",
+      lavender: "7287fd",
+      text: "4c4f69",
+      subtext1: "5c5f77",
+      subtext0: "6c6f85",
+      overlay2: "7c7f93",
+      overlay1: "8c8fa1",
+      overlay0: "9ca0b0",
+      surface2: "acb0be",
+      surface1: "bcc0cc",
+      surface0: "ccd0da",
+      base: "eff1f5",
+      mantle: "e6e9ef",
+      crust: "dce0e8",
+    },
+  },
+  mocha: {
+    baseVariant: "vs-dark" as const,
+    palette: {
+      rosewater: "f5e0dc",
+      flamingo: "f2cdcd",
+      pink: "f5c2e7",
+      mauve: "cba6f7",
+      red: "f38ba8",
+      maroon: "eba0ac",
+      peach: "fab387",
+      yellow: "f9e2af",
+      green: "a6e3a1",
+      teal: "94e2d5",
+      sky: "89dceb",
+      sapphire: "74c7ec",
+      blue: "89b4fa",
+      lavender: "b4befe",
+      text: "cdd6f4",
+      subtext1: "bac2de",
+      subtext0: "a6adc8",
+      overlay2: "9399b2",
+      overlay1: "7f849c",
+      overlay0: "6c7086",
+      surface2: "585b70",
+      surface1: "45475a",
+      surface0: "313244",
+      base: "1e1e2e",
+      mantle: "181825",
+      crust: "11111b",
+    },
+  },
+};
 
-  monaco.editor.defineTheme("catppuccin-latte", {
-    base: "vs",
-    inherit: false,
+type Palette = typeof themes.latte.palette;
+
+const hex = (color: string, alpha = "") => `#${color}${alpha}`;
+
+function getThemeRulesAndColors(
+  palette: Palette,
+): Pick<MonacoEditor.editor.IStandaloneThemeData, "rules" | "colors"> {
+  return {
     rules: [
-      // base
-      { token: "", foreground: latte.text, background: latte.base },
-
-      // comments
-      { token: "comment", foreground: latte.overlay1, fontStyle: "italic" },
+      { token: "", foreground: palette.text, background: palette.base },
+      { token: "comment", foreground: palette.overlay1, fontStyle: "italic" },
       {
         token: "comment.block",
-        foreground: latte.overlay1,
+        foreground: palette.overlay1,
         fontStyle: "italic",
       },
       {
         token: "comment.line",
-        foreground: latte.overlay1,
+        foreground: palette.overlay1,
         fontStyle: "italic",
       },
-
-      // keywords
-      { token: "keyword", foreground: latte.mauve },
-      { token: "keyword.control", foreground: latte.mauve },
-      { token: "keyword.operator", foreground: latte.sky },
-      { token: "keyword.other", foreground: latte.mauve },
-
-      // types
-      { token: "type", foreground: latte.yellow },
-      { token: "type.identifier", foreground: latte.yellow },
-      { token: "support.type", foreground: latte.yellow },
-      { token: "entity.name.type", foreground: latte.yellow },
-
-      // classes & functions
-      { token: "entity.name.function", foreground: latte.blue },
-      { token: "entity.name.class", foreground: latte.yellow },
-      { token: "support.function", foreground: latte.blue },
-      { token: "meta.function-call", foreground: latte.blue },
-
-      // variables
-      { token: "variable", foreground: latte.text },
-      { token: "variable.other", foreground: latte.text },
-      { token: "variable.parameter", foreground: latte.maroon },
-      { token: "variable.language", foreground: latte.mauve },
-
-      // strings
-      { token: "string", foreground: latte.green },
-      { token: "string.quoted", foreground: latte.green },
-      { token: "string.template", foreground: latte.green },
-      { token: "string.escape", foreground: latte.pink },
-
-      // numbers
-      { token: "constant.numeric", foreground: latte.peach },
-      { token: "number", foreground: latte.peach },
-
-      // booleans & constants
-      { token: "constant.language", foreground: latte.peach },
-      { token: "constant", foreground: latte.peach },
-
-      // operators & punctuation
-      { token: "operator", foreground: latte.sky },
-      { token: "punctuation", foreground: latte.overlay2 },
-      { token: "delimiter", foreground: latte.overlay2 },
-      { token: "delimiter.bracket", foreground: latte.overlay2 },
-      { token: "delimiter.parenthesis", foreground: latte.overlay2 },
-
-      // tags (jsx/html)
-      { token: "tag", foreground: latte.red },
-      { token: "tag.attribute.name", foreground: latte.yellow },
-      { token: "attribute.name", foreground: latte.yellow },
-      { token: "attribute.value", foreground: latte.green },
-
-      // typescript specific
-      { token: "type.annotation", foreground: latte.yellow },
-      { token: "keyword.operator.type", foreground: latte.sky },
-      { token: "storage.type", foreground: latte.mauve },
-      { token: "storage.modifier", foreground: latte.mauve },
-      { token: "meta.type.annotation", foreground: latte.yellow },
-
-      // invalid
-      { token: "invalid", foreground: latte.red, fontStyle: "underline" },
+      { token: "keyword", foreground: palette.mauve },
+      { token: "keyword.control", foreground: palette.mauve },
+      { token: "keyword.operator", foreground: palette.sky },
+      { token: "keyword.other", foreground: palette.mauve },
+      { token: "type", foreground: palette.yellow },
+      { token: "type.identifier", foreground: palette.yellow },
+      { token: "support.type", foreground: palette.yellow },
+      { token: "entity.name.type", foreground: palette.yellow },
+      { token: "entity.name.function", foreground: palette.blue },
+      { token: "entity.name.class", foreground: palette.yellow },
+      { token: "support.function", foreground: palette.blue },
+      { token: "meta.function-call", foreground: palette.blue },
+      { token: "variable", foreground: palette.text },
+      { token: "variable.other", foreground: palette.text },
+      { token: "variable.parameter", foreground: palette.maroon },
+      { token: "variable.language", foreground: palette.mauve },
+      { token: "string", foreground: palette.green },
+      { token: "string.quoted", foreground: palette.green },
+      { token: "string.template", foreground: palette.green },
+      { token: "string.escape", foreground: palette.pink },
+      { token: "constant.numeric", foreground: palette.peach },
+      { token: "number", foreground: palette.peach },
+      { token: "constant.language", foreground: palette.peach },
+      { token: "constant", foreground: palette.peach },
+      { token: "operator", foreground: palette.sky },
+      { token: "punctuation", foreground: palette.overlay2 },
+      { token: "delimiter", foreground: palette.overlay2 },
+      { token: "delimiter.bracket", foreground: palette.overlay2 },
+      { token: "delimiter.parenthesis", foreground: palette.overlay2 },
+      { token: "tag", foreground: palette.red },
+      { token: "tag.attribute.name", foreground: palette.yellow },
+      { token: "attribute.name", foreground: palette.yellow },
+      { token: "attribute.value", foreground: palette.green },
+      { token: "type.annotation", foreground: palette.yellow },
+      { token: "keyword.operator.type", foreground: palette.sky },
+      { token: "storage.type", foreground: palette.mauve },
+      { token: "storage.modifier", foreground: palette.mauve },
+      { token: "meta.type.annotation", foreground: palette.yellow },
+      { token: "invalid", foreground: palette.red, fontStyle: "underline" },
     ],
     colors: {
-      // editor chrome
-      "editor.background": `#${latte.base}`,
-      "editor.foreground": `#${latte.text}`,
-      "editorLineNumber.foreground": `#${latte.surface2}`,
-      "editorLineNumber.activeForeground": `#${latte.subtext0}`,
-      "editorCursor.foreground": `#${latte.rosewater}`,
-      "editorCursor.background": `#${latte.base}`,
-
-      // selection & highlights
-      "editor.selectionBackground": `#${latte.surface0}`,
-      "editor.inactiveSelectionBackground": `#${latte.surface0}88`,
-      "editor.selectionHighlightBackground": `#${latte.surface0}66`,
-      "editor.wordHighlightBackground": `#${latte.surface0}`,
-      "editor.wordHighlightStrongBackground": `#${latte.surface1}`,
-      "editor.findMatchBackground": `#${latte.yellow}44`,
-      "editor.findMatchHighlightBackground": `#${latte.yellow}22`,
-
-      // line
-      "editor.lineHighlightBackground": `#${latte.mantle}`,
-      "editor.lineHighlightBorder": `#00000000`,
-
-      // indent guides
-      "editorIndentGuide.background1": `#${latte.surface0}`,
-      "editorIndentGuide.activeBackground1": `#${latte.surface2}`,
-
-      // gutter
-      "editorGutter.background": `#${latte.base}`,
-      "editorGutter.addedBackground": `#${latte.green}`,
-      "editorGutter.modifiedBackground": `#${latte.yellow}`,
-      "editorGutter.deletedBackground": `#${latte.red}`,
-
-      // widgets
-      "editorWidget.background": `#${latte.mantle}`,
-      "editorWidget.border": `#${latte.surface1}`,
-      "editorWidget.foreground": `#${latte.text}`,
-
-      // suggest widget
-      "editorSuggestWidget.background": `#${latte.mantle}`,
-      "editorSuggestWidget.border": `#${latte.surface1}`,
-      "editorSuggestWidget.foreground": `#${latte.text}`,
-      "editorSuggestWidget.selectedForeground": `#${latte.text}`,
-      "editorSuggestWidget.selectedBackground": `#${latte.surface0}`,
-      "editorSuggestWidget.highlightForeground": `#${latte.blue}`,
-
-      // hover widget
-      "editorHoverWidget.background": `#${latte.mantle}`,
-      "editorHoverWidget.border": `#${latte.surface1}`,
-      "editorHoverWidget.foreground": `#${latte.text}`,
-
-      // bracket matching
-      "editorBracketMatch.background": `#${latte.surface1}`,
-      "editorBracketMatch.border": `#${latte.overlay2}`,
-
-      // errors & warnings
-      "editorError.foreground": `#${latte.red}`,
-      "editorWarning.foreground": `#${latte.yellow}`,
-      "editorInfo.foreground": `#${latte.blue}`,
-
-      // scrollbar
-      "scrollbarSlider.background": `#${latte.surface1}88`,
-      "scrollbarSlider.hoverBackground": `#${latte.surface2}88`,
-      "scrollbarSlider.activeBackground": `#${latte.overlay0}88`,
-
-      // list
-      "list.hoverBackground": `#${latte.surface0}`,
-      "list.hoverForeground": `#${latte.text}`,
-      "list.activeSelectionBackground": `#${latte.surface1}`,
-      "list.activeSelectionForeground": `#${latte.text}`,
-      "list.inactiveSelectionBackground": `#${latte.surface0}`,
-      "list.inactiveSelectionForeground": `#${latte.text}`,
-
-      // minimap
-      "minimap.background": `#${latte.mantle}`,
-
-      // overview ruler
-      "editorOverviewRuler.border": `#${latte.surface0}`,
-      "editorOverviewRuler.errorForeground": `#${latte.red}`,
-      "editorOverviewRuler.warningForeground": `#${latte.yellow}`,
+      "editor.background": hex(palette.base),
+      "editor.foreground": hex(palette.text),
+      "editorLineNumber.foreground": hex(palette.surface2),
+      "editorLineNumber.activeForeground": hex(palette.subtext0),
+      "editorCursor.foreground": hex(palette.rosewater),
+      "editorCursor.background": hex(palette.base),
+      "editor.selectionBackground": hex(palette.surface0),
+      "editor.inactiveSelectionBackground": hex(palette.surface0, "88"),
+      "editor.selectionHighlightBackground": hex(palette.surface0, "66"),
+      "editor.wordHighlightBackground": hex(palette.surface0),
+      "editor.wordHighlightStrongBackground": hex(palette.surface1),
+      "editor.findMatchBackground": hex(palette.yellow, "44"),
+      "editor.findMatchHighlightBackground": hex(palette.yellow, "22"),
+      "editor.lineHighlightBackground": hex(palette.mantle),
+      "editor.lineHighlightBorder": "#00000000",
+      "editorIndentGuide.background1": hex(palette.surface0),
+      "editorIndentGuide.activeBackground1": hex(palette.surface2),
+      "editorGutter.background": hex(palette.base),
+      "editorGutter.addedBackground": hex(palette.green),
+      "editorGutter.modifiedBackground": hex(palette.yellow),
+      "editorGutter.deletedBackground": hex(palette.red),
+      "editorWidget.background": hex(palette.mantle),
+      "editorWidget.border": hex(palette.surface1),
+      "editorWidget.foreground": hex(palette.text),
+      "editorSuggestWidget.background": hex(palette.mantle),
+      "editorSuggestWidget.border": hex(palette.surface1),
+      "editorSuggestWidget.foreground": hex(palette.text),
+      "editorSuggestWidget.selectedForeground": hex(palette.text),
+      "editorSuggestWidget.selectedBackground": hex(palette.surface0),
+      "editorSuggestWidget.highlightForeground": hex(palette.blue),
+      "editorHoverWidget.background": hex(palette.mantle),
+      "editorHoverWidget.border": hex(palette.surface1),
+      "editorHoverWidget.foreground": hex(palette.text),
+      "editorBracketMatch.background": hex(palette.surface1),
+      "editorBracketMatch.border": hex(palette.overlay2),
+      "editorError.foreground": hex(palette.red),
+      "editorWarning.foreground": hex(palette.yellow),
+      "editorInfo.foreground": hex(palette.blue),
+      "scrollbarSlider.background": hex(palette.surface1, "88"),
+      "scrollbarSlider.hoverBackground": hex(palette.surface2, "88"),
+      "scrollbarSlider.activeBackground": hex(palette.overlay0, "88"),
+      "list.hoverBackground": hex(palette.surface0),
+      "list.hoverForeground": hex(palette.text),
+      "list.activeSelectionBackground": hex(palette.surface1),
+      "list.activeSelectionForeground": hex(palette.text),
+      "list.inactiveSelectionBackground": hex(palette.surface0),
+      "list.inactiveSelectionForeground": hex(palette.text),
+      "minimap.background": hex(palette.mantle),
+      "editorOverviewRuler.border": hex(palette.surface0),
+      "editorOverviewRuler.errorForeground": hex(palette.red),
+      "editorOverviewRuler.warningForeground": hex(palette.yellow),
     },
-  });
+  };
+}
+
+/**
+ * Initializes Catppuccin themes for Monaco
+ * @param monaco The editor instance
+ */
+export default function defineThemes(monaco: typeof MonacoEditor) {
+  for (const [themeName, themeConfig] of Object.entries(themes)) {
+    const { rules, colors } = getThemeRulesAndColors(themeConfig.palette);
+
+    monaco.editor.defineTheme(`catppuccin-${themeName}`, {
+      base: themeConfig.baseVariant, // Maps Latte to 'vs' and Mocha to 'vs-dark'
+      inherit: false,
+      rules,
+      colors,
+    });
+  }
 }
