@@ -145,10 +145,10 @@ export function Workbench<M>({
     }));
 
     try {
-      const response = await fetch(`${window.location.origin}/${recipe.path}`);
+      const response = await fetch(recipe.path);
 
       if (!response.ok) {
-        throw new Error(`Failed to load recipe at /${recipe.path}`);
+        throw new Error(`Failed to load recipe at ${recipe.path}`);
       }
 
       const fetchedCode = await response.text();
