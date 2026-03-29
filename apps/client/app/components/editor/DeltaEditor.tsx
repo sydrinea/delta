@@ -6,7 +6,6 @@ import * as MonacoEditor from "monaco-editor";
 import defineThemes from "./defineTheme";
 import { useDeltaStore } from "@/store/deltaStore";
 import { useCompile } from "@/hooks/useCompile";
-import DELTA_D_TS from "@/lib/editor-types";
 import { Caution } from "@/icons/Caution";
 import { useTheme } from "next-themes";
 import { themeNames } from "@/lib/theme";
@@ -61,13 +60,13 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
     });
 
     monaco.typescript.typescriptDefaults.addExtraLib(
-      DELTA_D_TS,
+      process.env["DELTA_TYPES"]!,
       "ts:delta/lib.d.ts",
     );
 
     if (!monaco.editor.getModel(monaco.Uri.parse("ts:delta/lib.d.ts"))) {
       monaco.editor.createModel(
-        DELTA_D_TS,
+        process.env["DELTA_TYPES"]!,
         "typescript",
         monaco.Uri.parse("ts:delta/lib.d.ts"),
       );

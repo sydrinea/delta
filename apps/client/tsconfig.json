@@ -1,6 +1,7 @@
 {
   "extends": "../../packages/tsconfig/base.json",
   "compilerOptions": {
+    "module": "esnext",
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,

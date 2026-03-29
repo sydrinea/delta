@@ -15,7 +15,7 @@ recipes.nfa["aDivisibleBy2Or3"] = {
   tests: [{"id":"mod-0","input":"","expected":true},{"id":"mod-1","input":"a","expected":false},{"id":"mod-2","input":"aa","expected":true},{"id":"mod-3","input":"aaa","expected":true},{"id":"mod-4","input":"aaaa","expected":true},{"id":"mod-5","input":"aaaaa","expected":false},{"id":"mod-6","input":"aaaaaa","expected":true}]
 };
 recipes.nfa["endsInAb"] = {
-  label: "Strings ending in ab",
+  label: "Strings ending with 'ab'",
   path: "/examples/nfa/ends-in-ab.ts",
   tests: [{"id":"empty","input":"","expected":false},{"id":"single-a","input":"a","expected":false},{"id":"single-b","input":"b","expected":false},{"id":"exact-match","input":"ab","expected":true},{"id":"reversed","input":"ba","expected":false},{"id":"prefix-a","input":"aab","expected":true},{"id":"prefix-b","input":"bab","expected":true},{"id":"suffix-a","input":"aba","expected":false},{"id":"suffix-b","input":"abb","expected":false},{"id":"multiple-ab","input":"abab","expected":true},{"id":"long-match","input":"bbbaaab","expected":true},{"id":"long-fail","input":"bbaba","expected":false}]
 };
@@ -30,7 +30,7 @@ recipes.nfa["oddZerosOrEndsWithTwoOnes"] = {
   tests: [{"id":"oztwo-1","input":"0","expected":true},{"id":"oztwo-2","input":"000","expected":true},{"id":"oztwo-3","input":"00000","expected":true},{"id":"oztwo-4","input":"00","expected":false},{"id":"oztwo-5","input":"0000","expected":false},{"id":"oztwo-6","input":"11","expected":true},{"id":"oztwo-7","input":"011","expected":true},{"id":"oztwo-8","input":"111","expected":true},{"id":"oztwo-9","input":"0011","expected":true},{"id":"oztwo-10","input":"10011","expected":true},{"id":"oztwo-11","input":"00011","expected":true},{"id":"oztwo-12","input":"","expected":false},{"id":"oztwo-13","input":"1","expected":false},{"id":"oztwo-14","input":"10","expected":false},{"id":"oztwo-15","input":"01","expected":false},{"id":"oztwo-16","input":"010","expected":false},{"id":"oztwo-17","input":"0110","expected":false}]
 };
 recipes.nfa["regularGrammar"] = {
-  label: "String ending with 'ab' (Regular Grammar)",
+  label: "Strings ending with 'ab' (Regular Grammar)",
   path: "/examples/nfa/regular-grammar.ts",
   tests: [{"id":"empty","input":"","expected":false},{"id":"single-a","input":"a","expected":false},{"id":"single-b","input":"b","expected":false},{"id":"exact-match","input":"ab","expected":true},{"id":"reversed","input":"ba","expected":false},{"id":"prefix-a","input":"aab","expected":true},{"id":"prefix-b","input":"bab","expected":true},{"id":"suffix-a","input":"aba","expected":false},{"id":"suffix-b","input":"abb","expected":false},{"id":"multiple-ab","input":"abab","expected":true},{"id":"long-match","input":"bbbaaab","expected":true},{"id":"long-fail","input":"bbaba","expected":false}]
 };
