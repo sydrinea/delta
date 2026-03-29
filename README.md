@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://github.com/sydrinea/delta/blob/dev/apps/client/public/android-chrome-512x512.png?raw=true" width="96" alt="Delta logo" />
+<img src="https://delta.sydneyn.dev/android-chrome-512x512.png" width="96" alt="Delta logo" />
 
 # Delta
 
