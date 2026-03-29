@@ -7,6 +7,8 @@ import {
   shouldTriggerNavigationLoader,
 } from "@/lib/navigation-loader-config";
 import { GitHub } from "@/icons/GitHub";
+import deltaLogo from "../public/android-chrome-192x192.png";
+import Image from "next/image";
 
 interface FeatureBlock {
   title: string;
@@ -92,11 +94,15 @@ export default function Home() {
   };
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-3xl mx-auto w-full">
+    <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-3xl mx-auto">
       <div className="mb-12 text-center">
-        <p className="text-ctp-overlay0 text-xs tracking-widest uppercase mb-4">
-          delta
-        </p>
+        <Image
+          src={deltaLogo}
+          alt="Delta logo"
+          className="mx-auto mb-10"
+          width={72}
+          height={72}
+        />
         <h1 className="text-ctp-text text-3xl font-bold mb-4 leading-tight">
           design, test, and visualize automata
         </h1>
