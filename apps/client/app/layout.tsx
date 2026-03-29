@@ -3,6 +3,8 @@ import { Syne, Recursive } from "next/font/google";
 import Layout from "@/components/Layout";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
+import { flavors } from "@catppuccin/palette";
+import { SerwistProvider } from "./serwist";
 
 const syne = Syne({
   variable: "--font-syne",
@@ -15,6 +17,7 @@ const recursiveMono = Recursive({
 });
 
 export const metadata: Metadata = {
+  applicationName: "Delta — theory of computation tools",
   title: "Delta — theory of computation tools",
   description: "Create, test, and visualize DFAs and NFAs, with more to come!",
   creator: "Sydney Newmark",
@@ -40,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#8839ef",
+  themeColor: flavors.latte.colors.mauve.hex,
   initialScale: 1,
   width: "device-width",
   colorScheme: "light",
@@ -56,21 +59,24 @@ export default function RootLayout({
       suppressHydrationWarning
       lang="en"
       className={`overscroll-none bg-ctp-base ${recursiveMono.variable} ${syne.variable} antialiased font-sans`}
+      dir="ltr"
     >
       <body>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem={true}
-          value={{
-            light: "latte",
-            dark: "mocha",
-          }}
-        >
-          <div id="dark-mode-root">
-            <Layout>{children}</Layout>
-          </div>
-        </ThemeProvider>
+        <SerwistProvider swUrl="/serwist/sw.js">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem={true}
+            value={{
+              light: "latte",
+              dark: "mocha",
+            }}
+          >
+            <div id="dark-mode-root">
+              <Layout>{children}</Layout>
+            </div>
+          </ThemeProvider>
+        </SerwistProvider>
       </body>
     </html>
   );
