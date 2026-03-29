@@ -14,18 +14,7 @@
       "cache": false
     },
     "generate": {
-      "inputs": [
-        "nfa/**/*.meta.ts",
-        "tm/**/*.meta.ts",
-        "packages/build/src/**/*.ts"
-      ],
-      "outputs": [
-        "generated/index.ts",
-        "generated/recipes.ts",
-        "../apps/client/public/examples/**",
-        "../packages/build/dist/delta-build.d.ts",
-        "../packages/transform/dist/delta-transform.d.ts"
-      ]
+      "cache": false
     }
   }
 }
