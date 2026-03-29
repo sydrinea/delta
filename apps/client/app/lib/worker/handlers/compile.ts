@@ -1,19 +1,5 @@
-import { convertToDFA } from "@delta/transform";
-import {
-  EPS,
-  nfa,
-  dfa,
-  tm,
-  multitape,
-  thompson,
-  grammar,
-  q,
-  union,
-  concat,
-  star,
-  char,
-  epsilon,
-} from "@delta/build";
+import * as transform from "@delta/transform";
+import * as build from "@delta/build";
 import {
   WorkerDispatchError,
   WorkerErrorCodes,
@@ -24,20 +10,8 @@ import {
 } from "../protocol";
 
 const api = {
-  nfa,
-  dfa,
-  tm,
-  multitape,
-  thompson,
-  grammar,
-  convertToDFA,
-  EPS,
-  q,
-  union,
-  concat,
-  star,
-  char,
-  epsilon,
+  ...build,
+  ...transform,
 };
 
 const workerScope = self as typeof self & { _deltaAPI?: typeof api };
@@ -45,21 +19,9 @@ workerScope._deltaAPI = api;
 
 const virtualLibraryCode = `
   const api = self._deltaAPI;
-  export const nfa = api.nfa;
-  export const dfa = api.dfa;
-  export const tm = api.tm;
-  export const multitape = api.multitape;
-  export const thompson = api.thompson;
-  export const grammar = api.grammar;
-  export const convertToDFA = api.convertToDFA;
-  export const EPS = api.EPS;
-  export const q = api.q;
-  export const union = api.union;
-  export const concat = api.concat;
-  export const star = api.star;
-  export const char = api.char;
-  export const epsilon = api.epsilon;
-
+  ${Object.keys(api)
+    .map((key) => `export const ${key} = api.${key};`)
+    .join("\n  ")}
   export default api;
 `;
 
