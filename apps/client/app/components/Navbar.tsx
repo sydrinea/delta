@@ -47,75 +47,83 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="flex items-center justify-between px-6 py-3 border-b border-ctp-surface0 shrink-0 relative z-50">
-        {/* mobile — animated hamburger → x */}
-        <button
-          onClick={() => setOpen((o) => !o)}
-          className="md:hidden text-ctp-text w-5 h-5 relative cursor-pointer"
-          aria-label={open ? "close menu" : "open menu"}
-        >
-          <span
-            className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-              open ? "top-2 rotate-45" : "top-0.5"
-            }`}
-          />
-          <span
-            className={`absolute left-0 top-2 h-0.5 w-5 bg-current transition-all duration-300 ${
-              open ? "opacity-0 scale-x-0" : "opacity-100 scale-x-100"
-            }`}
-          />
-          <span
-            className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-              open ? "top-2 -rotate-45" : "top-3.5"
-            }`}
-          />
-        </button>
+      <header className="sticky top-0 z-50 h-14 w-full shrink-0 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md">
+        <div className="hidden md:flex h-full items-center justify-between px-6">
+          <div className="flex items-center gap-6">
+            <Link href="/">
+              <h1 className="text-ctp-text text-sm font-bold tracking-widest uppercase">
+                delta
+              </h1>
+            </Link>
 
-        {/* desktop — delta + tabs */}
-        <div className="hidden md:flex items-center gap-6">
-          <Link href="/">
-            <h1 className="text-ctp-text text-sm font-bold tracking-widest uppercase">
-              delta
-            </h1>
-          </Link>
+            <nav className="flex items-center gap-1">
+              {TABS.map((tab) => {
+                const isActive = pathname === tab.href;
+                return (
+                  <Link
+                    key={tab.href}
+                    href={tab.href}
+                    onClick={() => handleNavigationStart(tab.href)}
+                    className={`relative px-3 py-1.5 text-xs rounded-lg transition-all duration-200 ${
+                      isActive
+                        ? "text-ctp-text"
+                        : "text-ctp-subtext0 hover:text-ctp-text"
+                    }`}
+                  >
+                    {isActive && (
+                      <span className="absolute inset-0 bg-ctp-surface0 rounded-lg animate-in fade-in slide-in-from-bottom-1 duration-200" />
+                    )}
+                    <span className="relative">{tab.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-          <nav className="flex items-center gap-1">
-            {TABS.map((tab) => {
-              const isActive = pathname === tab.href;
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  onClick={() => handleNavigationStart(tab.href)}
-                  className={`relative px-3 py-1.5 text-xs rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "text-ctp-text"
-                      : "text-ctp-subtext0 hover:text-ctp-text"
-                  }`}
-                >
-                  {isActive && (
-                    <span className="absolute inset-0 bg-ctp-surface0 rounded-lg animate-in fade-in slide-in-from-bottom-1 duration-200" />
-                  )}
-                  <span className="relative">{tab.label}</span>
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="flex items-center gap-1.5">
+            <MadeBy />
+            <span className="text-ctp-overlay1 text-xs">·</span>
+            <span className="text-ctp-overlay0 text-xs">v{version}</span>
+          </div>
         </div>
 
-        {/* mobile — delta title centered */}
-        <h1 className="md:hidden text-ctp-text text-sm font-bold tracking-widest uppercase absolute left-1/2 -translate-x-1/2">
-          delta
-        </h1>
+        <div className="grid h-full grid-cols-3 items-center px-6 md:hidden">
+          <div className="flex justify-start">
+            <button
+              onClick={() => setOpen((o) => !o)}
+              className="text-ctp-text w-5 h-5 relative cursor-pointer"
+              aria-label={open ? "close menu" : "open menu"}
+            >
+              <span
+                className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
+                  open ? "top-2 rotate-45" : "top-0.5"
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-2 h-0.5 w-5 bg-current transition-all duration-300 ${
+                  open ? "opacity-0 scale-x-0" : "opacity-100 scale-x-100"
+                }`}
+              />
+              <span
+                className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
+                  open ? "top-2 -rotate-45" : "top-3.5"
+                }`}
+              />
+            </button>
+          </div>
 
-        <div className="hidden md:flex items-center gap-1.5">
-          <MadeBy />
-          <span className="text-ctp-overlay1 text-xs">·</span>
-          <span className="text-ctp-overlay0 text-xs">v{version}</span>
+          <div className="flex justify-center">
+            <Link href="/">
+              <h1 className="text-ctp-text text-sm font-bold tracking-widest uppercase">
+                delta
+              </h1>
+            </Link>
+          </div>
+
+          <div className="flex justify-end"></div>
         </div>
       </header>
 
-      {/* mobile overlay */}
       <div
         className={`fixed inset-0 z-40 md:hidden transition-all duration-75 ${
           open
