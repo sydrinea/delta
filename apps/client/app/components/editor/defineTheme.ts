@@ -1,197 +1,22 @@
 import * as MonacoEditor from "monaco-editor";
-
-const themes = {
-  latte: {
-    baseVariant: "vs" as const,
-    palette: {
-      rosewater: "dc8a78",
-      flamingo: "dd7878",
-      pink: "ea76cb",
-      mauve: "8839ef",
-      red: "d20f39",
-      maroon: "e64553",
-      peach: "fe640b",
-      yellow: "df8e1d",
-      green: "40a02b",
-      teal: "179299",
-      sky: "04a5e5",
-      sapphire: "209fb5",
-      blue: "1e66f5",
-      lavender: "7287fd",
-      text: "4c4f69",
-      subtext1: "5c5f77",
-      subtext0: "6c6f85",
-      overlay2: "7c7f93",
-      overlay1: "8c8fa1",
-      overlay0: "9ca0b0",
-      surface2: "acb0be",
-      surface1: "bcc0cc",
-      surface0: "ccd0da",
-      base: "eff1f5",
-      mantle: "e6e9ef",
-      crust: "dce0e8",
-    },
-  },
-  mocha: {
-    baseVariant: "vs-dark" as const,
-    palette: {
-      rosewater: "f5e0dc",
-      flamingo: "f2cdcd",
-      pink: "f5c2e7",
-      mauve: "cba6f7",
-      red: "f38ba8",
-      maroon: "eba0ac",
-      peach: "fab387",
-      yellow: "f9e2af",
-      green: "a6e3a1",
-      teal: "94e2d5",
-      sky: "89dceb",
-      sapphire: "74c7ec",
-      blue: "89b4fa",
-      lavender: "b4befe",
-      text: "cdd6f4",
-      subtext1: "bac2de",
-      subtext0: "a6adc8",
-      overlay2: "9399b2",
-      overlay1: "7f849c",
-      overlay0: "6c7086",
-      surface2: "585b70",
-      surface1: "45475a",
-      surface0: "313244",
-      base: "1e1e2e",
-      mantle: "181825",
-      crust: "11111b",
-    },
-  },
-};
-
-type Palette = typeof themes.latte.palette;
-
-const hex = (color: string, alpha = "") => `#${color}${alpha}`;
-
-function getThemeRulesAndColors(
-  palette: Palette,
-): Pick<MonacoEditor.editor.IStandaloneThemeData, "rules" | "colors"> {
-  return {
-    rules: [
-      { token: "", foreground: palette.text, background: palette.base },
-      { token: "comment", foreground: palette.overlay1, fontStyle: "italic" },
-      {
-        token: "comment.block",
-        foreground: palette.overlay1,
-        fontStyle: "italic",
-      },
-      {
-        token: "comment.line",
-        foreground: palette.overlay1,
-        fontStyle: "italic",
-      },
-      { token: "keyword", foreground: palette.mauve },
-      { token: "keyword.control", foreground: palette.mauve },
-      { token: "keyword.operator", foreground: palette.sky },
-      { token: "keyword.other", foreground: palette.mauve },
-      { token: "type", foreground: palette.yellow },
-      { token: "type.identifier", foreground: palette.yellow },
-      { token: "support.type", foreground: palette.yellow },
-      { token: "entity.name.type", foreground: palette.yellow },
-      { token: "entity.name.function", foreground: palette.blue },
-      { token: "entity.name.class", foreground: palette.yellow },
-      { token: "support.function", foreground: palette.blue },
-      { token: "meta.function-call", foreground: palette.blue },
-      { token: "variable", foreground: palette.text },
-      { token: "variable.other", foreground: palette.text },
-      { token: "variable.parameter", foreground: palette.maroon },
-      { token: "variable.language", foreground: palette.mauve },
-      { token: "string", foreground: palette.green },
-      { token: "string.quoted", foreground: palette.green },
-      { token: "string.template", foreground: palette.green },
-      { token: "string.escape", foreground: palette.pink },
-      { token: "constant.numeric", foreground: palette.peach },
-      { token: "number", foreground: palette.peach },
-      { token: "constant.language", foreground: palette.peach },
-      { token: "constant", foreground: palette.peach },
-      { token: "operator", foreground: palette.sky },
-      { token: "punctuation", foreground: palette.overlay2 },
-      { token: "delimiter", foreground: palette.overlay2 },
-      { token: "delimiter.bracket", foreground: palette.overlay2 },
-      { token: "delimiter.parenthesis", foreground: palette.overlay2 },
-      { token: "tag", foreground: palette.red },
-      { token: "tag.attribute.name", foreground: palette.yellow },
-      { token: "attribute.name", foreground: palette.yellow },
-      { token: "attribute.value", foreground: palette.green },
-      { token: "type.annotation", foreground: palette.yellow },
-      { token: "keyword.operator.type", foreground: palette.sky },
-      { token: "storage.type", foreground: palette.mauve },
-      { token: "storage.modifier", foreground: palette.mauve },
-      { token: "meta.type.annotation", foreground: palette.yellow },
-      { token: "invalid", foreground: palette.red, fontStyle: "underline" },
-    ],
-    colors: {
-      "editor.background": hex(palette.base),
-      "editor.foreground": hex(palette.text),
-      "editorLineNumber.foreground": hex(palette.surface2),
-      "editorLineNumber.activeForeground": hex(palette.subtext0),
-      "editorCursor.foreground": hex(palette.rosewater),
-      "editorCursor.background": hex(palette.base),
-      "editor.selectionBackground": hex(palette.surface0),
-      "editor.inactiveSelectionBackground": hex(palette.surface0, "88"),
-      "editor.selectionHighlightBackground": hex(palette.surface0, "66"),
-      "editor.wordHighlightBackground": hex(palette.surface0),
-      "editor.wordHighlightStrongBackground": hex(palette.surface1),
-      "editor.findMatchBackground": hex(palette.yellow, "44"),
-      "editor.findMatchHighlightBackground": hex(palette.yellow, "22"),
-      "editor.lineHighlightBackground": hex(palette.mantle),
-      "editor.lineHighlightBorder": "#00000000",
-      "editorIndentGuide.background1": hex(palette.surface0),
-      "editorIndentGuide.activeBackground1": hex(palette.surface2),
-      "editorGutter.background": hex(palette.base),
-      "editorGutter.addedBackground": hex(palette.green),
-      "editorGutter.modifiedBackground": hex(palette.yellow),
-      "editorGutter.deletedBackground": hex(palette.red),
-      "editorWidget.background": hex(palette.mantle),
-      "editorWidget.border": hex(palette.surface1),
-      "editorWidget.foreground": hex(palette.text),
-      "editorSuggestWidget.background": hex(palette.mantle),
-      "editorSuggestWidget.border": hex(palette.surface1),
-      "editorSuggestWidget.foreground": hex(palette.text),
-      "editorSuggestWidget.selectedForeground": hex(palette.text),
-      "editorSuggestWidget.selectedBackground": hex(palette.surface0),
-      "editorSuggestWidget.highlightForeground": hex(palette.blue),
-      "editorHoverWidget.background": hex(palette.mantle),
-      "editorHoverWidget.border": hex(palette.surface1),
-      "editorHoverWidget.foreground": hex(palette.text),
-      "editorBracketMatch.background": hex(palette.surface1),
-      "editorBracketMatch.border": hex(palette.overlay2),
-      "editorError.foreground": hex(palette.red),
-      "editorWarning.foreground": hex(palette.yellow),
-      "editorInfo.foreground": hex(palette.blue),
-      "scrollbarSlider.background": hex(palette.surface1, "88"),
-      "scrollbarSlider.hoverBackground": hex(palette.surface2, "88"),
-      "scrollbarSlider.activeBackground": hex(palette.overlay0, "88"),
-      "list.hoverBackground": hex(palette.surface0),
-      "list.hoverForeground": hex(palette.text),
-      "list.activeSelectionBackground": hex(palette.surface1),
-      "list.activeSelectionForeground": hex(palette.text),
-      "list.inactiveSelectionBackground": hex(palette.surface0),
-      "list.inactiveSelectionForeground": hex(palette.text),
-      "minimap.background": hex(palette.mantle),
-      "editorOverviewRuler.border": hex(palette.surface0),
-      "editorOverviewRuler.errorForeground": hex(palette.red),
-      "editorOverviewRuler.warningForeground": hex(palette.yellow),
-    },
-  };
-}
+import { flavors } from "@catppuccin/palette";
+import { getCatppuccinMonacoTheme } from "./catppuccin-monaco";
 
 /**
- * Initializes Catppuccin themes for Monaco
- * @param monaco The editor instance
+ * Initializes Catppuccin themes for Monaco Editor
+ * @param monaco The Monaco Editor instance
  */
 export default function defineThemes(monaco: typeof MonacoEditor) {
-  for (const [themeName, themeConfig] of Object.entries(themes)) {
-    const { rules, colors } = getThemeRulesAndColors(themeConfig.palette);
+  const themesToRegister = [
+    { name: "latte", base: "vs" as const, colors: flavors.latte.colors },
+    { name: "mocha", base: "vs-dark" as const, colors: flavors.mocha.colors },
+  ];
 
-    monaco.editor.defineTheme(`catppuccin-${themeName}`, {
-      base: themeConfig.baseVariant, // Maps Latte to 'vs' and Mocha to 'vs-dark'
+  for (const theme of themesToRegister) {
+    const { rules, colors } = getCatppuccinMonacoTheme(theme.colors);
+
+    monaco.editor.defineTheme(`catppuccin-${theme.name}`, {
+      base: theme.base,
       inherit: false,
       rules,
       colors,

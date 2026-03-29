@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@babel/parser": "^7.29.2",
+    "@catppuccin/palette": "^1.8.0",
     "@delta/build": "workspace:*",
     "@delta/examples": "workspace:*",
     "@delta/simulator": "workspace:*",

@@ -17,6 +17,9 @@ importers:
       '@babel/parser':
         specifier: ^7.29.2
         version: 7.29.2
+      '@catppuccin/palette':
+        specifier: ^1.8.0
+        version: 1.8.0
       '@delta/build':
         specifier: workspace:*
         version: link:../../packages/build
@@ -296,6 +299,9 @@ packages:
   '@bcoe/v8-coverage@1.0.2':
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
+
+  '@catppuccin/palette@1.8.0':
+    resolution: {integrity: sha512-qXhwKiLzQomUygUJYB36YAFgs+dET5bIocfkiaFIatQF5Pwc7L112TlF9P8J5Oqs3x3XTjYSucG0ncHXSCuk7Q==}
 
   '@catppuccin/tailwindcss@1.0.0':
     resolution: {integrity: sha512-l8pOlcYe2ncGd8a1gUmL5AHmKlxR2+CHuG5kt4Me6IZwzntW1DoLmj89BH+DcsPHBsdDGLrTSv35emlYyU3FeQ==}
@@ -3792,6 +3798,8 @@ snapshots:
       '@babel/helper-validator-identifier': 7.28.5
 
   '@bcoe/v8-coverage@1.0.2': {}
+
+  '@catppuccin/palette@1.8.0': {}
 
   '@catppuccin/tailwindcss@1.0.0': {}
 

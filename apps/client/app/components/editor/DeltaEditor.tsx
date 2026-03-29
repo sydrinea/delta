@@ -148,7 +148,7 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
   return (
     <div className="relative w-full h-full">
       <Editor
-        theme="catppuccin-latte"
+        theme={`catppuccin-${themeNames[resolvedTheme ?? "light"]}`}
         path={editorPath}
         height="100%"
         width="100%"

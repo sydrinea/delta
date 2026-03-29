@@ -4,23 +4,24 @@ import {
   formatReadTuple,
 } from "../components/visualize/metadata";
 import { Theme } from "./theme";
+import { flavors } from "@catppuccin/palette";
 
 const COLORS = {
   latte: {
-    active: "#8839ef", // ctp-mauve
-    activeFontColor: "#eff1f5", // ctp-base
-    default: "#4c4f69", // ctp-text
-    defaultFontColor: "#4c4f69", // ctp-text
-    edge: "#4c4f69", // ctp-text
-    background: "#e6e9ef", // ctp-mantle
+    active: flavors.latte.colors.mauve.hex,
+    activeFontColor: flavors.latte.colors.base.hex,
+    default: flavors.latte.colors.text.hex,
+    defaultFontColor: flavors.latte.colors.text.hex,
+    edge: flavors.latte.colors.text.hex,
+    background: flavors.latte.colors.mantle.hex,
   },
   mocha: {
-    active: "#cba6f7", // ctp-mauve
-    activeFontColor: "#1e1e2e", // ctp-base
-    default: "#cdd6f4", // ctp-text
-    defaultFontColor: "#cdd6f4", // ctp-text
-    edge: "#cdd6f4", // ctp-text
-    background: "#181825", // ctp-mantle
+    active: flavors.mocha.colors.mauve.hex,
+    activeFontColor: flavors.mocha.colors.base.hex,
+    default: flavors.mocha.colors.text.hex,
+    defaultFontColor: flavors.mocha.colors.text.hex,
+    edge: flavors.mocha.colors.text.hex,
+    background: flavors.mocha.colors.mantle.hex,
   },
 } as const;
 

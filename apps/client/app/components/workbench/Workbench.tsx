@@ -168,15 +168,15 @@ export function Workbench<M>({
     }
   };
 
-  const dotGenerators = {
-    nfa: (m: NFA) => toDot(m, themeNames[resolvedTheme ?? "light"]),
-    tm: (m: TuringMachine) => toDotTM(m, themeNames[resolvedTheme ?? "light"]),
-  };
-
   const machineDot = useMemo(() => {
     if (!machine) return null;
+    const currentTheme = themeNames[resolvedTheme ?? "light"];
+    const dotGenerators = {
+      nfa: (m: NFA) => toDot(m, currentTheme),
+      tm: (m: TuringMachine) => toDotTM(m, currentTheme),
+    };
     return dotGenerators[storeScope](machine as unknown as NFA & TuringMachine);
-  }, [machine, storeScope]);
+  }, [machine, storeScope, resolvedTheme]);
 
   const requestTabChange = (tab: TabId) => {
     if (!isTabEnabled(enabledTabs, tab)) return;

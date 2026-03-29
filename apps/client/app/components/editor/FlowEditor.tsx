@@ -22,6 +22,7 @@ import ReactFlow, {
   useReactFlow,
   useStoreApi,
 } from "reactflow";
+import { flavors } from "@catppuccin/palette";
 import "reactflow/dist/style.css";
 import { useDeltaStore } from "@/store/deltaStore";
 import { getFlowElementsFromDot } from "./layoutNFA";
@@ -40,7 +41,6 @@ function AutomataEdge({
   data,
   markerEnd,
 }: EdgeProps) {
-  const [curvature, setCurvature] = useState(data?.curvature ?? 0.25);
   const [editing, setEditing] = useState(false);
   const [label, setLabel] = useState(data?.label ?? "a");
   const containerRef = useRef<HTMLDivElement>(null);
@@ -50,6 +50,8 @@ function AutomataEdge({
   const startId = useDeltaStore((s) => s.nfa.startId);
   const syncFromFlow = useDeltaStore((s) => s.actions.syncNfaFromFlow);
 
+  const { resolvedTheme } = useTheme();
+
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -57,7 +59,6 @@ function AutomataEdge({
     targetX,
     targetY,
     targetPosition,
-    curvature,
   });
 
   const handleBlur = (e: React.FocusEvent) => {
@@ -83,7 +84,10 @@ function AutomataEdge({
       <BaseEdge
         path={edgePath}
         markerEnd={markerEnd}
-        style={{ stroke: "#4c4f69", strokeWidth: 1.5 }}
+        style={{
+          stroke: flavors[themeNames[resolvedTheme ?? "light"]].colors.text.hex,
+          strokeWidth: 1.5,
+        }}
       />
       <EdgeLabelRenderer>
         <div
@@ -111,18 +115,7 @@ function AutomataEdge({
                     updateEdges();
                   }
                 }}
-                className="w-16 text-xs text-center bg-transparent border-b border-ctp-surface1 text-ctp-text focus:outline-none"
-              />
-              <input
-                type="range"
-                min="0.25"
-                max="1.5"
-                step="0.05"
-                defaultValue={curvature}
-                onMouseUp={(e) =>
-                  setCurvature(parseFloat((e.target as HTMLInputElement).value))
-                }
-                className="w-16"
+                className="w-16 text-xs text-center bg-transparent text-ctp-text focus:outline-none"
               />
             </div>
           ) : (
