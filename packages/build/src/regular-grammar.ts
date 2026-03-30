@@ -1,6 +1,7 @@
 import { NFABuilder } from "./nfa";
 import type { NFA } from "./nfa";
 import type { Message } from "./automata";
+import { EPSILON } from "./constants";
 
 export interface GrammarRule {
   from: string; // nonterminal A
@@ -93,7 +94,7 @@ export class RegularGrammarBuilder {
       );
     }
 
-    if (!this._terminals.has(terminal)) {
+    if (terminal !== EPSILON && !this._terminals.has(terminal)) {
       this.message(
         "error",
         RegularGrammarMessages.terminalNotDeclared(terminal),
