@@ -153,7 +153,9 @@ export function Workbench<M>({
 
       const fetchedCode = await response.text();
 
-      setActiveTab("editor"); // it gets really weird to switch recipes from the canvas
+      if (activeTab === "canvas") {
+        setActiveTab("editor"); // it gets really weird to switch recipes from the canvas
+      }
       setTests(testsWithFreshIds);
       setEditorValue(fetchedCode.replace("//@ts-nocheck", "").trim());
       setEditorErrors(null);
