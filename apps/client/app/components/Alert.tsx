@@ -41,7 +41,7 @@ export function Alert({
           <div className="fixed inset-0 bg-ctp-crust/60 backdrop-blur-sm transition-opacity" />
         </TransitionChild>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as={Fragment}

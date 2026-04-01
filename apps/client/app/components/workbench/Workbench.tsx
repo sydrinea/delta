@@ -426,7 +426,7 @@ function WorkbenchHeader<M>({
   } = logic;
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row justify-between gap-3 relative z-50">
+    <div className="flex flex-col-reverse lg:flex-row justify-between gap-3 relative">
       <div className="flex items-center gap-y-3">
         <Tooltip label="cmd+s">
           <button
@@ -534,7 +534,7 @@ function RecipeDropdown({
           leaveFrom="opacity-100 scale-100"
           leaveTo="opacity-0 scale-95"
         >
-          <ListboxOptions className="absolute right-0 z-20 mt-1 max-h-60 min-w-56 overflow-auto rounded-lg border border-ctp-surface1 bg-ctp-mantle py-1 text-sm shadow-lg focus:outline-none">
+          <ListboxOptions className="absolute right-0 z-30 mt-1 max-h-60 min-w-56 overflow-auto rounded-lg border border-ctp-surface1 bg-ctp-mantle py-1 text-sm shadow-lg focus:outline-none">
             {recipeEntries.map(([key, recipe]) => (
               <ListboxOption
                 key={key}

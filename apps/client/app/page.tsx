@@ -126,21 +126,17 @@ export default function Home() {
               ${block.bg} ${block.bgHover} ${block.border} ${block.shadow} ${block.labelColor}
             `}
           >
-            <div className="relative z-10">
-              <div className="flex items-start justify-between mb-2">
-                <h2 className="text-sm font-semibold font-mono">
-                  {block.title}
-                </h2>
-                <span
-                  className={`${block.labelColor} text-xs font-mono transition-colors duration-200`}
-                >
-                  {block.label}
-                </span>
-              </div>
-              <p className="font-sans text-ctp-subtext1 text-xs leading-relaxed">
-                {block.description}
-              </p>
+            <div className="flex items-start justify-between mb-2">
+              <h2 className="text-sm font-semibold font-mono">{block.title}</h2>
+              <span
+                className={`${block.labelColor} text-xs font-mono transition-colors duration-200`}
+              >
+                {block.label}
+              </span>
             </div>
+            <p className="font-sans text-ctp-subtext1 text-xs leading-relaxed">
+              {block.description}
+            </p>
           </Link>
         ))}
       </div>

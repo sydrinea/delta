@@ -310,7 +310,7 @@ export function GraphvizViewer({
         createPortal(
           <Transition as={Fragment} show={isFullscreen}>
             <div
-              className="fixed inset-0 z-120 p-3 sm:p-4 md:p-6"
+              className="fixed inset-0 z-50 p-3 sm:p-4 md:p-6"
               onClick={() => setIsFullscreen(false)}
             >
               <TransitionChild
