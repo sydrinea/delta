@@ -30,13 +30,8 @@
   .doc-prose code {
     @apply font-mono;
   }
-
-  table {
-    @apply border-collapse w-full block overflow-x-auto;
-  }
-
   .doc-prose table {
-    @apply max-w-full;
+    @apply border-collapse overflow-x-auto block min-w-full;
   }
 
   th,
