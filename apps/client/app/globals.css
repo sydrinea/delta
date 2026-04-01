@@ -25,30 +25,23 @@
     @apply scroll-mt-24 cursor-pointer;
   }
   .doc-prose pre {
-    @apply bg-ctp-mantle border border-ctp-surface0 rounded-lg;
+    @apply bg-ctp-mantle border border-ctp-surface0 rounded-lg font-mono tracking-wide;
   }
   .doc-prose code {
-    @apply font-mono tracking-wide;
+    @apply font-mono;
   }
 
-  /* Table Overrides */
+  table {
+    @apply border-collapse w-full block overflow-x-auto;
+  }
+
   .doc-prose table {
-    @apply rounded-xl border border-ctp-surface0 bg-ctp-mantle border-separate border-spacing-0 shadow-sm p-2;
+    @apply max-w-full;
   }
-  .doc-prose thead {
-    @apply bg-ctp-crust/80 text-ctp-subtext0;
-  }
-  .doc-prose thead th {
-    @apply p-3 border-b border-ctp-surface1 font-semibold;
-  }
-  .doc-prose tbody tr:last-child {
-    @apply border-b-0;
-  }
-  .doc-prose tbody tr:nth-child(even) {
-    @apply bg-ctp-surface0/30;
-  }
-  .doc-prose tbody td {
-    @apply text-ctp-text p-5;
+
+  th,
+  td {
+    @apply border-b border-ctp-surface0;
   }
 }
 
@@ -144,6 +137,18 @@ input[type="range"]::-moz-range-thumb {
   --tw-prose-pre-bg: var(--color-base-default);
   --tw-prose-th-borders: var(--color-ctp-lavender);
   --tw-prose-td-borders: var(--color-ctp-lavender);
+}
+
+html.latte :is(pre, code)[data-theme*=" "],
+html.latte :is(pre, code)[data-theme*=" "] * {
+  color: var(--shiki-light) !important;
+  background-color: var(--shiki-light-bg) !important;
+}
+
+html.mocha :is(pre, code)[data-theme*=" "],
+html.mocha :is(pre, code)[data-theme*=" "] * {
+  color: var(--shiki-dark) !important;
+  background-color: var(--shiki-dark-bg) !important;
 }
 
 .workbench-loader-dot {

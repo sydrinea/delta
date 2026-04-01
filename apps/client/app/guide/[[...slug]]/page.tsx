@@ -12,6 +12,8 @@ import fs from "fs/promises";
 import path from "path";
 import { notFound } from "next/navigation";
 
+const GITHUB_REPO = "https://github.com/sydrinea/delta";
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function extractHeadings(markdown: string): Heading[] {
@@ -32,7 +34,10 @@ async function parseMarkdown(md: string): Promise<string> {
     .use(remarkRehype)
     .use(rehypeSlug)
     .use(rehypePrettyCode, {
-      theme: "catppuccin-mocha",
+      theme: {
+        light: "catppuccin-latte",
+        dark: "catppuccin-mocha",
+      },
       keepBackground: false,
     })
     .use(rehypeStringify)
@@ -53,6 +58,8 @@ export default async function DocsPage({
 }) {
   const { slug } = await params;
   const pageId = slug?.[0] ?? "quick-start";
+  const docsFilePath = `apps/client/public/docs/${pageId}.md`;
+  const editUrl = `${GITHUB_REPO}/edit/main/${docsFilePath}`;
 
   const filePath = path.join(process.cwd(), "public/docs", `${pageId}.md`);
   let markdown = "";
@@ -65,5 +72,53 @@ export default async function DocsPage({
   const html = await parseMarkdown(markdown);
   const headings = extractHeadings(markdown);
 
-  return <DocsLayout activePage={pageId} html={html} headings={headings} />;
+  const orderedPages = NAV.flatMap((group) => group.pages);
+  const currentIndex = orderedPages.findIndex((page) => page.id === pageId);
+  const previousPage = currentIndex > 0 ? orderedPages[currentIndex - 1] : null;
+  const nextPage =
+    currentIndex >= 0 && currentIndex < orderedPages.length - 1
+      ? orderedPages[currentIndex + 1]
+      : null;
+
+  const issueTitle = `Docs: ${orderedPages[currentIndex]?.label ?? pageId}`;
+  const issueBody = [
+    "## Docs issue",
+    "",
+    `Page route: /guide/${pageId === "quick-start" ? "" : pageId}`,
+    `Source file: ${docsFilePath}`,
+    `Edit URL: ${editUrl}`,
+    "",
+    "Describe the problem or suggestion below:",
+  ].join("\n");
+
+  const issueUrl = `${GITHUB_REPO}/issues/new?${new URLSearchParams({
+    title: issueTitle,
+    body: issueBody,
+  }).toString()}`;
+
+  return (
+    <DocsLayout
+      activePage={pageId}
+      html={html}
+      headings={headings}
+      editUrl={editUrl}
+      issueUrl={issueUrl}
+      previousPage={
+        previousPage
+          ? {
+              label: previousPage.label,
+              href: `/guide/${previousPage.id === "quick-start" ? "" : previousPage.id}`,
+            }
+          : null
+      }
+      nextPage={
+        nextPage
+          ? {
+              label: nextPage.label,
+              href: `/guide/${nextPage.id === "quick-start" ? "" : nextPage.id}`,
+            }
+          : null
+      }
+    />
+  );
 }

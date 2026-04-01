@@ -6,7 +6,7 @@ import type { TuringMachine } from "@delta/build";
 
 export default function TMPage() {
   return (
-    <section className="flex md:flex-col md:h-screen md:overflow-hidden">
+    <section className="flex flex-1 min-h-0 md:flex-col md:h-[calc(100dvh-3.5rem)] md:overflow-hidden">
       <Workbench<TuringMachine>
         simulate={(machine, input) =>
           simulateTM(machine, input, {

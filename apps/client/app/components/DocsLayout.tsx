@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { type Heading, NAV } from "../guide/nav";
+import { GitHub } from "@/icons/GitHub";
 
 interface ToCProps {
   headings: Heading[];
@@ -86,12 +87,20 @@ interface DocsLayoutProps {
   activePage: string;
   html: string;
   headings: Heading[];
+  editUrl: string;
+  issueUrl: string;
+  previousPage: { label: string; href: string } | null;
+  nextPage: { label: string; href: string } | null;
 }
 
 export default function DocsLayout({
   activePage,
   html,
   headings,
+  editUrl,
+  issueUrl,
+  previousPage,
+  nextPage,
 }: DocsLayoutProps) {
   const [activeHeading, setActiveHeading] = useState(headings[0]?.id ?? "");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -117,10 +126,25 @@ export default function DocsLayout({
 
     const handleHeadingClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (target.tagName.match(/^H[1-3]$/)) {
-        setActiveHeading(target.id);
-        window.location.hash = target.id;
-      }
+      const heading = target.closest("h1, h2, h3") as HTMLElement | null;
+      if (!heading?.id) return;
+
+      setActiveHeading(heading.id);
+
+      const prefersReducedMotion = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+
+      heading.scrollIntoView({
+        behavior: prefersReducedMotion ? "auto" : "smooth",
+        block: "start",
+      });
+
+      window.history.replaceState(
+        null,
+        "",
+        `#${encodeURIComponent(heading.id)}`,
+      );
     };
 
     root.addEventListener("click", handleHeadingClick);
@@ -169,6 +193,65 @@ export default function DocsLayout({
                 className="prose doc-prose"
                 dangerouslySetInnerHTML={{ __html: html }}
               />
+
+              <footer className="mt-12 border-t border-ctp-surface0 pt-6 pb-10 space-y-4">
+                <div className="flex flex-wrap items-center gap-2">
+                  <a
+                    href={editUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-peach/35 border border-ctp-peach/55 text-ctp-text hover:bg-ctp-peach/45 transition-colors"
+                  >
+                    <GitHub className="w-3.5 h-3.5" />
+                    Edit on GitHub
+                  </a>
+                  <a
+                    href={issueUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-red/35 border border-ctp-red/55 text-ctp-text hover:bg-ctp-red/45 transition-colors"
+                  >
+                    <GitHub className="w-3.5 h-3.5" />
+                    Report issue
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {previousPage ? (
+                    <Link
+                      href={previousPage.href}
+                      onClick={() => navigate("")}
+                      className="rounded-lg border border-ctp-surface1 bg-ctp-mantle/70 px-3 py-2 text-xs text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+                    >
+                      <span className="block text-[10px] uppercase tracking-widest text-ctp-overlay0">
+                        Previous
+                      </span>
+                      <span className="block mt-0.5 font-semibold">
+                        {previousPage.label}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
+
+                  {nextPage ? (
+                    <Link
+                      href={nextPage.href}
+                      onClick={() => navigate("")}
+                      className="rounded-lg border border-ctp-surface1 bg-ctp-mantle/70 px-3 py-2 text-xs text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors sm:text-right"
+                    >
+                      <span className="block text-[10px] uppercase tracking-widest text-ctp-overlay0">
+                        Next
+                      </span>
+                      <span className="block mt-0.5 font-semibold">
+                        {nextPage.label}
+                      </span>
+                    </Link>
+                  ) : (
+                    <div />
+                  )}
+                </div>
+              </footer>
             </div>
           </main>
 
