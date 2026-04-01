@@ -27,7 +27,6 @@ export function TransitionTable({
   hoveredEdgeId,
 }: TransitionTableProps) {
   const [tableMode, setTableMode] = useState<TMTableMode>("state");
-  const [hideForShortViewport, setHideForShortViewport] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
 
@@ -117,23 +116,6 @@ export function TransitionTable({
 
     scrollRowToCenter(activeRow);
   }, [visibleRows, currentState, currentReadTuple]);
-
-  useEffect(() => {
-    const updateViewportState = () => {
-      setHideForShortViewport(window.innerHeight < 760);
-    };
-
-    updateViewportState();
-    window.addEventListener("resize", updateViewportState);
-
-    return () => {
-      window.removeEventListener("resize", updateViewportState);
-    };
-  }, []);
-
-  if (hideForShortViewport) {
-    return null;
-  }
 
   return (
     <div className="w-full rounded-2xl border border-ctp-surface0 bg-ctp-mantle overflow-hidden flex flex-col">

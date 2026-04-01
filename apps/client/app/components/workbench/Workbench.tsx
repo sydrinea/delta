@@ -274,6 +274,7 @@ export function Workbench<M>({
     tm: {
       machine: tm.machine as TraceMachine | null,
       tests: tm.tests,
+      shortThreshold: 900,
       simulate: (machine: TraceMachine, input: string) =>
         simulateTM(machine as TuringMachine, input, {
           maxSteps: Math.max(1000, input.length * 100),
@@ -322,6 +323,7 @@ export function Workbench<M>({
     <Trace<TraceMachine>
       machine={traceConfig.machine}
       tests={traceConfig.tests}
+      shortThreshold={traceConfig.shortThreshold}
       simulate={traceConfig.simulate}
       getDot={traceConfig.getDot}
       getInputTokens={traceConfig.getInputTokens}

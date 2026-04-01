@@ -1,6 +1,13 @@
 "use client";
 
-import { Fragment, useState, useMemo, useRef, type ReactNode } from "react";
+import {
+  Fragment,
+  useState,
+  useMemo,
+  useRef,
+  type ReactNode,
+  useEffect,
+} from "react";
 import { GraphvizViewer } from "./GraphvizViewer";
 import { useStepNavigation } from "@/hooks/useStepNavigation";
 import { type TestCase } from "@delta/examples";
@@ -44,6 +51,7 @@ interface TraceInputToken {
 interface TraceProps<M extends VisualMachine> {
   machine: M | null;
   tests: TestCase[];
+  shortThreshold?: number;
   simulate: (machine: M, input: string) => TraceSimulationResult;
   getDot: (machine: M, states: Set<string>) => string;
   inputFilter?: (value: string) => string | null;
@@ -67,6 +75,7 @@ export interface TraceBottomPanelContext<M extends VisualMachine> {
 export function Trace<M extends VisualMachine>({
   machine,
   tests,
+  shortThreshold,
   simulate,
   getDot,
   getInputTokens,
@@ -76,6 +85,20 @@ export function Trace<M extends VisualMachine>({
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedTest, setSelectedTest] = useState("");
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
+  const [hideForShortViewport, setHideForShortViewport] = useState(false);
+
+  useEffect(() => {
+    const updateViewportState = () => {
+      setHideForShortViewport(window.innerHeight < (shortThreshold || 0));
+    };
+
+    updateViewportState();
+    window.addEventListener("resize", updateViewportState);
+
+    return () => {
+      window.removeEventListener("resize", updateViewportState);
+    };
+  }, []);
 
   const simulation = useMemo(() => {
     if (!machine) return null;
@@ -216,14 +239,16 @@ export function Trace<M extends VisualMachine>({
       {/* graph + optional bottom panel */}
       {machine && current && dot && (
         <div className="flex flex-col gap-3">
-          <div className="w-full">
-            <GraphvizViewer
-              dot={dot}
-              machineName={machine.name}
-              showExportActions
-              onEdgeHover={bottomPanel ? setHoveredEdgeId : undefined}
-            />
-          </div>
+          {!hideForShortViewport && (
+            <div className="w-full">
+              <GraphvizViewer
+                dot={dot}
+                machineName={machine.name}
+                showExportActions
+                onEdgeHover={bottomPanel ? setHoveredEdgeId : undefined}
+              />
+            </div>
+          )}
           {bottomPanel?.({
             machine,
             current,
