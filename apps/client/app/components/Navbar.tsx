@@ -47,7 +47,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 h-14 w-full shrink-0 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md">
+      <header className="sticky top-0 z-200 h-14 w-full shrink-0 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md">
         <div className="hidden md:flex h-full items-center justify-between px-6">
           <div className="flex items-center gap-6">
             <Link href="/">
@@ -125,7 +125,7 @@ export default function Navbar() {
       </header>
 
       <div
-        className={`fixed inset-0 z-40 md:hidden transition-all duration-75 ${
+        className={`fixed inset-0 z-100 md:hidden transition-all duration-75 ${
           open
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
