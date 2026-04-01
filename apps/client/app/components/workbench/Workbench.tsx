@@ -329,7 +329,7 @@ function DesktopWorkbench<M>({
     <div className="hidden md:flex flex-row flex-1 overflow-hidden">
       {/* Left Panel: Tabs & Editor/Canvas/Visualizer */}
       <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
-        <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0">
+        <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0 relative z-50">
           {/* Add shrink-0 here so the tabs NEVER shrink */}
           <div className="flex items-center gap-4 shrink-0">
             {visibleTabs.map((tab) => (
@@ -426,7 +426,7 @@ function WorkbenchHeader<M>({
   } = logic;
 
   return (
-    <div className="flex flex-col-reverse lg:flex-row justify-between gap-3">
+    <div className="flex flex-col-reverse lg:flex-row justify-between gap-3 relative z-50">
       <div className="flex items-center gap-y-3">
         <Tooltip label="cmd+s">
           <button
