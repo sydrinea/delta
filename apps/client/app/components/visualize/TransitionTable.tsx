@@ -18,6 +18,8 @@ interface TransitionTableProps {
   machine: TuringMachine<any>;
   current: TransitionTableCurrentStep;
   hoveredEdgeId: string | null;
+  isLast: boolean;
+  accepted: boolean;
 }
 
 type TMTableMode = "all" | "state";
@@ -26,6 +28,8 @@ export function TransitionTable({
   machine,
   current,
   hoveredEdgeId,
+  isLast,
+  accepted,
 }: TransitionTableProps) {
   const [tableMode, setTableMode] = useState<TMTableMode>("state");
   const { scrollContainerRef, rowRefs, scrollRowToCenter } =
@@ -99,29 +103,43 @@ export function TransitionTable({
   }, [visibleRows, currentState, currentReadTuple]);
 
   return (
-    <div className="w-full rounded-2xl border border-ctp-surface0 bg-ctp-mantle overflow-hidden flex flex-col">
-      <div className="px-3 py-2 border-b border-ctp-surface0 flex items-center justify-between gap-2">
+    <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-ctp-surface0 bg-ctp-mantle flex flex-col">
+      <div className="px-3 py-2 min-h-10.5 border-b border-ctp-surface0 flex items-center justify-between gap-2">
         <p className="text-xs uppercase tracking-widest text-ctp-subtext0">
           transitions
         </p>
-        <div className="inline-flex rounded-lg border border-ctp-surface1 overflow-hidden text-xs">
-          <button
-            className={`cursor-pointer px-2 py-1 border-l border-ctp-surface1 ${tableMode === "state" ? "bg-ctp-surface0 text-ctp-text" : "text-ctp-subtext0 hover:text-ctp-text"}`}
-            onClick={() => setTableMode("state")}
-          >
-            state
-          </button>
-          <button
-            className={`cursor-pointer px-2 py-1 ${tableMode === "all" ? "bg-ctp-surface0 text-ctp-text" : "text-ctp-subtext0 hover:text-ctp-text"}`}
-            onClick={() => setTableMode("all")}
-          >
-            all
-          </button>
+        <div className="flex items-center gap-3">
+          {isLast && (
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-bold ${
+                accepted ? "text-ctp-green" : "text-ctp-red"
+              }`}
+            >
+              {accepted ? "✓ accepted" : "✗ rejected"}
+            </span>
+          )}
+          <div className="inline-flex rounded-lg border border-ctp-surface1 overflow-hidden text-xs">
+            <button
+              className={`cursor-pointer px-2 py-1 border-l border-ctp-surface1 ${tableMode === "state" ? "bg-ctp-surface0 text-ctp-text" : "text-ctp-subtext0 hover:text-ctp-text"}`}
+              onClick={() => setTableMode("state")}
+            >
+              state
+            </button>
+            <button
+              className={`cursor-pointer px-2 py-1 ${tableMode === "all" ? "bg-ctp-surface0 text-ctp-text" : "text-ctp-subtext0 hover:text-ctp-text"}`}
+              onClick={() => setTableMode("all")}
+            >
+              all
+            </button>
+          </div>
         </div>
       </div>
 
-      <div ref={scrollContainerRef} className="overflow-auto max-h-96">
-        <table className="w-full text-xs text-left border-collapse">
+      <div
+        ref={scrollContainerRef}
+        className="overflow-auto max-h-96 w-full relative"
+      >
+        <table className="w-full min-w-max text-xs text-left border-collapse">
           <thead className="sticky top-0 bg-ctp-crust/80 backdrop-blur-sm text-ctp-subtext0">
             <tr>
               <th className="px-2 py-2 border-b border-ctp-surface1">ID</th>

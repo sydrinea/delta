@@ -39,15 +39,12 @@ import { useTheme } from "next-themes";
 import { themeNames } from "@/lib/theme";
 
 type TabId = "editor" | "canvas" | "visualizer";
-
 interface EnabledTabs {
   editor?: boolean;
   canvas?: boolean;
   visualizer?: boolean;
 }
-
 type WorkbenchScope = "nfa" | "tm";
-
 interface WorkbenchProps<M> {
   simulate: (machine: M, input: string) => boolean;
   storeScope: WorkbenchScope;
@@ -59,20 +56,16 @@ const TAB_ORDER: TabId[] = ["editor", "canvas", "visualizer"];
 function isTabEnabled(enabledTabs: EnabledTabs, tab: TabId): boolean {
   return enabledTabs[tab] !== false;
 }
-
 function scopeToMachineType(scope: WorkbenchScope): MachineType {
   return scope === "nfa" ? MachineTypes.NFA : MachineTypes.TM;
 }
-
 function getInitialTab(enabledTabs: EnabledTabs): TabId {
   return TAB_ORDER.find((tab) => isTabEnabled(enabledTabs, tab)) ?? "editor";
 }
 
-function WorkbenchInner<M>({
-  simulate,
-  storeScope,
-  enabledTabs,
-}: WorkbenchProps<M>) {
+function useWorkbenchLogic<M>(props: WorkbenchProps<M>) {
+  const { simulate, storeScope, enabledTabs } = props;
+
   const [activeTab, setActiveTab] = useState<TabId>(() =>
     getInitialTab(enabledTabs),
   );
@@ -85,18 +78,11 @@ function WorkbenchInner<M>({
   const setNfa = useDeltaStore((s) => s.actions.setNfa);
   const setTm = useDeltaStore((s) => s.actions.setTm);
   const { showAlert } = useAlert();
-
   const { resolvedTheme } = useTheme();
 
   const scopeConfig = {
-    nfa: {
-      store: nfa,
-      setScopeState: setNfa,
-    },
-    tm: {
-      store: tm,
-      setScopeState: setTm,
-    },
+    nfa: { store: nfa, setScopeState: setNfa },
+    tm: { store: tm, setScopeState: setTm },
   };
 
   const currentConfig = scopeConfig[storeScope];
@@ -105,34 +91,25 @@ function WorkbenchInner<M>({
   const tests = currentConfig.store.tests;
   const editorErrors = currentConfig.store.editorErrors;
 
-  const setEditorValue = (value: string) => {
+  const setEditorValue = (value: string) =>
     currentConfig.setScopeState({ editorValue: value });
-  };
-
   const setEditorErrors = (
     errors: { message: string; line: number; column: number }[] | null,
   ) => {
     currentConfig.setScopeState({ editorErrors: errors });
   };
-
   const setTests = (
-    nextTests: {
-      id: string;
-      input: string;
-      expected: boolean;
-    }[],
+    nextTests: { id: string; input: string; expected: boolean }[],
   ) => {
     currentConfig.setScopeState({ tests: nextTests });
   };
 
   const compile = useCompile(storeScope);
-
   const scopedRecipes = recipes[storeScope];
   const recipeEntries = useMemo(
     () => Object.entries(scopedRecipes),
     [scopedRecipes],
   );
-
   const selectedRecipeLabel =
     scopedRecipes[selectedRecipeKey]?.label ?? "load example";
 
@@ -148,16 +125,12 @@ function WorkbenchInner<M>({
 
     try {
       const response = await fetch(recipe.path);
-
-      if (!response.ok) {
+      if (!response.ok)
         throw new Error(`Failed to load recipe at ${recipe.path}`);
-      }
 
       const fetchedCode = await response.text();
+      if (activeTab === "canvas") setActiveTab("editor");
 
-      if (activeTab === "canvas") {
-        setActiveTab("editor"); // it gets really weird to switch recipes from the canvas
-      }
       setTests(testsWithFreshIds);
       setEditorValue(fetchedCode.replace("//@ts-nocheck", "").trim());
       setEditorErrors(null);
@@ -187,7 +160,6 @@ function WorkbenchInner<M>({
 
   const requestTabChange = (tab: TabId) => {
     if (!isTabEnabled(enabledTabs, tab)) return;
-
     if (
       tab === "canvas" &&
       activeTab !== "canvas" &&
@@ -197,25 +169,18 @@ function WorkbenchInner<M>({
       setShowWarning(true);
       return;
     }
-
     setActiveTab(tab);
   };
 
   const confirmTabChange = () => {
     if (pendingTab === "canvas" && storeScope === "nfa" && nfa.machine) {
       const { nodes, edges } = nfaToFlow(nfa.machine);
-      setNfa({
-        nodes,
-        edges,
-        startId: nfa.machine.startState,
-      });
+      setNfa({ nodes, edges, startId: nfa.machine.startState });
     }
-
     if (pendingTab) {
       setEditorErrors(null);
       setActiveTab(pendingTab);
     }
-
     setShowWarning(false);
     setPendingTab(null);
   };
@@ -243,7 +208,6 @@ function WorkbenchInner<M>({
   });
 
   const visualizer = <Trace />;
-
   const canvasContent = {
     nfa: (
       <ReactFlowProvider>
@@ -257,26 +221,17 @@ function WorkbenchInner<M>({
     ),
   };
 
-  const tabs = TAB_ORDER.map((tab) => {
-    if (tab === "editor") {
-      return {
-        id: tab,
-        content: <DeltaEditor scope={storeScope} />,
-      };
-    }
-
-    if (tab === "canvas") {
-      return {
-        id: tab,
-        content: canvasContent[storeScope],
-      };
-    }
-
-    return {
-      id: tab,
-      content: visualizer,
-    };
-  });
+  const tabs = TAB_ORDER.map((tab) => ({
+    id: tab,
+    content:
+      tab === "editor" ? (
+        <DeltaEditor scope={storeScope} />
+      ) : tab === "canvas" ? (
+        canvasContent[storeScope]
+      ) : (
+        visualizer
+      ),
+  }));
 
   const visibleTabs = tabs.filter((tab) => isTabEnabled(enabledTabs, tab.id));
   const activeTabContent =
@@ -289,142 +244,146 @@ function WorkbenchInner<M>({
     setActiveTab(visibleTabs[0].id);
   }, [activeTab, visibleTabs]);
 
+  return {
+    simulate,
+    storeScope,
+    activeTab,
+    requestTabChange,
+    visibleTabs,
+    activeTabContent,
+    showWarning,
+    confirmTabChange,
+    cancelTabChange,
+    recipeEntries,
+    selectedRecipeKey,
+    applyRecipe,
+    selectedRecipeLabel,
+    machine,
+    machineDot,
+    editorErrors,
+    editorValue,
+    compile,
+    tests,
+    setTests,
+    handleShare,
+    copied,
+    setHoveredEdgeId,
+    visualizer,
+  };
+}
+
+function MobileWorkbench<M>({
+  logic,
+}: {
+  logic: ReturnType<typeof useWorkbenchLogic<M>>;
+}) {
+  const { machine, visualizer, tests, setTests, simulate } = logic;
+
   return (
-    <div className="relative flex flex-col md:flex-row flex-1 md:overflow-hidden">
-      <div className="hidden md:flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
-        <div className="flex flex-col h-full">
-          <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0">
-            <div className="flex items-center gap-4">
-              {visibleTabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => requestTabChange(tab.id)}
-                  className={`tracking-wide pb-2 text-xs transition-colors border-b-2 cursor-pointer ${activeTab === tab.id ? "text-ctp-text border-ctp-mauve" : "text-ctp-subtext0 border-transparent hover:text-ctp-text"}`}
-                >
-                  {tab.id}
-                </button>
-              ))}
-            </div>
+    <div className="flex flex-col md:hidden w-full h-full overflow-y-auto min-w-0 p-4 gap-6">
+      <WorkbenchHeader logic={logic} />
 
-            {recipeEntries.length > 0 && (
-              <Listbox
-                as="div"
-                value={selectedRecipeKey}
-                onChange={applyRecipe}
-                className="ml-auto pb-2"
+      <div className="flex-1 w-full min-h-75">{machine && visualizer}</div>
+
+      <TestSuite
+        tests={tests}
+        setTests={setTests}
+        evaluateInput={
+          machine ? (input: string) => simulate(machine as M, input) : undefined
+        }
+        machineName={(machine as { name?: string } | null)?.name ?? "delta"}
+        resetKeys={[machine, logic.selectedRecipeKey]}
+      />
+    </div>
+  );
+}
+
+function DesktopWorkbench<M>({
+  logic,
+}: {
+  logic: ReturnType<typeof useWorkbenchLogic<M>>;
+}) {
+  const {
+    storeScope,
+    activeTab,
+    requestTabChange,
+    visibleTabs,
+    activeTabContent,
+    showWarning,
+    confirmTabChange,
+    cancelTabChange,
+    recipeEntries,
+    selectedRecipeKey,
+    applyRecipe,
+    selectedRecipeLabel,
+    machine,
+    machineDot,
+    setHoveredEdgeId,
+    tests,
+    setTests,
+    simulate,
+    visualizer,
+  } = logic;
+
+  return (
+    <div className="hidden md:flex flex-row flex-1 overflow-hidden">
+      {/* Left Panel: Tabs & Editor/Canvas/Visualizer */}
+      <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
+        <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0">
+          <div className="flex items-center gap-4">
+            {visibleTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => requestTabChange(tab.id)}
+                className={`tracking-wide pb-2 text-xs transition-colors border-b-2 cursor-pointer ${
+                  activeTab === tab.id
+                    ? "text-ctp-text border-ctp-mauve"
+                    : "text-ctp-subtext0 border-transparent hover:text-ctp-text"
+                }`}
               >
-                <div className="relative w-full md:w-auto">
-                  <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1 text-xs text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve">
-                    <span
-                      className={selectedRecipeKey ? "" : "text-ctp-subtext1"}
-                    >
-                      {selectedRecipeLabel}
-                    </span>
-                  </ListboxButton>
-
-                  <svg
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M2 4L6 8L10 4" />
-                  </svg>
-
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="opacity-0 scale-95"
-                    enterTo="opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="opacity-100 scale-100"
-                    leaveTo="opacity-0 scale-95"
-                  >
-                    <ListboxOptions className="absolute right-0 z-20 mt-1 max-h-60 min-w-56 overflow-auto rounded-lg border border-ctp-surface1 bg-ctp-mantle py-1 text-sm shadow-lg focus:outline-none">
-                      {recipeEntries.map(([key, recipe]) => (
-                        <ListboxOption
-                          key={key}
-                          value={key}
-                          className="cursor-pointer select-none px-3 py-1.5 text-xs text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text"
-                        >
-                          {recipe.label}
-                        </ListboxOption>
-                      ))}
-                    </ListboxOptions>
-                  </Transition>
-                </div>
-              </Listbox>
-            )}
+                {tab.id}
+              </button>
+            ))}
           </div>
 
-          <div className="flex-1 overflow-hidden">{activeTabContent}</div>
-
-          {storeScope === "nfa" && (
-            <ConfirmModal
-              isOpen={showWarning}
-              title="Switching to Canvas"
-              message="Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?"
-              confirmText="Convert to Canvas"
-              cancelText={`Stay in ${activeTab.replace(/^[a-z]/, (s) => s.toUpperCase())}`}
-              onConfirm={confirmTabChange}
-              onCancel={cancelTabChange}
-            />
-          )}
+          <RecipeDropdown
+            recipeEntries={recipeEntries}
+            selectedRecipeKey={selectedRecipeKey}
+            applyRecipe={applyRecipe}
+            selectedRecipeLabel={selectedRecipeLabel}
+            className="ml-auto pb-2"
+          />
         </div>
+
+        <div className="flex-1 overflow-hidden">{activeTabContent}</div>
+
+        {storeScope === "nfa" && (
+          <ConfirmModal
+            isOpen={showWarning}
+            title="Switching to Canvas"
+            message="Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?"
+            confirmText="Convert to Canvas"
+            cancelText={`Stay in ${activeTab.replace(/^[a-z]/, (s) => s.toUpperCase())}`}
+            onConfirm={confirmTabChange}
+            onCancel={cancelTabChange}
+          />
+        )}
       </div>
 
-      <div className="flex flex-col w-full md:w-1/2 overflow-y-auto">
-        <div className="flex flex-col gap-4 p-6">
-          <div className="flex flex-col-reverse lg:flex-row justify-between gap-3">
-            <div className="flex items-center gap-y-3">
-              <Tooltip label="cmd+s">
-                <button
-                  onClick={() => compile(editorValue)}
-                  className="hover:cursor-pointer text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                >
-                  compile
-                </button>
-              </Tooltip>
-              <p
-                className={`text-xs px-3 py-1 rounded-lg ${editorErrors && editorErrors.length > 0 ? "text-ctp-red" : "text-ctp-green"} transition-colors`}
-              >
-                {editorErrors && editorErrors.length > 0
-                  ? "✗ check errors"
-                  : "✓ valid"}
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <h1 className="text-ctp-text text-sm lg:text-end font-bold uppercase tracking-widest max-w-56 xl:max-w-80 text-nowrap overflow-scroll">
-                {(machine as { name?: string } | null)?.name ?? "untitled"}
-              </h1>
-              <Tooltip label="Share Machine">
-                <button
-                  onClick={handleShare}
-                  className="text-ctp-overlay0 hover:text-ctp-text transition-colors flex items-center"
-                >
-                  {copied ? <Check /> : <Share />}
-                </button>
-              </Tooltip>
-            </div>
-          </div>
+      {/* Right Panel: Graph & Test Suite */}
+      <div className="flex flex-col w-1/2 overflow-y-auto overflow-x-hidden min-w-0">
+        <div className="flex flex-col gap-4 p-6 min-w-0">
+          <WorkbenchHeader logic={logic} />
 
           <div className="flex flex-col gap-4">
             {machine && machineDot && (
-              <div className="hidden md:block">
-                <GraphvizViewer
-                  dot={machineDot}
-                  machineName={(machine as { name?: string }).name ?? "machine"}
-                  showExportActions
-                  onEdgeHover={
-                    storeScope === "tm" ? setHoveredEdgeId : undefined
-                  }
-                />
-              </div>
+              <GraphvizViewer
+                dot={machineDot}
+                machineName={(machine as { name?: string }).name ?? "machine"}
+                showExportActions
+                onEdgeHover={storeScope === "tm" ? setHoveredEdgeId : undefined}
+              />
             )}
-
-            {machine && <div className="md:hidden">{visualizer}</div>}
 
             <TestSuite
               tests={tests}
@@ -446,14 +405,152 @@ function WorkbenchInner<M>({
   );
 }
 
+function WorkbenchHeader<M>({
+  logic,
+}: {
+  logic: ReturnType<typeof useWorkbenchLogic<M>>;
+}) {
+  const {
+    editorValue,
+    compile,
+    editorErrors,
+    machine,
+    handleShare,
+    copied,
+    recipeEntries,
+    selectedRecipeKey,
+    applyRecipe,
+    selectedRecipeLabel,
+  } = logic;
+
+  return (
+    <div className="flex flex-col-reverse lg:flex-row justify-between gap-3">
+      <div className="flex items-center gap-y-3">
+        <Tooltip label="cmd+s">
+          <button
+            onClick={() => compile(editorValue)}
+            className="hover:cursor-pointer text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          >
+            compile
+          </button>
+        </Tooltip>
+        <p
+          className={`font-bold text-xs px-3 py-1 rounded-lg ${editorErrors && editorErrors.length > 0 ? "text-ctp-red" : "text-ctp-green"} transition-colors whitespace-nowrap`}
+        >
+          {editorErrors && editorErrors.length > 0
+            ? "✗ check errors"
+            : "✓ valid"}
+        </p>
+      </div>
+
+      <div className="flex items-center justify-between w-full lg:w-auto gap-4">
+        <div className="flex items-center gap-2 overflow-hidden">
+          <h1 className="text-ctp-text text-sm lg:text-end font-bold uppercase tracking-widest max-w-40 md:max-w-56 xl:max-w-80 text-nowrap overflow-x-auto">
+            {(machine as { name?: string } | null)?.name ?? "untitled"}
+          </h1>
+          <Tooltip label="Share Machine">
+            <button
+              onClick={handleShare}
+              className="text-ctp-overlay0 hover:text-ctp-text transition-colors flex items-center shrink-0"
+            >
+              {copied ? <Check /> : <Share />}
+            </button>
+          </Tooltip>
+        </div>
+
+        <div className="md:hidden shrink-0">
+          <RecipeDropdown
+            recipeEntries={recipeEntries}
+            selectedRecipeKey={selectedRecipeKey}
+            applyRecipe={applyRecipe}
+            selectedRecipeLabel={selectedRecipeLabel}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WorkbenchInner<M>(props: WorkbenchProps<M>) {
+  const logic = useWorkbenchLogic(props);
+
+  return (
+    <>
+      <DesktopWorkbench logic={logic} />
+      <MobileWorkbench logic={logic} />
+    </>
+  );
+}
+
+function RecipeDropdown({
+  recipeEntries,
+  selectedRecipeKey,
+  applyRecipe,
+  selectedRecipeLabel,
+  className = "",
+}: {
+  recipeEntries: [string, any][];
+  selectedRecipeKey: string;
+  applyRecipe: (key: string) => void;
+  selectedRecipeLabel: string;
+  className?: string;
+}) {
+  if (recipeEntries.length === 0) return null;
+
+  return (
+    <Listbox
+      as="div"
+      value={selectedRecipeKey}
+      onChange={applyRecipe}
+      className={className}
+    >
+      <div className="relative w-full md:w-auto min-w-32">
+        <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1 text-xs text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve">
+          <span className={selectedRecipeKey ? "" : "text-ctp-subtext1"}>
+            {selectedRecipeLabel}
+          </span>
+        </ListboxButton>
+        <svg
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <path d="M2 4L6 8L10 4" />
+        </svg>
+        <Transition
+          as={Fragment}
+          enter="transition ease-out duration-100"
+          enterFrom="opacity-0 scale-95"
+          enterTo="opacity-100 scale-100"
+          leave="transition ease-in duration-75"
+          leaveFrom="opacity-100 scale-100"
+          leaveTo="opacity-0 scale-95"
+        >
+          <ListboxOptions className="absolute right-0 z-20 mt-1 max-h-60 min-w-56 overflow-auto rounded-lg border border-ctp-surface1 bg-ctp-mantle py-1 text-sm shadow-lg focus:outline-none">
+            {recipeEntries.map(([key, recipe]) => (
+              <ListboxOption
+                key={key}
+                value={key}
+                className="cursor-pointer select-none px-3 py-1.5 text-xs text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text"
+              >
+                {recipe.label}
+              </ListboxOption>
+            ))}
+          </ListboxOptions>
+        </Transition>
+      </div>
+    </Listbox>
+  );
+}
+
+// --- Main Export ---
 export function Workbench<M>(props: WorkbenchProps<M>) {
   const storeScope = props.storeScope;
   const nfa = useDeltaStore((s) => s.nfa);
   const tm = useDeltaStore((s) => s.tm);
-  const scopeConfig = {
-    nfa: { store: nfa },
-    tm: { store: tm },
-  };
+  const scopeConfig = { nfa: { store: nfa }, tm: { store: tm } };
   const currentConfig = scopeConfig[storeScope as WorkbenchScope];
   const { resolvedTheme } = useTheme();
 
@@ -473,55 +570,94 @@ export function Workbench<M>(props: WorkbenchProps<M>) {
           : toDotTM(m as TuringMachine, themeNames[resolvedTheme ?? "light"], s)
       }
       getInputTokens={(args) => {
+        const WINDOW_SIZE = 81;
+        const HALF_WINDOW = Math.floor(WINDOW_SIZE / 2);
+
         if (storeScope === "nfa") {
-          return args.input.split("").map((symbol: string, i: number) => {
-            const isActive = !args.isLast && i === args.step;
-            const isPast = args.isLast || i < args.step;
-            return {
-              key: `${symbol}-${i}`,
-              text: symbol,
-              className: isActive
-                ? "text-ctp-mauve font-bold underline underline-offset-4"
-                : isPast
-                  ? "text-ctp-surface2 line-through"
-                  : "text-ctp-subtext1",
-            };
-          });
+          const tokens = [];
+          for (let i = 0; i < WINDOW_SIZE; i++) {
+            const charIndex = args.step - HALF_WINDOW + i;
+            const symbol = args.input[charIndex];
+            const isActive = !args.isLast && i === HALF_WINDOW;
+            const isPast = args.isLast || charIndex < args.step;
+
+            if (charIndex >= 0 && charIndex < args.input.length) {
+              tokens.push({
+                key: `nfa-${i}-${charIndex}`,
+                text: symbol,
+                isActive: isActive,
+                className: isActive
+                  ? "text-ctp-mauve font-bold bg-ctp-surface0 ring-1 ring-ctp-mauve"
+                  : isPast
+                    ? "text-ctp-surface2"
+                    : "text-ctp-subtext1",
+              });
+            } else {
+              tokens.push({
+                key: `nfa-empty-${i}`,
+                text: "",
+                isActive: false,
+                className: "text-transparent",
+              });
+            }
+          }
+          return tokens;
         }
+
         const tapes = args.current.tapes ?? [];
         return tapes.flatMap((tape: string[], row: number) => {
           const activeTapeIndex = tape.findIndex(
             (cell: string) => cell.startsWith("[") && cell.endsWith("]"),
           );
-          return tape.map((cell: string, i: number) => {
-            const isActive = i === activeTapeIndex;
-            const symbol = cell.replace(/^\[/, "").replace(/\]$/, "");
-            return {
-              key: `t${row}-${symbol}-${i}`,
-              text: isActive ? `[${symbol}]` : symbol,
-              className: isActive ? "text-ctp-mauve" : "text-ctp-text",
-              row: row,
-            };
-          });
+          const tokens = [];
+          for (let i = 0; i < WINDOW_SIZE; i++) {
+            const charIndex = activeTapeIndex - HALF_WINDOW + i;
+            const cell = tape[charIndex];
+            const isActive = i === HALF_WINDOW;
+
+            if (cell !== undefined) {
+              const symbol = cell.replace(/^\[/, "").replace(/\]$/, "");
+              tokens.push({
+                key: `t${row}-${i}-${charIndex}`,
+                text: symbol,
+                isActive: isActive,
+                className: isActive
+                  ? "text-ctp-mauve font-bold bg-ctp-surface0 ring-1 ring-ctp-mauve"
+                  : "text-ctp-text",
+                row: row,
+              });
+            } else {
+              tokens.push({
+                key: `t${row}-empty-${i}`,
+                text: "",
+                isActive: false,
+                className: "text-transparent",
+                row: row,
+              });
+            }
+          }
+          return tokens;
         });
       }}
       bottomPanel={
         storeScope === "tm"
-          ? ({ machine, current, hoveredEdgeId }: any) => (
+          ? ({ machine, current, hoveredEdgeId, isLast, accepted }: any) => (
               <TransitionTable
                 machine={machine as TuringMachine}
                 current={current}
                 hoveredEdgeId={hoveredEdgeId}
+                isLast={isLast}
+                accepted={accepted}
               />
             )
           : storeScope === "nfa"
-            ? ({ machine, current, trace, step, input }: any) => (
+            ? ({ trace, step, input, isLast, accepted }: any) => (
                 <ConfigurationTable
-                  machine={machine as NFA}
-                  current={current}
                   trace={trace}
                   step={step}
                   input={input}
+                  isLast={isLast}
+                  accepted={accepted}
                 />
               )
             : undefined

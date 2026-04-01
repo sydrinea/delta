@@ -13,6 +13,7 @@ import {
 
 export function Trace<M extends VisualMachine>() {
   const containerRef = useRef<HTMLDivElement>(null);
+
   const {
     machine,
     tests,
@@ -135,7 +136,7 @@ export function Trace<M extends VisualMachine>() {
       onBlur={onBlur}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      className="flex flex-col gap-4 md:p-4 focus:outline-none"
+      className="flex flex-col gap-4 md:p-4 focus:outline-none min-w-0 w-full max-w-full"
     >
       {/* input + test picker */}
       <div className="flex flex-col md:flex-row gap-2">
@@ -193,25 +194,49 @@ export function Trace<M extends VisualMachine>() {
       </div>
 
       {!isEmpty && current && (
-        <div className="flex flex-col items-center gap-2 p-4 bg-ctp-mantle border border-ctp-surface0 rounded-lg">
-          <div className="flex flex-col gap-1 text-lg tracking-widest w-full">
+        <div className="flex flex-col items-center gap-2 py-4 bg-ctp-mantle border border-ctp-surface0 rounded-lg w-full min-w-0 overflow-x-hidden box-border">
+          <div className="flex flex-col gap-1 text-lg tracking-widest w-full min-w-0 px-4 box-border">
             {tokenRows.map(([row, tokens]) => (
-              <div key={row} className="flex items-center gap-2 justify-center">
+              <div key={row} className="flex items-center gap-2 w-full min-w-0">
                 {tokenRows.length > 1 && (
-                  <span className="text-xs text-ctp-subtext1 min-w-12 text-right">
+                  <span className="text-xs text-ctp-subtext1 min-w-8 text-right pr-2">
                     T{row + 1}:
                   </span>
                 )}
-                {tokens.map((token) => (
-                  <span key={token.key} className={token.className}>
-                    {token.text}
-                  </span>
-                ))}
+                <div className="relative flex-1 basis-0 min-w-0 max-w-full overflow-hidden bg-ctp-crust p-1 rounded border border-ctp-surface1 h-10">
+                  <div className="absolute inset-y-1 left-1/2 w-px bg-ctp-mauve/70 pointer-events-none" />
+                  {(() => {
+                    const activeIndex = tokens.findIndex(
+                      (token) => token.isActive,
+                    );
+                    const centeredIndex =
+                      activeIndex >= 0
+                        ? activeIndex
+                        : Math.floor(tokens.length / 2);
+                    return (
+                      <div
+                        className="relative left-1/2 flex transition-transform duration-150 ease-out will-change-transform"
+                        style={{
+                          transform: `translateX(calc(-${centeredIndex * 32 + 16}px))`,
+                        }}
+                      >
+                        {tokens.map((token) => (
+                          <span
+                            key={token.key}
+                            className={`flex items-center justify-center w-8 h-8 font-mono text-lg rounded-sm shrink-0 ${token.className}`}
+                          >
+                            {token.text || "\u00A0"}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
+                </div>
               </div>
             ))}
           </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 text-sm text-ctp-subtext0">
+          <div className="flex flex-col md:flex-row items-center gap-1 md:gap-4 text-sm text-ctp-subtext0 mt-2 px-4">
             <span>
               step <span className="text-ctp-text font-bold">{safeStep}</span> /{" "}
               {maxStep}
@@ -240,18 +265,6 @@ export function Trace<M extends VisualMachine>() {
         hoveredEdgeId,
         setHoveredEdgeId,
       })}
-
-      {/* result */}
-      {(isEmpty || isLast) && (
-        <div
-          className={`flex items-center justify-center gap-2 text-sm font-bold mt-4 p-3 rounded-lg ${accepted ? "text-ctp-green bg-ctp-green/10 border border-ctp-green/20" : "text-ctp-red bg-ctp-red/10 border border-ctp-red/20"}`}
-        >
-          <span className="w-4 h-4 flex items-center justify-center">
-            {accepted ? "✓" : "✗"}
-          </span>
-          {accepted ? "accepted" : "rejected"}
-        </div>
-      )}
 
       {!focused && !isEmpty && (
         <p className="text-ctp-overlay0 text-xs text-center mt-auto">

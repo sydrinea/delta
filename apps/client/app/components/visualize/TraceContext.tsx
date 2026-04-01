@@ -30,6 +30,7 @@ export interface TraceInputArgs {
   step: number;
   maxStep: number;
   isLast: boolean;
+  windowSize?: number;
 }
 
 export interface TraceInputToken {
@@ -37,6 +38,7 @@ export interface TraceInputToken {
   text: string;
   className: string;
   row?: number;
+  isActive?: boolean;
 }
 
 export interface TraceBottomPanelContext<M extends VisualMachine> {
