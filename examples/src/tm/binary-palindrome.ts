@@ -7,7 +7,7 @@ const machine = multitape("binary palindrome", 1)
   .states("q0", "q1", "q2", "q3", "q4", "q5", "q6", "q7", "q8")
   .start("q0")
   .accept("q6")
-  // Step 1: Start by moving right (skipping the initial blank if tape is standard)
+  // Step 1: Start by moving right, skipping the initial blank
   .state("q0", (s) => s.on(["_"], ["R"], "q1"))
   // Step 2: Read the leftmost unmarked character and mark it (X for 0, Y for 1)
   .state(
