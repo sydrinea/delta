@@ -1,16 +1,8 @@
 "use client";
 
-import {
-  Fragment,
-  useState,
-  useMemo,
-  useRef,
-  type ReactNode,
-  useEffect,
-} from "react";
-import { GraphvizViewer } from "./GraphvizViewer";
-import { useStepNavigation } from "@/hooks/useStepNavigation";
-import { type TestCase } from "@delta/examples";
+import { useMemo, useRef, Fragment } from "react";
+import { useTraceContext, type VisualMachine } from "./TraceContext";
+import { type NFA } from "@delta/build";
 import {
   Listbox,
   ListboxButton,
@@ -19,113 +11,34 @@ import {
   Transition,
 } from "@headlessui/react";
 
-interface TraceStep {
-  states: Set<string>;
-  tapes?: string[][];
-}
-
-interface TraceSimulationResult {
-  accepted: boolean;
-  trace: TraceStep[];
-}
-
-interface VisualMachine {
-  name: string;
-}
-
-interface TraceInputArgs {
-  input: string;
-  current: TraceStep;
-  step: number;
-  maxStep: number;
-  isLast: boolean;
-}
-
-interface TraceInputToken {
-  key: string;
-  text: string;
-  className: string;
-  row?: number;
-}
-
-interface TraceProps<M extends VisualMachine> {
-  machine: M | null;
-  tests: TestCase[];
-  shortThreshold?: number;
-  simulate: (machine: M, input: string) => TraceSimulationResult;
-  getDot: (machine: M, states: Set<string>) => string;
-  inputFilter?: (value: string) => string | null;
-  getInputTokens: (args: TraceInputArgs) => TraceInputToken[];
-  bottomPanel?: (context: TraceBottomPanelContext<M>) => ReactNode;
-}
-
-export interface TraceBottomPanelContext<M extends VisualMachine> {
-  machine: M;
-  current: TraceStep;
-  step: number;
-  maxStep: number;
-  isLast: boolean;
-  input: string;
-  accepted: boolean;
-  dot: string;
-  hoveredEdgeId: string | null;
-  setHoveredEdgeId: (edgeId: string | null) => void;
-}
-
-export function Trace<M extends VisualMachine>({
-  machine,
-  tests,
-  shortThreshold,
-  simulate,
-  getDot,
-  getInputTokens,
-  bottomPanel,
-}: TraceProps<M>) {
-  const [input, setInput] = useState("");
+export function Trace<M extends VisualMachine>() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [selectedTest, setSelectedTest] = useState("");
-  const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null);
-  const [hideForShortViewport, setHideForShortViewport] = useState(false);
-
-  useEffect(() => {
-    const updateViewportState = () => {
-      setHideForShortViewport(window.innerHeight < (shortThreshold || 0));
-    };
-
-    updateViewportState();
-    window.addEventListener("resize", updateViewportState);
-
-    return () => {
-      window.removeEventListener("resize", updateViewportState);
-    };
-  }, []);
-
-  const simulation = useMemo(() => {
-    if (!machine) return null;
-    return simulate(machine, input);
-  }, [input, machine, simulate]);
-
-  const trace = simulation?.trace ?? [];
-  const maxStep = Math.max(0, trace.length - 1);
-
-  const { step, focused, onFocus, onBlur, onTouchStart, onTouchEnd } =
-    useStepNavigation({
-      maxStep,
-      resetDeps: [input, machine],
-      focusRequiredForKeys: true,
-      enableSwipe: true,
-    });
-
-  const safeStep = Math.min(step, maxStep);
-  const current = trace[safeStep];
-  const dot = useMemo(() => {
-    if (!machine || !current) return null;
-    return getDot(machine, current.states);
-  }, [machine, current, getDot]);
-
-  const isEmpty = input === "";
-  const isLast = safeStep === maxStep;
-  const accepted = simulation?.accepted ?? false;
+  const {
+    machine,
+    tests,
+    input,
+    setInput,
+    selectedTest,
+    setSelectedTest,
+    trace,
+    step,
+    maxStep,
+    safeStep,
+    current,
+    isEmpty,
+    isLast,
+    accepted,
+    focused,
+    onFocus,
+    onBlur,
+    onTouchStart,
+    onTouchEnd,
+    getInputTokens,
+    bottomPanel,
+    dot,
+    hoveredEdgeId,
+    setHoveredEdgeId,
+  } = useTraceContext<M>();
 
   const handleTestSelect = (testId: string) => {
     setSelectedTest(testId);
@@ -145,7 +58,7 @@ export function Trace<M extends VisualMachine>({
         isLast,
       }) ?? [];
 
-    const rows = new Map<number, TraceInputToken[]>();
+    const rows = new Map<number, any[]>();
     tokens.forEach((token) => {
       const row = token.row ?? 0;
       const existing = rows.get(row) ?? [];
@@ -163,6 +76,49 @@ export function Trace<M extends VisualMachine>({
     setSelectedTest(match?.id ?? "");
   };
 
+  // History panel details
+  const history = useMemo(() => {
+    return trace.slice(0, safeStep + 1);
+  }, [trace, safeStep]);
+
+  // NFA active transition calculations
+  const activeTransitions = useMemo(() => {
+    if (!machine || !current) return null;
+    if ("transitions" in machine === false) return null; // Only for NFAs/DFAs
+    const nfaMachine = machine as unknown as NFA;
+
+    const prevStep = safeStep > 0 ? trace[safeStep - 1] : null;
+    const prevStates = prevStep?.states ?? new Set([nfaMachine.startState]);
+    const readSymbol = input[safeStep - 1] ?? null;
+
+    // Evaluate regular rules from previous states taking the current symbol
+    const evaluated: {
+      from: string;
+      symbol: string | null;
+      to: Set<string>;
+    }[] = [];
+
+    if (readSymbol) {
+      for (const st of prevStates) {
+        const targets = nfaMachine.transitions.get(st)?.get(readSymbol);
+        if (targets && targets.size > 0) {
+          evaluated.push({ from: st, symbol: readSymbol, to: targets });
+        }
+      }
+    }
+
+    // Check for Epsilon additions in the current states not accounted for by explicitly targeted transitions
+    const explicitTargets = new Set(evaluated.flatMap((e) => [...e.to]));
+    const epsilonStates = new Set(
+      [...current.states].filter(
+        (s) =>
+          !explicitTargets.has(s) && (readSymbol ? !prevStates.has(s) : true),
+      ),
+    );
+
+    return { evaluated, epsilonStates, explicitTargets };
+  }, [machine, current, safeStep, trace, input]);
+
   if (!machine) {
     return (
       <div className="h-full flex items-center justify-center text-sm text-ctp-subtext0">
@@ -179,7 +135,7 @@ export function Trace<M extends VisualMachine>({
       onBlur={onBlur}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      className="flex flex-col gap-4 md:p-4 h-full overflow-y-scroll focus:outline-none"
+      className="flex flex-col gap-4 md:p-4 focus:outline-none"
     >
       {/* input + test picker */}
       <div className="flex flex-col md:flex-row gap-2">
@@ -236,36 +192,8 @@ export function Trace<M extends VisualMachine>({
         </Listbox>
       </div>
 
-      {/* graph + optional bottom panel */}
-      {machine && current && dot && (
-        <div className="flex flex-col gap-3">
-          {!hideForShortViewport && (
-            <div className="w-full">
-              <GraphvizViewer
-                dot={dot}
-                machineName={machine.name}
-                showExportActions
-                onEdgeHover={bottomPanel ? setHoveredEdgeId : undefined}
-              />
-            </div>
-          )}
-          {bottomPanel?.({
-            machine,
-            current,
-            step: safeStep,
-            maxStep,
-            isLast,
-            input,
-            accepted,
-            dot,
-            hoveredEdgeId,
-            setHoveredEdgeId,
-          })}
-        </div>
-      )}
-
       {!isEmpty && current && (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2 p-4 bg-ctp-mantle border border-ctp-surface0 rounded-lg">
           <div className="flex flex-col gap-1 text-lg tracking-widest w-full">
             {tokenRows.map(([row, tokens]) => (
               <div key={row} className="flex items-center gap-2 justify-center">
@@ -299,23 +227,42 @@ export function Trace<M extends VisualMachine>({
         </div>
       )}
 
+      {bottomPanel?.({
+        machine,
+        current: current ?? { states: new Set<string>() },
+        trace,
+        step: safeStep,
+        maxStep,
+        isLast,
+        input,
+        accepted,
+        dot: dot ?? "",
+        hoveredEdgeId,
+        setHoveredEdgeId,
+      })}
+
       {/* result */}
       {(isEmpty || isLast) && (
-        <p
-          className={`text-sm font-bold text-center ${accepted ? "text-ctp-green" : "text-ctp-red"}`}
+        <div
+          className={`flex items-center justify-center gap-2 text-sm font-bold mt-4 p-3 rounded-lg ${accepted ? "text-ctp-green bg-ctp-green/10 border border-ctp-green/20" : "text-ctp-red bg-ctp-red/10 border border-ctp-red/20"}`}
         >
-          {accepted ? "✓ accepted" : "✗ rejected"}
-        </p>
+          <span className="w-4 h-4 flex items-center justify-center">
+            {accepted ? "✓" : "✗"}
+          </span>
+          {accepted ? "accepted" : "rejected"}
+        </div>
       )}
 
       {!focused && !isEmpty && (
-        <p className="text-ctp-overlay0 text-xs text-center">
+        <p className="text-ctp-overlay0 text-xs text-center mt-auto">
           click to focus · ← → to step
         </p>
       )}
 
       {focused && !isEmpty && (
-        <p className="text-ctp-overlay0 text-xs text-center">← → to step</p>
+        <p className="text-ctp-overlay0 text-xs text-center mt-auto">
+          ← → to step
+        </p>
       )}
     </div>
   );

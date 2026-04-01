@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { type TuringMachine } from "@delta/build";
 import {
   activeTupleFromTapes,
   buildTMTransitionRows,
   formatReadTuple,
 } from "@/components/visualize/metadata";
+import { useScrollableTable } from "@/components/visualize/hooks/useScrollableTable";
 
 interface TransitionTableCurrentStep {
   states: Set<string>;
@@ -27,8 +28,8 @@ export function TransitionTable({
   hoveredEdgeId,
 }: TransitionTableProps) {
   const [tableMode, setTableMode] = useState<TMTableMode>("state");
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
+  const { scrollContainerRef, rowRefs, scrollRowToCenter } =
+    useScrollableTable();
 
   const transitionRows = useMemo(
     () => buildTMTransitionRows(machine),
@@ -54,26 +55,6 @@ export function TransitionTable({
   }, [transitionRows, currentState]);
 
   const visibleRows = tableMode === "all" ? transitionRows : stateRelevantRows;
-
-  const scrollRowToCenter = (row: (typeof transitionRows)[number]): void => {
-    const container = scrollContainerRef.current;
-    const rowElement = rowRefs.current[row.id];
-
-    if (!container || !rowElement) {
-      return;
-    }
-
-    const targetTop =
-      rowElement.offsetTop -
-      (container.clientHeight / 2 - rowElement.clientHeight / 2);
-    const maxScroll = Math.max(
-      0,
-      container.scrollHeight - container.clientHeight,
-    );
-    const boundedTop = Math.max(0, Math.min(targetTop, maxScroll));
-
-    container.scrollTo({ top: boundedTop, behavior: "smooth" });
-  };
 
   const isCurrentTransition = (
     row: (typeof transitionRows)[number],
@@ -105,7 +86,7 @@ export function TransitionTable({
       return;
     }
 
-    scrollRowToCenter(hoveredRow);
+    scrollRowToCenter(hoveredRow.id);
   }, [hoveredEdgeId, visibleRows]);
 
   useEffect(() => {
@@ -114,7 +95,7 @@ export function TransitionTable({
       return;
     }
 
-    scrollRowToCenter(activeRow);
+    scrollRowToCenter(activeRow.id);
   }, [visibleRows, currentState, currentReadTuple]);
 
   return (

@@ -11,16 +11,18 @@ import {
 import { ReactFlowProvider } from "reactflow";
 import { useDeltaStore } from "@/store/deltaStore";
 import { MachineTypes, type MachineType } from "../../lib/worker/protocol";
-import { type NFA, type TuringMachine } from "@delta/build";
+import { TM, type NFA, type TuringMachine } from "@delta/build";
 import { nfaToFlow } from "@/lib/flow/toFlow";
 import { containsCustomLogicOrComments } from "@/lib/detect-custom-logic";
 import { DeltaEditor } from "@/components/editor/DeltaEditor";
 import { FlowEditor } from "@/components/editor/FlowEditor";
+import { Trace } from "@/components/visualize/Trace";
 import {
-  Trace,
-  type TraceBottomPanelContext,
-} from "@/components/visualize/Trace";
+  TraceProvider,
+  useTraceContext,
+} from "@/components/visualize/TraceContext";
 import { TransitionTable } from "@/components/visualize/TransitionTable";
+import { ConfigurationTable } from "@/components/visualize/ConfigurationTable";
 import { GraphvizViewer } from "@/components/visualize/GraphvizViewer";
 import { TestSuite } from "@/components/TestSuite";
 import { Tooltip } from "@/components/Tooltip";
@@ -66,7 +68,7 @@ function getInitialTab(enabledTabs: EnabledTabs): TabId {
   return TAB_ORDER.find((tab) => isTabEnabled(enabledTabs, tab)) ?? "editor";
 }
 
-export function Workbench<M>({
+function WorkbenchInner<M>({
   simulate,
   storeScope,
   enabledTabs,
@@ -170,7 +172,10 @@ export function Workbench<M>({
     }
   };
 
+  const { dot: activeDot, setHoveredEdgeId } = useTraceContext<any>();
+
   const machineDot = useMemo(() => {
+    if (activeDot) return activeDot;
     if (!machine) return null;
     const currentTheme = themeNames[resolvedTheme ?? "light"];
     const dotGenerators = {
@@ -178,7 +183,7 @@ export function Workbench<M>({
       tm: (m: TuringMachine) => toDotTM(m, currentTheme),
     };
     return dotGenerators[storeScope](machine as unknown as NFA & TuringMachine);
-  }, [machine, storeScope, resolvedTheme]);
+  }, [machine, storeScope, resolvedTheme, activeDot]);
 
   const requestTabChange = (tab: TabId) => {
     if (!isTabEnabled(enabledTabs, tab)) return;
@@ -237,99 +242,7 @@ export function Workbench<M>({
     },
   });
 
-  type TraceMachine = NFA | TuringMachine;
-
-  const traceConfig = {
-    nfa: {
-      machine: nfa.machine as TraceMachine | null,
-      tests: nfa.tests,
-      simulate: (machine: TraceMachine, input: string) =>
-        simulateNFA(machine as NFA, input),
-      getDot: (machine: TraceMachine, states: Set<string>) =>
-        toDot(machine as NFA, themeNames[resolvedTheme ?? "light"], states),
-      getInputTokens: ({
-        input,
-        step,
-        isLast,
-      }: {
-        input: string;
-        step: number;
-        isLast: boolean;
-      }) =>
-        input.split("").map((symbol, i) => {
-          const isActive = !isLast && i === step;
-          const isPast = isLast || i < step;
-
-          return {
-            key: `${symbol}-${i}`,
-            text: symbol,
-            className: isActive
-              ? "text-ctp-mauve font-bold underline underline-offset-4"
-              : isPast
-                ? "text-ctp-surface2 line-through"
-                : "text-ctp-subtext1",
-          };
-        }),
-    },
-    tm: {
-      machine: tm.machine as TraceMachine | null,
-      tests: tm.tests,
-      shortThreshold: 900,
-      simulate: (machine: TraceMachine, input: string) =>
-        simulateTM(machine as TuringMachine, input, {
-          maxSteps: Math.max(1000, input.length * 100),
-        }),
-      getDot: (machine: TraceMachine, states: Set<string>) =>
-        toDotTM(
-          machine as TuringMachine,
-          themeNames[resolvedTheme ?? "light"],
-          states,
-        ),
-      getInputTokens: ({ current }: { current: { tapes?: string[][] } }) => {
-        const tapes = current.tapes ?? [];
-        return tapes.flatMap((tape, row) => {
-          const activeTapeIndex = tape.findIndex(
-            (cell) => cell.startsWith("[") && cell.endsWith("]"),
-          );
-
-          return tape.map((cell, i) => {
-            const isActive = i === activeTapeIndex;
-            const symbol = cell.replace(/^\[/, "").replace(/\]$/, "");
-
-            return {
-              key: `t${row}-${symbol}-${i}`,
-              text: isActive ? `[${symbol}]` : symbol,
-              className: isActive ? "text-ctp-mauve" : "text-ctp-text",
-              row,
-            };
-          });
-        });
-      },
-      bottomPanel: ({
-        machine,
-        current,
-        hoveredEdgeId,
-      }: TraceBottomPanelContext<TraceMachine>) => (
-        <TransitionTable
-          machine={machine as TuringMachine}
-          current={current}
-          hoveredEdgeId={hoveredEdgeId}
-        />
-      ),
-    },
-  }[storeScope];
-
-  const visualizer = (
-    <Trace<TraceMachine>
-      machine={traceConfig.machine}
-      tests={traceConfig.tests}
-      shortThreshold={traceConfig.shortThreshold}
-      simulate={traceConfig.simulate}
-      getDot={traceConfig.getDot}
-      getInputTokens={traceConfig.getInputTokens}
-      bottomPanel={traceConfig.bottomPanel}
-    />
-  );
+  const visualizer = <Trace />;
 
   const canvasContent = {
     nfa: (
@@ -504,6 +417,9 @@ export function Workbench<M>({
                   dot={machineDot}
                   machineName={(machine as { name?: string }).name ?? "machine"}
                   showExportActions
+                  onEdgeHover={
+                    storeScope === "tm" ? setHoveredEdgeId : undefined
+                  }
                 />
               </div>
             )}
@@ -527,5 +443,91 @@ export function Workbench<M>({
         </div>
       </div>
     </div>
+  );
+}
+
+export function Workbench<M>(props: WorkbenchProps<M>) {
+  const storeScope = props.storeScope;
+  const nfa = useDeltaStore((s) => s.nfa);
+  const tm = useDeltaStore((s) => s.tm);
+  const scopeConfig = {
+    nfa: { store: nfa },
+    tm: { store: tm },
+  };
+  const currentConfig = scopeConfig[storeScope as WorkbenchScope];
+  const { resolvedTheme } = useTheme();
+
+  return (
+    <TraceProvider<any>
+      machine={currentConfig.store.machine}
+      tests={currentConfig.store.tests}
+      simulate={
+        storeScope === "nfa"
+          ? (m: NFA, i: string) => simulateNFA(m, i)
+          : (m: TuringMachine, i: string) =>
+              simulateTM(m, i, { maxSteps: Math.max(1000, i.length * 100) })
+      }
+      getDot={(m, s) =>
+        storeScope === "nfa"
+          ? toDot(m as NFA, themeNames[resolvedTheme ?? "light"], s)
+          : toDotTM(m as TuringMachine, themeNames[resolvedTheme ?? "light"], s)
+      }
+      getInputTokens={(args) => {
+        if (storeScope === "nfa") {
+          return args.input.split("").map((symbol: string, i: number) => {
+            const isActive = !args.isLast && i === args.step;
+            const isPast = args.isLast || i < args.step;
+            return {
+              key: `${symbol}-${i}`,
+              text: symbol,
+              className: isActive
+                ? "text-ctp-mauve font-bold underline underline-offset-4"
+                : isPast
+                  ? "text-ctp-surface2 line-through"
+                  : "text-ctp-subtext1",
+            };
+          });
+        }
+        const tapes = args.current.tapes ?? [];
+        return tapes.flatMap((tape: string[], row: number) => {
+          const activeTapeIndex = tape.findIndex(
+            (cell: string) => cell.startsWith("[") && cell.endsWith("]"),
+          );
+          return tape.map((cell: string, i: number) => {
+            const isActive = i === activeTapeIndex;
+            const symbol = cell.replace(/^\[/, "").replace(/\]$/, "");
+            return {
+              key: `t${row}-${symbol}-${i}`,
+              text: isActive ? `[${symbol}]` : symbol,
+              className: isActive ? "text-ctp-mauve" : "text-ctp-text",
+              row: row,
+            };
+          });
+        });
+      }}
+      bottomPanel={
+        storeScope === "tm"
+          ? ({ machine, current, hoveredEdgeId }: any) => (
+              <TransitionTable
+                machine={machine as TuringMachine}
+                current={current}
+                hoveredEdgeId={hoveredEdgeId}
+              />
+            )
+          : storeScope === "nfa"
+            ? ({ machine, current, trace, step, input }: any) => (
+                <ConfigurationTable
+                  machine={machine as NFA}
+                  current={current}
+                  trace={trace}
+                  step={step}
+                  input={input}
+                />
+              )
+            : undefined
+      }
+    >
+      <WorkbenchInner {...props} />
+    </TraceProvider>
   );
 }

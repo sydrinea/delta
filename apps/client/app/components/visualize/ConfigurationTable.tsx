@@ -1,0 +1,110 @@
+"use client";
+
+import { useEffect, useMemo } from "react";
+import { type NFA } from "@delta/build";
+import { useScrollableTable } from "@/components/visualize/hooks/useScrollableTable";
+import { type TraceStep } from "@/components/visualize/TraceContext";
+
+interface ConfigurationTableProps {
+  machine: NFA;
+  current: TraceStep;
+  trace: TraceStep[];
+  step: number;
+  input: string;
+}
+
+export function ConfigurationTable({
+  machine,
+  current,
+  trace,
+  step,
+  input,
+}: ConfigurationTableProps) {
+  const { scrollContainerRef, rowRefs, scrollRowToCenter } =
+    useScrollableTable();
+
+  const configurations = useMemo(() => {
+    // Only show configurations up to the current step
+    const currentTrace = trace.slice(0, step + 1);
+
+    return currentTrace
+      .map((t, index) => {
+        const remainingInput = input.slice(index);
+        return {
+          index,
+          states: [...t.states].sort(),
+          remainingInput: remainingInput === "" ? "ε" : remainingInput,
+        };
+      })
+      .reverse(); // Most recent at the top
+  }, [trace, step, input]);
+
+  useEffect(() => {
+    // Scroll to the most recent step whenever it changes
+    scrollRowToCenter(step.toString());
+  }, [step, scrollRowToCenter]);
+
+  if (configurations.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="w-full rounded-2xl border border-ctp-surface0 bg-ctp-mantle overflow-hidden flex flex-col">
+      <div className="px-3 py-2 border-b border-ctp-surface0 flex items-center justify-between gap-2">
+        <p className="text-xs uppercase tracking-widest text-ctp-subtext0">
+          configurations
+        </p>
+      </div>
+
+      <div ref={scrollContainerRef} className="overflow-auto max-h-96">
+        <table className="w-full text-xs text-left border-collapse">
+          <thead className="sticky top-0 bg-ctp-crust/80 backdrop-blur-sm text-ctp-subtext0 z-10">
+            <tr>
+              <th className="px-3 py-2 border-b border-ctp-surface1 w-12">
+                Step
+              </th>
+              <th className="px-3 py-2 border-b border-ctp-surface1">
+                Configuration
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {configurations.map((config) => {
+              const isCurrent = config.index === step;
+              const rowClassName = isCurrent ? "bg-ctp-green/20" : "";
+              const prefix = config.index > 0 ? "⊢ " : "  ";
+
+              return (
+                <tr
+                  key={config.index}
+                  ref={(element) => {
+                    rowRefs.current[config.index.toString()] = element;
+                  }}
+                  className={rowClassName}
+                >
+                  <td className="px-3 py-1.5 border-b border-ctp-surface0 text-ctp-mauve font-semibold w-12">
+                    {config.index}
+                  </td>
+                  <td className="px-3 py-1.5 border-b border-ctp-surface0 text-ctp-text whitespace-nowrap font-mono">
+                    <span className="text-ctp-subtext1 mr-2 inline-block w-4 text-center">
+                      {prefix}
+                    </span>
+                    (
+                    <span className="text-ctp-mauve">
+                      {"{" + config.states.join(", ") + "}"}
+                    </span>
+                    ,{" "}
+                    <span className="text-ctp-green">
+                      {config.remainingInput}
+                    </span>
+                    )
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
