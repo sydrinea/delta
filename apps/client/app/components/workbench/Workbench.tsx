@@ -330,7 +330,8 @@ function DesktopWorkbench<M>({
       {/* Left Panel: Tabs & Editor/Canvas/Visualizer */}
       <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
         <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0">
-          <div className="flex items-center gap-4">
+          {/* Add shrink-0 here so the tabs NEVER shrink */}
+          <div className="flex items-center gap-4 shrink-0">
             {visibleTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -346,12 +347,13 @@ function DesktopWorkbench<M>({
             ))}
           </div>
 
+          {/* Ensure the dropdown itself is allowed to shrink */}
           <RecipeDropdown
             recipeEntries={recipeEntries}
             selectedRecipeKey={selectedRecipeKey}
             applyRecipe={applyRecipe}
             selectedRecipeLabel={selectedRecipeLabel}
-            className="ml-auto pb-2"
+            className="ml-auto pb-2 shrink"
           />
         </div>
 
@@ -502,16 +504,20 @@ function RecipeDropdown({
       as="div"
       value={selectedRecipeKey}
       onChange={applyRecipe}
-      className={className}
+      className={`min-w-0 ${className}`}
     >
       <div className="relative w-full md:w-auto min-w-32">
-        <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1 text-xs text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve">
-          <span className={selectedRecipeKey ? "" : "text-ctp-subtext1"}>
+        <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1 text-xs text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve overflow-hidden">
+          <span
+            className={`block overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
+              selectedRecipeKey ? "" : "text-ctp-subtext1"
+            }`}
+          >
             {selectedRecipeLabel}
           </span>
         </ListboxButton>
         <svg
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none bg-ctp-mantle"
           viewBox="0 0 12 12"
           fill="none"
           stroke="currentColor"
