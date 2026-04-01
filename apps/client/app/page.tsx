@@ -57,7 +57,7 @@ const blocks: FeatureBlock[] = [
     border: "border-ctp-green/25",
     shadow: "shadow-ctp-green/10",
     labelColor: "text-ctp-green",
-    href: "https://github.com/sydrinea/delta/blob/main/docs/quick-start.md",
+    href: "/guide/quick-start",
     label: "read →",
     external: true,
   },
@@ -106,7 +106,7 @@ export default function Home() {
         <h1 className="text-ctp-text text-3xl font-bold mb-4 leading-tight">
           design, test, and visualize automata
         </h1>
-        <p className="text-ctp-subtext0 text-sm max-w-md mx-auto leading-relaxed font-sans">
+        <p className="text-ctp-subtext0 max-w-md mx-auto leading-relaxed font-sans">
           A code-first environment for finite automata and Turing machines.
           Write machines as TypeScript, run test suites, and step through
           execution visually.
@@ -134,7 +134,7 @@ export default function Home() {
                 {block.label}
               </span>
             </div>
-            <p className="font-sans text-ctp-subtext1 text-xs leading-relaxed">
+            <p className="font-sans text-ctp-subtext1 leading-relaxed">
               {block.description}
             </p>
           </Link>

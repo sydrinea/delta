@@ -2,7 +2,6 @@
 
 import { simulate } from "@delta/simulator";
 import { Workbench } from "@/components/workbench/Workbench";
-// import { WhatsNewModal } from "@/components/WhatsNewModal";
 import type { NFA } from "@delta/build";
 
 export default function Page() {
@@ -17,7 +16,6 @@ export default function Page() {
           visualizer: true,
         }}
       />
-      {/* <WhatsNewModal /> */}
     </section>
   );
 }

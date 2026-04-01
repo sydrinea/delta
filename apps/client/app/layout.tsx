@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Syne, Recursive } from "next/font/google";
+import { Syne, Recursive, Cormorant } from "next/font/google";
 import Layout from "@/components/Layout";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
@@ -13,6 +13,11 @@ const syne = Syne({
 
 const recursiveMono = Recursive({
   variable: "--font-recursive-mono",
+  subsets: ["latin"],
+});
+
+const cormorant = Cormorant({
+  variable: "--font-cormorant",
   subsets: ["latin"],
 });
 
@@ -58,25 +63,25 @@ export default function RootLayout({
     <html
       suppressHydrationWarning
       lang="en"
-      className={`overscroll-none bg-ctp-base ${recursiveMono.variable} ${syne.variable} antialiased font-sans`}
+      className={`overscroll-none bg-ctp-base ${recursiveMono.variable} ${syne.variable} ${cormorant.variable} antialiased font-sans`}
       dir="ltr"
     >
       <body>
-        <SerwistProvider swUrl="/serwist/sw.js">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem={true}
-            value={{
-              light: "latte",
-              dark: "mocha",
-            }}
-          >
-            <div id="dark-mode-root">
-              <Layout>{children}</Layout>
-            </div>
-          </ThemeProvider>
-        </SerwistProvider>
+        {/* <SerwistProvider swUrl="/serwist/sw.js"> */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+          value={{
+            light: "latte",
+            dark: "mocha",
+          }}
+        >
+          <div id="dark-mode-root">
+            <Layout>{children}</Layout>
+          </div>
+        </ThemeProvider>
+        {/* </SerwistProvider> */}
       </body>
     </html>
   );

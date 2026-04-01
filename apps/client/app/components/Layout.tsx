@@ -8,7 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ToastProvider>
       <AlertProvider>
-        <main className="relative h-dvh flex flex-col font-mono">
+        <main className="relative min-h-dvh flex flex-col font-mono">
           <Loader />
           <Navbar />
           {children}

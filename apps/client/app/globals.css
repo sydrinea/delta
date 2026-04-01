@@ -1,20 +1,58 @@
 @import "tailwindcss";
+@import "@catppuccin/tailwindcss/mocha.css";
+
+@plugin "@tailwindcss/typography";
 
 @theme {
   --font-sans: var(--font-syne);
   --font-mono: var(--font-recursive-mono);
+
+  --animate-toast-in: toast-in 0.3s ease-out forwards;
+  --animate-toast-out: toast-out 0.3s ease-in forwards;
 }
 
-@layer utilities {
-  .font-sans {
-    font-family: var(--font-sans);
-    font-size: 12pt;
+@utility font-sans {
+  font-family: var(--font-sans);
+  font-size: 12pt;
+}
+
+@layer components {
+  /* Documentation Markdown Overrides */
+  .doc-prose {
+    @apply max-w-full;
+  }
+  .doc-prose :is(h1, h2, h3) {
+    @apply scroll-mt-24 cursor-pointer;
+  }
+  .doc-prose pre {
+    @apply bg-ctp-mantle border border-ctp-surface0 rounded-lg;
+  }
+  .doc-prose code {
+    @apply font-mono tracking-wide;
+  }
+
+  /* Table Overrides */
+  .doc-prose table {
+    @apply rounded-xl border border-ctp-surface0 bg-ctp-mantle border-separate border-spacing-0 shadow-sm p-2;
+  }
+  .doc-prose thead {
+    @apply bg-ctp-crust/80 text-ctp-subtext0;
+  }
+  .doc-prose thead th {
+    @apply p-3 border-b border-ctp-surface1 font-semibold;
+  }
+  .doc-prose tbody tr:last-child {
+    @apply border-b-0;
+  }
+  .doc-prose tbody tr:nth-child(even) {
+    @apply bg-ctp-surface0/30;
+  }
+  .doc-prose tbody td {
+    @apply text-ctp-text p-5;
   }
 }
 
-@import "@catppuccin/tailwindcss/mocha.css";
-@plugin "@tailwindcss/typography";
-
+/* Keyframes */
 @keyframes toast-cover {
   from {
     transform: scaleX(0);
@@ -48,11 +86,19 @@
   }
 }
 
-@theme {
-  --animate-toast-in: toast-in 0.3s ease-out forwards;
-  --animate-toast-out: toast-out 0.3s ease-in forwards;
+@keyframes workbenchDotFade {
+  0% {
+    opacity: 0.2;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.2;
+  }
 }
 
+/* Standard CSS Selectors */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
@@ -107,18 +153,4 @@ input[type="range"]::-moz-range-thumb {
   border-radius: 9999px;
   opacity: 0.2;
   animation: workbenchDotFade 660ms infinite ease-in-out;
-}
-
-@keyframes workbenchDotFade {
-  0% {
-    opacity: 0.2;
-  }
-
-  40% {
-    opacity: 1;
-  }
-
-  100% {
-    opacity: 0.2;
-  }
 }
