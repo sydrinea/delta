@@ -1,5 +1,4 @@
-import { type NFA } from "@delta/build";
-import { epsilonClosure } from "../../transform/src/utils";
+import { epsilonClosure, type NFA } from "@delta/build";
 
 export interface SimulationStep {
   symbol: string | null;

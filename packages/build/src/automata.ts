@@ -62,6 +62,22 @@ export abstract class Automata {
   }
 
   /**
+   * Returns all error-severity messages collected so far.
+   */
+  protected errors(): Message[] {
+    return this._messages.filter((m) => m.severity === "error");
+  }
+
+  /**
+   * Throws the provided build error when at least one error message exists.
+   */
+  protected throwIfAnyErrors<E extends Error>(createError: () => E): void {
+    if (this.errors().length > 0) {
+      throw createError();
+    }
+  }
+
+  /**
    * Describe the alphabet.
    */
   public alphabet(...symbols: string[]): this {

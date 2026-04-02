@@ -5,25 +5,46 @@ const MessageSchema = z.object({
   severity: z.enum(["warning", "error"]),
 });
 
+const stringSetAdapter = z
+  .union([z.set(z.string()), z.array(z.string())])
+  .transform<
+    Set<string>
+  >((value) => (value instanceof Set ? new Set(value) : new Set(value)));
+
+const stringKeyMapAdapter = <V>(valueSchema: z.ZodType<V>) =>
+  z
+    .union([z.map(z.string(), valueSchema), z.record(z.string(), valueSchema)])
+    .transform<
+      Map<string, V>
+    >((value) => (value instanceof Map ? new Map(value) : new Map(Object.entries(value) as [string, V][])));
+
+const nfaTransitionsAdapter = stringKeyMapAdapter(
+  stringKeyMapAdapter(stringSetAdapter),
+);
+
+const tmTransitionsAdapter = stringKeyMapAdapter(
+  stringKeyMapAdapter(z.unknown()),
+);
+
 export const NFASchema = z.strictObject({
   name: z.string(),
-  alphabet: z.instanceof(Set<string>),
-  states: z.instanceof(Set<string>),
+  alphabet: stringSetAdapter,
+  states: stringSetAdapter,
   startState: z.string(),
-  acceptStates: z.instanceof(Set<string>),
-  transitions: z.instanceof(Map<string, Map<string, Set<string>>>),
+  acceptStates: stringSetAdapter,
+  transitions: nfaTransitionsAdapter,
   messages: z.array(MessageSchema),
 });
 
 export const TMSchema = z.strictObject({
   name: z.string(),
-  alphabet: z.instanceof(Set<string>),
-  states: z.instanceof(Set<string>),
+  alphabet: stringSetAdapter,
+  states: stringSetAdapter,
   startState: z.string(),
-  acceptStates: z.instanceof(Set<string>),
+  acceptStates: stringSetAdapter,
   tapeCount: z.number().int().positive(),
-  tapeAlphabet: z.instanceof(Set<string>),
+  tapeAlphabet: stringSetAdapter,
   blankSymbol: z.string(),
-  transitions: z.instanceof(Map<string, Map<string, unknown>>),
+  transitions: tmTransitionsAdapter,
   messages: z.array(MessageSchema),
 });

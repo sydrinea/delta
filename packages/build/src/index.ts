@@ -8,6 +8,7 @@ export * from "./thompson";
 export * from "./tm";
 export * from "./schemas";
 export * from "./regular-grammar";
+export * from "./utils";
 
 export { default as grammar } from "./regular-grammar";
 export { default as dfa } from "./dfa";

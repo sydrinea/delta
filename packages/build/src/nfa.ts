@@ -238,10 +238,7 @@ export class NFABuilder extends Automata {
       }
     }
 
-    const errors = this._messages.filter((m) => m.severity === "error");
-    if (errors.length > 0) {
-      throw new NFABuildError(this._messages);
-    }
+    this.throwIfAnyErrors(() => new NFABuildError(this._messages));
 
     return {
       name: this._name,

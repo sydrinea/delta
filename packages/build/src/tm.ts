@@ -320,10 +320,7 @@ export abstract class BaseTMBuilder extends Automata {
   }
 
   protected throwIfErrors(): void {
-    const errors = this._messages.filter((m) => m.severity === "error");
-    if (errors.length > 0) {
-      throw new TMBuildError(this._messages);
-    }
+    this.throwIfAnyErrors(() => new TMBuildError(this._messages));
   }
 
   protected markBuilt(): void {

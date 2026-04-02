@@ -62,3 +62,101 @@ describe("subset construction: empty string with two states", () => {
     });
   });
 });
+
+describe("subset construction: empty alphabet is handled", () => {
+  const emptyAlphabetNfa = nfa("empty alphabet")
+    .states("q0", "q1")
+    .start("q0")
+    .accept("q1")
+    .transition("q0", EPS, "q1")
+    .build();
+
+  const dfa = convertToDFA(emptyAlphabetNfa);
+
+  it("creates one state from initial epsilon closure", () => {
+    expect(dfa.states).toStrictEqual(new Set(["{q0,q1}"]));
+  });
+
+  it("keeps alphabet empty and has no outgoing transitions", () => {
+    expect(dfa.alphabet).toStrictEqual(new Set());
+    expect(dfa.transitions.get("{q0,q1}")?.size ?? 0).toBe(0);
+  });
+
+  it("marks closure state as accepting", () => {
+    expect(dfa.acceptStates).toStrictEqual(new Set(["{q0,q1}"]));
+  });
+});
+
+describe("subset construction: unreachable accepting states stay unreachable", () => {
+  const unreachableAcceptNfa = nfa("unreachable accept")
+    .alphabet("a")
+    .states("q0", "q1", "qDead")
+    .start("q0")
+    .accept("qDead")
+    .transition("q0", "a", "q1")
+    .transition("q1", "a", "q1")
+    .build();
+
+  const dfa = convertToDFA(unreachableAcceptNfa);
+
+  it("does not generate accepting DFA states", () => {
+    expect(dfa.acceptStates).toStrictEqual(new Set());
+  });
+
+  it("contains only reachable subset states", () => {
+    expect(dfa.states).toStrictEqual(new Set(["{q0}", "{q1}"]));
+  });
+});
+
+describe("subset construction: generated names with preserveNames=false", () => {
+  const namedNfa = nfa("renaming")
+    .alphabet("a", "b")
+    .states("q10", "q20", "q30")
+    .start("q10")
+    .accept("q30")
+    .transition("q10", "a", "q20")
+    .transition("q10", "b", "q10")
+    .transition("q20", "a", "q20")
+    .transition("q20", "b", "q30")
+    .transition("q30", "a", "q20")
+    .transition("q30", "b", "q10")
+    .build();
+
+  const dfa = convertToDFA(namedNfa, { preserveNames: false });
+
+  it("uses generated qN state names", () => {
+    expect(dfa.startState).toBe("q0");
+    expect([...dfa.states].every((s) => /^q\d+$/.test(s))).toBe(true);
+  });
+
+  it("keeps transition graph deterministic after renaming", () => {
+    const startTransitions = dfa.transitions.get(dfa.startState);
+    expect(startTransitions?.size).toBe(2);
+    expect(startTransitions?.get("a")?.size).toBe(1);
+    expect(startTransitions?.get("b")?.size).toBe(1);
+  });
+});
+
+describe("subset construction: epsilon chain before first symbol", () => {
+  const epsilonChainNfa = nfa("epsilon chain")
+    .alphabet("a")
+    .states("q0", "q1", "q2", "q3")
+    .start("q0")
+    .accept("q3")
+    .transition("q0", EPS, "q1")
+    .transition("q1", EPS, "q2")
+    .transition("q2", "a", "q3")
+    .build();
+
+  const dfa = convertToDFA(epsilonChainNfa);
+
+  it("expands start closure across epsilon chain", () => {
+    expect(dfa.startState).toBe("{q0,q1,q2}");
+  });
+
+  it("reaches accepting state after one symbol", () => {
+    const onA = dfa.transitions.get("{q0,q1,q2}")?.get("a");
+    expect(onA).toStrictEqual(new Set(["{q3}"]));
+    expect(dfa.acceptStates).toStrictEqual(new Set(["{q3}"]));
+  });
+});
