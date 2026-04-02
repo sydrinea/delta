@@ -11,7 +11,7 @@ import {
   Copy,
   Maximize,
   Minimize2,
-  LayoutTemplate,
+  Network,
   Code,
 } from "lucide-react";
 import { toPng, toSvg } from "./helpers";
@@ -252,7 +252,7 @@ export function GraphvizViewer({
       id: "dot",
       label: "Copy DOT",
       color: "hover:text-ctp-blue",
-      icon: LayoutTemplate,
+      icon: Network,
       handler: handleCopyDot,
     },
   ] as const;

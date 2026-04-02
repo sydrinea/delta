@@ -14,7 +14,6 @@ const TABS = [
   { label: "NFA / DFA", href: "/nfa" },
   { label: "PDA", href: "/pda" },
   { label: "TM", href: "/tm" },
-  { label: "Guide", href: "/guide " },
 ] as const;
 
 const MadeBy = () => (
