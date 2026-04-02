@@ -55,15 +55,16 @@ export interface TraceBottomPanelContext<M extends VisualMachine> {
   setHoveredEdgeId: (edgeId: string | null) => void;
 }
 
-interface TraceContextValue<M extends VisualMachine> {
-  machine: M | null;
+interface TraceInputContextValue {
   tests: TestCase[];
   input: string;
   setInput: (value: string) => void;
   selectedTest: string;
   setSelectedTest: (value: string) => void;
-  hoveredEdgeId: string | null;
-  setHoveredEdgeId: (id: string | null) => void;
+}
+
+interface TraceSimulationContextValue<M extends VisualMachine> {
+  machine: M | null;
   simulation: TraceSimulationResult | null;
   trace: TraceStep[];
   step: number;
@@ -74,16 +75,29 @@ interface TraceContextValue<M extends VisualMachine> {
   isEmpty: boolean;
   isLast: boolean;
   accepted: boolean;
+  getInputTokens: (args: TraceInputArgs) => TraceInputToken[];
+  bottomPanel?: (context: TraceBottomPanelContext<M>) => ReactNode;
+}
+
+interface TraceInteractionContextValue {
+  hoveredEdgeId: string | null;
+  setHoveredEdgeId: (id: string | null) => void;
   focused: boolean;
   onFocus: () => void;
   onBlur: () => void;
   onTouchStart: (e: React.TouchEvent) => void;
   onTouchEnd: (e: React.TouchEvent) => void;
-  getInputTokens: (args: TraceInputArgs) => TraceInputToken[];
-  bottomPanel?: (context: TraceBottomPanelContext<M>) => ReactNode;
 }
 
-const TraceContext = createContext<TraceContextValue<any> | null>(null);
+type TraceContextValue<M extends VisualMachine> = TraceInputContextValue &
+  TraceSimulationContextValue<M> &
+  TraceInteractionContextValue;
+
+const TraceInputContext = createContext<TraceInputContextValue | null>(null);
+const TraceSimulationContext =
+  createContext<TraceSimulationContextValue<VisualMachine> | null>(null);
+const TraceInteractionContext =
+  createContext<TraceInteractionContextValue | null>(null);
 
 interface TraceProviderProps<M extends VisualMachine> {
   children: ReactNode;
@@ -113,7 +127,7 @@ export function TraceProvider<M extends VisualMachine>({
     return simulate(machine, input);
   }, [input, machine, simulate]);
 
-  const trace = simulation?.trace ?? [];
+  const trace = useMemo(() => simulation?.trace ?? [], [simulation]);
   const maxStep = Math.max(0, trace.length - 1);
 
   const { step, focused, onFocus, onBlur, onTouchStart, onTouchEnd } =
@@ -135,43 +149,114 @@ export function TraceProvider<M extends VisualMachine>({
   const isLast = safeStep === maxStep;
   const accepted = simulation?.accepted ?? false;
 
-  const value: TraceContextValue<M> = {
-    machine,
-    tests,
-    input,
-    setInput,
-    selectedTest,
-    setSelectedTest,
-    hoveredEdgeId,
-    setHoveredEdgeId,
-    simulation,
-    trace,
-    step,
-    maxStep,
-    safeStep,
-    current,
-    dot,
-    isEmpty,
-    isLast,
-    accepted,
-    focused,
-    onFocus,
-    onBlur,
-    onTouchStart,
-    onTouchEnd,
-    getInputTokens,
-    bottomPanel,
-  };
+  const inputValue = useMemo<TraceInputContextValue>(
+    () => ({
+      tests,
+      input,
+      setInput,
+      selectedTest,
+      setSelectedTest,
+    }),
+    [tests, input, selectedTest],
+  );
+
+  const simulationValue = useMemo<TraceSimulationContextValue<M>>(
+    () => ({
+      machine,
+      simulation,
+      trace,
+      step,
+      maxStep,
+      safeStep,
+      current,
+      dot,
+      isEmpty,
+      isLast,
+      accepted,
+      getInputTokens,
+      bottomPanel,
+    }),
+    [
+      machine,
+      simulation,
+      trace,
+      step,
+      maxStep,
+      safeStep,
+      current,
+      dot,
+      isEmpty,
+      isLast,
+      accepted,
+      getInputTokens,
+      bottomPanel,
+    ],
+  );
+
+  const interactionValue = useMemo<TraceInteractionContextValue>(
+    () => ({
+      hoveredEdgeId,
+      setHoveredEdgeId,
+      focused,
+      onFocus,
+      onBlur,
+      onTouchStart,
+      onTouchEnd,
+    }),
+    [hoveredEdgeId, focused, onFocus, onBlur, onTouchStart, onTouchEnd],
+  );
 
   return (
-    <TraceContext.Provider value={value}>{children}</TraceContext.Provider>
+    <TraceInputContext.Provider value={inputValue}>
+      <TraceSimulationContext.Provider
+        value={
+          simulationValue as unknown as TraceSimulationContextValue<VisualMachine>
+        }
+      >
+        <TraceInteractionContext.Provider value={interactionValue}>
+          {children}
+        </TraceInteractionContext.Provider>
+      </TraceSimulationContext.Provider>
+    </TraceInputContext.Provider>
   );
 }
 
-export function useTraceContext<M extends VisualMachine>() {
-  const context = useContext(TraceContext);
+export function useTraceInputContext() {
+  const context = useContext(TraceInputContext);
   if (!context) {
-    throw new Error("useTraceContext must be used within a TraceProvider");
+    throw new Error("useTraceInputContext must be used within a TraceProvider");
   }
-  return context as unknown as TraceContextValue<M>;
+  return context;
+}
+
+export function useTraceSimulationContext<M extends VisualMachine>() {
+  const context = useContext(TraceSimulationContext);
+  if (!context) {
+    throw new Error(
+      "useTraceSimulationContext must be used within a TraceProvider",
+    );
+  }
+  return context as unknown as TraceSimulationContextValue<M>;
+}
+
+export function useTraceInteractionContext() {
+  const context = useContext(TraceInteractionContext);
+  if (!context) {
+    throw new Error(
+      "useTraceInteractionContext must be used within a TraceProvider",
+    );
+  }
+  return context;
+}
+
+export function useTraceContext<M extends VisualMachine>() {
+  const inputContext = useTraceInputContext();
+  const simulationContext = useTraceSimulationContext<M>();
+  const interactionContext = useTraceInteractionContext();
+
+  return {
+    ...inputContext,
+    ...simulationContext,
+    ...interactionContext,
+  } as TraceContextValue<M>;
 }

@@ -19,8 +19,10 @@ import { DeltaEditor } from "@/components/editor/DeltaEditor";
 import { FlowEditor } from "@/components/editor/FlowEditor";
 import { Trace } from "@/components/visualize/Trace";
 import {
+  type TraceBottomPanelContext,
   TraceProvider,
-  useTraceContext,
+  useTraceInteractionContext,
+  useTraceSimulationContext,
 } from "@/components/visualize/TraceContext";
 import { TransitionTable } from "@/components/visualize/TransitionTable";
 import { ConfigurationTable } from "@/components/visualize/ConfigurationTable";
@@ -146,7 +148,8 @@ function useWorkbenchLogic<M>(props: WorkbenchProps<M>) {
     }
   };
 
-  const { dot: activeDot, setHoveredEdgeId } = useTraceContext<any>();
+  const { dot: activeDot } = useTraceSimulationContext<NFA | TuringMachine>();
+  const { setHoveredEdgeId } = useTraceInteractionContext();
 
   const machineDot = useMemo(() => {
     if (activeDot) return activeDot;
@@ -492,7 +495,7 @@ function RecipeDropdown({
   selectedRecipeLabel,
   className = "",
 }: {
-  recipeEntries: [string, any][];
+  recipeEntries: [string, { label: string }][];
   selectedRecipeKey: string;
   applyRecipe: (key: string) => void;
   selectedRecipeLabel: string;
@@ -562,14 +565,16 @@ export function Workbench<M>(props: WorkbenchProps<M>) {
   const { resolvedTheme } = useTheme();
 
   return (
-    <TraceProvider<any>
+    <TraceProvider<NFA | TuringMachine>
       machine={currentConfig.store.machine}
       tests={currentConfig.store.tests}
       simulate={
-        storeScope === "nfa"
-          ? (m: NFA, i: string) => simulateNFA(m, i)
-          : (m: TuringMachine, i: string) =>
-              simulateTM(m, i, { maxSteps: Math.max(1000, i.length * 100) })
+        (machine, input) =>
+          storeScope === "nfa"
+            ? simulateNFA(machine as NFA, input)
+            : simulateTM(machine as TuringMachine, input, {
+                maxSteps: Math.max(1000, input.length * 100),
+              })
       }
       getDot={(m, s) =>
         storeScope === "nfa"
@@ -648,7 +653,13 @@ export function Workbench<M>(props: WorkbenchProps<M>) {
       }}
       bottomPanel={
         storeScope === "tm"
-          ? ({ machine, current, hoveredEdgeId, isLast, accepted }: any) => (
+          ? ({
+              machine,
+              current,
+              hoveredEdgeId,
+              isLast,
+              accepted,
+            }: TraceBottomPanelContext<NFA | TuringMachine>) => (
               <TransitionTable
                 machine={machine as TuringMachine}
                 current={current}
@@ -658,7 +669,13 @@ export function Workbench<M>(props: WorkbenchProps<M>) {
               />
             )
           : storeScope === "nfa"
-            ? ({ trace, step, input, isLast, accepted }: any) => (
+            ? ({
+                trace,
+                step,
+                input,
+                isLast,
+                accepted,
+              }: TraceBottomPanelContext<NFA | TuringMachine>) => (
                 <ConfigurationTable
                   trace={trace}
                   step={step}

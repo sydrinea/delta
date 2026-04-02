@@ -1,7 +1,13 @@
 "use client";
 
 import { useMemo, useRef, Fragment } from "react";
-import { useTraceContext, type VisualMachine } from "./TraceContext";
+import {
+  type TraceInputToken,
+  useTraceInputContext,
+  useTraceInteractionContext,
+  useTraceSimulationContext,
+  type VisualMachine,
+} from "./TraceContext";
 import { type NFA } from "@delta/build";
 import {
   Listbox,
@@ -14,13 +20,11 @@ import {
 export function Trace<M extends VisualMachine>() {
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const { tests, input, setInput, selectedTest, setSelectedTest } =
+    useTraceInputContext();
+
   const {
     machine,
-    tests,
-    input,
-    setInput,
-    selectedTest,
-    setSelectedTest,
     trace,
     step,
     maxStep,
@@ -29,17 +33,20 @@ export function Trace<M extends VisualMachine>() {
     isEmpty,
     isLast,
     accepted,
+    getInputTokens,
+    bottomPanel,
+    dot,
+  } = useTraceSimulationContext<M>();
+
+  const {
+    hoveredEdgeId,
+    setHoveredEdgeId,
     focused,
     onFocus,
     onBlur,
     onTouchStart,
     onTouchEnd,
-    getInputTokens,
-    bottomPanel,
-    dot,
-    hoveredEdgeId,
-    setHoveredEdgeId,
-  } = useTraceContext<M>();
+  } = useTraceInteractionContext();
 
   const handleTestSelect = (testId: string) => {
     setSelectedTest(testId);
@@ -59,7 +66,7 @@ export function Trace<M extends VisualMachine>() {
         isLast,
       }) ?? [];
 
-    const rows = new Map<number, any[]>();
+    const rows = new Map<number, TraceInputToken[]>();
     tokens.forEach((token) => {
       const row = token.row ?? 0;
       const existing = rows.get(row) ?? [];
