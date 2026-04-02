@@ -188,6 +188,7 @@ function NfaWorkbenchInner({
   const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme);
   return <WorkbenchScaffold logic={logic} />;
 }
+
 export function NfaWorkbench({
   enabledTabs = DEFAULT_TABS,
 }: NfaWorkbenchProps) {

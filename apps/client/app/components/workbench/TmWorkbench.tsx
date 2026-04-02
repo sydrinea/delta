@@ -131,7 +131,7 @@ function getTmInputTokens(args: TraceInputArgs) {
               : "text-ctp-text",
         };
       },
-    });
+    }).map((token) => ({ ...token, row }));
   });
 }
 
