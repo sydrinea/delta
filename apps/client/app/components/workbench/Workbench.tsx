@@ -9,7 +9,8 @@ import {
   Transition,
 } from "@headlessui/react";
 import { ReactFlowProvider } from "reactflow";
-import { useDeltaStore } from "@/store/deltaStore";
+import { useNfaStore } from "@/store/nfaStore";
+import { useTmStore } from "@/store/tmStore";
 import { MachineTypes, type MachineType } from "../../lib/worker/protocol";
 import { TM, type NFA, type TuringMachine } from "@delta/build";
 import { nfaToFlow } from "@/lib/flow/toFlow";
@@ -73,16 +74,16 @@ function useWorkbenchLogic<M>(props: WorkbenchProps<M>) {
   const [pendingTab, setPendingTab] = useState<TabId | null>(null);
   const [selectedRecipeKey, setSelectedRecipeKey] = useState("");
 
-  const nfa = useDeltaStore((s) => s.nfa);
-  const tm = useDeltaStore((s) => s.tm);
-  const setNfa = useDeltaStore((s) => s.actions.setNfa);
-  const setTm = useDeltaStore((s) => s.actions.setTm);
+  const nfa = useNfaStore((s) => s);
+  const tm = useTmStore((s) => s);
+  const patchNfa = useNfaStore((s) => s.patch);
+  const patchTm = useTmStore((s) => s.patch);
   const { showAlert } = useAlert();
   const { resolvedTheme } = useTheme();
 
   const scopeConfig = {
-    nfa: { store: nfa, setScopeState: setNfa },
-    tm: { store: tm, setScopeState: setTm },
+    nfa: { store: nfa, setScopeState: patchNfa },
+    tm: { store: tm, setScopeState: patchTm },
   };
 
   const currentConfig = scopeConfig[storeScope];
@@ -175,7 +176,7 @@ function useWorkbenchLogic<M>(props: WorkbenchProps<M>) {
   const confirmTabChange = () => {
     if (pendingTab === "canvas" && storeScope === "nfa" && nfa.machine) {
       const { nodes, edges } = nfaToFlow(nfa.machine);
-      setNfa({ nodes, edges, startId: nfa.machine.startState });
+      patchNfa({ nodes, edges, startId: nfa.machine.startState });
     }
     if (pendingTab) {
       setEditorErrors(null);
@@ -554,8 +555,8 @@ function RecipeDropdown({
 // --- Main Export ---
 export function Workbench<M>(props: WorkbenchProps<M>) {
   const storeScope = props.storeScope;
-  const nfa = useDeltaStore((s) => s.nfa);
-  const tm = useDeltaStore((s) => s.tm);
+  const nfa = useNfaStore((s) => s);
+  const tm = useTmStore((s) => s);
   const scopeConfig = { nfa: { store: nfa }, tm: { store: tm } };
   const currentConfig = scopeConfig[storeScope as WorkbenchScope];
   const { resolvedTheme } = useTheme();

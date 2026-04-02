@@ -1,13 +1,14 @@
 import { useCallback } from "react";
 import { runCode, type ExecutionError } from "@/lib/runCode";
 import type { NFA, TuringMachine } from "@delta/build";
-import { useDeltaStore } from "@/store/deltaStore";
+import { useNfaStore } from "@/store/nfaStore";
+import { useTmStore } from "@/store/tmStore";
 
 type CompileScope = "nfa" | "tm";
 
 export function useCompile(scope: CompileScope) {
-  const setNfa = useDeltaStore((s) => s.actions.setNfa);
-  const setTm = useDeltaStore((s) => s.actions.setTm);
+  const patchNfa = useNfaStore((s) => s.patch);
+  const patchTm = useTmStore((s) => s.patch);
 
   return useCallback(
     (code: string) =>
@@ -16,20 +17,20 @@ export function useCompile(scope: CompileScope) {
           runCode<NFA>(
             code,
             "nfa",
-            (compiledMachine: NFA) => setNfa({ machine: compiledMachine }),
+            (compiledMachine: NFA) => patchNfa({ machine: compiledMachine }),
             (errors: ExecutionError[] | null) =>
-              setNfa({ editorErrors: errors }),
+              patchNfa({ editorErrors: errors }),
           ),
         tm: () =>
           runCode<TuringMachine>(
             code,
             "tm",
             (compiledMachine: TuringMachine) =>
-              setTm({ machine: compiledMachine }),
+              patchTm({ machine: compiledMachine }),
             (errors: ExecutionError[] | null) =>
-              setTm({ editorErrors: errors }),
+              patchTm({ editorErrors: errors }),
           ),
       })[scope](),
-    [scope, setNfa, setTm],
+    [scope, patchNfa, patchTm],
   );
 }

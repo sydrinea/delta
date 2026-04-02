@@ -4,7 +4,8 @@ import { useEffect, useRef } from "react";
 import Editor, { OnChange, OnMount, useMonaco } from "@monaco-editor/react";
 import * as MonacoEditor from "monaco-editor";
 import defineThemes from "./defineTheme";
-import { useDeltaStore } from "@/store/deltaStore";
+import { useNfaStore } from "@/store/nfaStore";
+import { useTmStore } from "@/store/tmStore";
 import { useCompile } from "@/hooks/useCompile";
 import { Caution } from "@/icons/Caution";
 import { useTheme } from "next-themes";
@@ -20,15 +21,15 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
   );
   const { resolvedTheme } = useTheme();
 
-  const setNfa = useDeltaStore((s) => s.actions.setNfa);
-  const setTm = useDeltaStore((s) => s.actions.setTm);
+  const patchNfa = useNfaStore((s) => s.patch);
+  const patchTm = useTmStore((s) => s.patch);
   const editorValue = {
-    nfa: useDeltaStore((s) => s.nfa.editorValue),
-    tm: useDeltaStore((s) => s.tm.editorValue),
+    nfa: useNfaStore((s) => s.editorValue),
+    tm: useTmStore((s) => s.editorValue),
   }[scope];
   const editorErrors = {
-    nfa: useDeltaStore((s) => s.nfa.editorErrors),
-    tm: useDeltaStore((s) => s.tm.editorErrors),
+    nfa: useNfaStore((s) => s.editorErrors),
+    tm: useTmStore((s) => s.editorErrors),
   }[scope];
   const editorPath = {
     nfa: "file:///main.nfa.ts",
@@ -138,8 +139,8 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
 
   const handleChange: OnChange = (value) => {
     const set = {
-      tm: setTm,
-      nfa: setNfa,
+      tm: patchTm,
+      nfa: patchNfa,
     };
     set[scope]({ editorValue: value ?? "" });
   };

@@ -24,7 +24,7 @@ import ReactFlow, {
 } from "reactflow";
 import { flavors } from "@catppuccin/palette";
 import "reactflow/dist/style.css";
-import { useDeltaStore } from "@/store/deltaStore";
+import { useNfaStore } from "@/store/nfaStore";
 import { getFlowElementsFromDot } from "./layoutNFA";
 import { toDot } from "@/lib/dot";
 import { themeNames } from "@/lib/theme";
@@ -45,10 +45,10 @@ function AutomataEdge({
   const [label, setLabel] = useState(data?.label ?? "a");
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const nodes = useDeltaStore((s) => s.nfa.nodes);
-  const edges = useDeltaStore((s) => s.nfa.edges);
-  const startId = useDeltaStore((s) => s.nfa.startId);
-  const syncFromFlow = useDeltaStore((s) => s.actions.syncNfaFromFlow);
+  const nodes = useNfaStore((s) => s.nodes);
+  const edges = useNfaStore((s) => s.edges);
+  const startId = useNfaStore((s) => s.startId);
+  const syncFromFlow = useNfaStore((s) => s.syncFromFlow);
 
   const { resolvedTheme } = useTheme();
 
@@ -174,12 +174,12 @@ const nodeTypes = { state: StateNode };
 const edgeTypes = { automata: AutomataEdge };
 
 export function FlowEditor() {
-  const machine = useDeltaStore((s) => s.nfa.machine);
-  const storeNodes = useDeltaStore((s) => s.nfa.nodes);
-  const storeEdges = useDeltaStore((s) => s.nfa.edges);
-  const startId = useDeltaStore((s) => s.nfa.startId);
-  const setNfa = useDeltaStore((s) => s.actions.setNfa);
-  const syncFromFlow = useDeltaStore((s) => s.actions.syncNfaFromFlow);
+  const machine = useNfaStore((s) => s.machine);
+  const storeNodes = useNfaStore((s) => s.nodes);
+  const storeEdges = useNfaStore((s) => s.edges);
+  const startId = useNfaStore((s) => s.startId);
+  const patchNfa = useNfaStore((s) => s.patch);
+  const syncFromFlow = useNfaStore((s) => s.syncFromFlow);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
@@ -224,11 +224,11 @@ export function FlowEditor() {
       },
     ) => {
       if (!pendingStateRef.current) {
-        const state = useDeltaStore.getState();
+        const state = useNfaStore.getState();
         pendingStateRef.current = {
-          nodes: state.nfa.nodes,
-          edges: state.nfa.edges,
-          startId: state.nfa.startId,
+          nodes: state.nodes,
+          edges: state.edges,
+          startId: state.startId,
         };
       }
 
@@ -284,8 +284,8 @@ export function FlowEditor() {
   ]);
 
   const onNodeDragStop = useCallback(() => {
-    const globalState = useDeltaStore.getState();
-    syncFromFlow(getNodes(), globalState.nfa.edges, globalState.nfa.startId);
+    const globalState = useNfaStore.getState();
+    syncFromFlow(getNodes(), globalState.edges, globalState.startId);
   }, [getNodes, syncFromFlow]);
 
   const handleNodesChange = useCallback(
@@ -328,9 +328,9 @@ export function FlowEditor() {
           return { nodes: nextNodes, edges: validEdges, startId: nextStartId };
         });
       } else {
-        const state = useDeltaStore.getState();
-        const nextNodes = applyNodeChanges(changes, state.nfa.nodes);
-        syncFromFlow(nextNodes, state.nfa.edges, state.nfa.startId);
+        const state = useNfaStore.getState();
+        const nextNodes = applyNodeChanges(changes, state.nodes);
+        syncFromFlow(nextNodes, state.edges, state.startId);
       }
     },
     [onNodesChange, batchStoreUpdate, syncFromFlow],
@@ -348,9 +348,9 @@ export function FlowEditor() {
           return { ...prev, edges: nextEdges };
         });
       } else {
-        const state = useDeltaStore.getState();
-        const nextEdges = applyEdgeChanges(changes, state.nfa.edges);
-        syncFromFlow(state.nfa.nodes, nextEdges, state.nfa.startId);
+        const state = useNfaStore.getState();
+        const nextEdges = applyEdgeChanges(changes, state.edges);
+        syncFromFlow(state.nodes, nextEdges, state.startId);
       }
     },
     [onEdgesChange, batchStoreUpdate, syncFromFlow],
@@ -396,11 +396,11 @@ export function FlowEditor() {
     const newNodes = [...nodes, newNode];
     const newStartId = startId ?? id;
 
-    if (!startId) setNfa({ startId: id });
+    if (!startId) patchNfa({ startId: id });
 
     setInUseStates((prev) => [...prev, smallestGap]);
     syncFromFlow(newNodes, edges, newStartId);
-  }, [inUseStates, nodes, edges, startId, setNfa, syncFromFlow]);
+  }, [inUseStates, nodes, edges, startId, patchNfa, syncFromFlow]);
 
   const toggleAccept = useCallback(() => {
     const newNodes = nodes.map((n) =>

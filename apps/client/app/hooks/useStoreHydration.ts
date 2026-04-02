@@ -1,10 +1,18 @@
 import { useEffect, useState } from "react";
-import { useDeltaStore } from "@/store/deltaStore";
+import { useAppStore } from "@/store/appStore";
+import { useNfaStore } from "@/store/nfaStore";
+import { useTmStore } from "@/store/tmStore";
+
+function hasHydratedAllStores() {
+  return (
+    useAppStore.persist.hasHydrated() &&
+    useNfaStore.persist.hasHydrated() &&
+    useTmStore.persist.hasHydrated()
+  );
+}
 
 export function useStoreHydration() {
-  const [isStoreHydrated, setIsStoreHydrated] = useState(() =>
-    useDeltaStore.persist.hasHydrated(),
-  );
+  const [isStoreHydrated, setIsStoreHydrated] = useState(hasHydratedAllStores);
   const [hasMetLoaderMinimum, setHasMetLoaderMinimum] = useState(false);
 
   useEffect(() => {
@@ -18,17 +26,32 @@ export function useStoreHydration() {
   }, []);
 
   useEffect(() => {
-    const unhydrate = useDeltaStore.persist.onHydrate(() => {
+    const markHydrating = () => {
       setIsStoreHydrated(false);
-    });
+    };
 
-    const finishHydration = useDeltaStore.persist.onFinishHydration(() => {
-      setIsStoreHydrated(true);
-    });
+    const markFinished = () => {
+      setIsStoreHydrated(hasHydratedAllStores());
+    };
+
+    const unhydrateApp = useAppStore.persist.onHydrate(markHydrating);
+    const unhydrateNfa = useNfaStore.persist.onHydrate(markHydrating);
+    const unhydrateTm = useTmStore.persist.onHydrate(markHydrating);
+
+    const finishHydrationApp =
+      useAppStore.persist.onFinishHydration(markFinished);
+    const finishHydrationNfa =
+      useNfaStore.persist.onFinishHydration(markFinished);
+    const finishHydrationTm =
+      useTmStore.persist.onFinishHydration(markFinished);
 
     return () => {
-      unhydrate();
-      finishHydration();
+      unhydrateApp();
+      unhydrateNfa();
+      unhydrateTm();
+      finishHydrationApp();
+      finishHydrationNfa();
+      finishHydrationTm();
     };
   }, []);
 
