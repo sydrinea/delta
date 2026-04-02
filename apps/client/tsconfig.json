@@ -25,7 +25,7 @@
       "@delta/examples": ["../../examples/generated/index.ts"],
       // app-scoped deps
       "@/components/*": ["./app/components/*"],
-      "@/icons/*": ["./app/components/icons/*"],
+      "@/icons": ["./app/icons.tsx"],
       "@/store/*": ["./app/store/*"],
       "@/hooks/*": ["./app/hooks/*"],
       "@/lib/*": ["./app/lib/*"],

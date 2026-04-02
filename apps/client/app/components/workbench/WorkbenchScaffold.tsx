@@ -8,12 +8,11 @@ import {
   ListboxOptions,
   Transition,
 } from "@headlessui/react";
+import { Check, Share2 } from "lucide-react";
 import { GraphvizViewer } from "@/components/visualize/GraphvizViewer";
 import { TestSuite } from "@/components/TestSuite";
 import { Tooltip } from "@/components/Tooltip";
 import { ConfirmModal } from "@/components/ConfirmModal";
-import { Check } from "@/icons/Check";
-import { Share } from "@/icons/Share";
 import type { WorkbenchLogic } from "./types";
 
 interface WorkbenchScaffoldProps<M extends { name?: string }> {
@@ -190,7 +189,11 @@ function WorkbenchHeader<M extends { name?: string }>({
               onClick={handleShare}
               className="text-ctp-overlay0 hover:text-ctp-text transition-colors flex items-center shrink-0"
             >
-              {copied ? <Check /> : <Share />}
+              {copied ? (
+                <Check className="w-4 h-4" />
+              ) : (
+                <Share2 className="w-4 h-4" />
+              )}
             </button>
           </Tooltip>
         </div>

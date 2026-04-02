@@ -7,7 +7,7 @@ import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
 } from "@/lib/navigation-loader-config";
-import { Heart } from "./icons/Heart";
+import { Heart } from "lucide-react";
 import { version } from "../../package.json";
 
 const TABS = [
@@ -24,7 +24,8 @@ const MadeBy = () => (
     rel="noopener noreferrer"
     className="flex items-center gap-1.5 text-ctp-overlay1 hover:text-ctp-text transition-colors text-xs"
   >
-    made with <Heart /> by @sydrinea
+    made with <Heart className="w-3 h-3 text-ctp-pink" fill="currentColor" /> by
+    @sydrinea
   </a>
 );
 

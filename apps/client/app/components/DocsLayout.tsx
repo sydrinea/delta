@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { type Heading, NAV } from "../guide/nav";
-import { GitHub } from "@/icons/GitHub";
+import { GitHubIcon } from "./GitHubIcon";
 
 interface ToCProps {
   headings: Heading[];
@@ -202,7 +202,7 @@ export default function DocsLayout({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-peach/35 border border-ctp-peach/55 text-ctp-text hover:bg-ctp-peach/45 transition-colors"
                   >
-                    <GitHub className="w-3.5 h-3.5" />
+                    <GitHubIcon className="w-3.5 h-3.5" />
                     Edit on GitHub
                   </a>
                   <a
@@ -211,7 +211,7 @@ export default function DocsLayout({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-red/35 border border-ctp-red/55 text-ctp-text hover:bg-ctp-red/45 transition-colors"
                   >
-                    <GitHub className="w-3.5 h-3.5" />
+                    <GitHubIcon className="w-3.5 h-3.5" />
                     Report issue
                   </a>
                 </div>

@@ -6,7 +6,7 @@ import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
 } from "@/lib/navigation-loader-config";
-import { GitHub } from "@/icons/GitHub";
+import { GitHubIcon } from "@/components/GitHubIcon";
 import deltaLogo from "../public/android-chrome-192x192.png";
 import Image from "next/image";
 
@@ -149,7 +149,7 @@ export default function Home() {
           className="p-2 rounded-lg text-ctp-overlay0 hover:text-ctp-text hover:bg-ctp-surface0 border border-transparent hover:border-ctp-surface1 transition-all duration-200"
           aria-label="View on GitHub"
         >
-          <GitHub className="w-5 h-5" />
+          <GitHubIcon className="w-5 h-5" />
         </a>
       </div>
     </div>

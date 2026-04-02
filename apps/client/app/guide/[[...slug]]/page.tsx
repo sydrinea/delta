@@ -14,15 +14,12 @@ import { notFound } from "next/navigation";
 
 const GITHUB_REPO = "https://github.com/sydrinea/delta";
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
-
 function extractHeadings(markdown: string): Heading[] {
   const slugger = new Slugger();
   return markdown.split("\n").flatMap((line) => {
     const m = line.match(/^(#{1,3})\s+(.+)/);
     if (!m) return [];
     const text = m[2].trim();
-    // Use github-slugger to match what rehype-slug generates
     return [{ level: m[1].length, text, id: slugger.slug(text) }];
   });
 }

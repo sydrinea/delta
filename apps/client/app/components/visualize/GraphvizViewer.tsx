@@ -5,13 +5,15 @@ import { createPortal } from "react-dom";
 import { instance } from "@viz-js/viz";
 import { Transition, TransitionChild } from "@headlessui/react";
 import { Tooltip } from "../Tooltip";
-import { Check } from "../icons/Check";
-import { Graph } from "../icons/Graph";
-import { Download } from "../icons/Download";
-import { Copy } from "../icons/Copy";
-import { Svg } from "../icons/Svg";
-import { Fullscreen } from "../icons/Fullscreen";
-import { Minimize } from "../icons/Minimize";
+import {
+  Check,
+  Download,
+  Copy,
+  Maximize,
+  Minimize2,
+  LayoutTemplate,
+  Code,
+} from "lucide-react";
 import { toPng, toSvg } from "./helpers";
 
 interface GraphvizViewerProps {
@@ -243,14 +245,14 @@ export function GraphvizViewer({
       id: "svg",
       label: "Copy SVG",
       color: "hover:text-ctp-yellow",
-      icon: Svg,
+      icon: Code,
       handler: handleCopySvg,
     },
     {
       id: "dot",
       label: "Copy DOT",
       color: "hover:text-ctp-blue",
-      icon: Graph,
+      icon: LayoutTemplate,
       handler: handleCopyDot,
     },
   ] as const;
@@ -295,7 +297,7 @@ export function GraphvizViewer({
             onClick={() => setIsFullscreen((value) => !value)}
             className="shrink-0 hover:cursor-pointer p-1.5 rounded-full text-ctp-overlay0 hover:text-ctp-mauve hover:bg-ctp-surface0 transition-colors flex items-center justify-center w-7 h-7"
           >
-            {isFullscreen ? <Minimize /> : <Fullscreen />}
+            {isFullscreen ? <Minimize2 /> : <Maximize />}
           </button>
         </Tooltip>
       </div>
