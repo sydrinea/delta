@@ -12,6 +12,7 @@ import { Check, Share2 } from 'lucide-react'
 import { Fragment } from 'react'
 import { ConfirmModal, TestSuite, Tooltip } from '../ui'
 import { GraphvizViewer } from '../visualize'
+import { TabSwitcher } from './TabSwitcher'
 
 interface WorkbenchShellProps<M extends { name?: string }> {
   logic: WorkbenchLogic<M>
@@ -34,11 +35,13 @@ function MobileWorkbench<M extends { name?: string }>({
   const { machine, tests, setTests, simulate } = logic
 
   return (
-    <div className="flex flex-col md:hidden w-full h-full overflow-y-auto min-w-0 p-4 gap-6">
+    <div className="flex flex-col md:hidden w-full h-full overflow-hidden min-w-0 p-4 gap-4">
       <WorkbenchHeader logic={logic} />
 
-      <div className="flex-1 w-full min-h-75">
-        {machine && <div className="h-full">{logic.activeTabContent}</div>}
+      <TabSwitcher logic={logic} />
+
+      <div className="flex-1 min-w-0 overflow-hidden">
+        {machine && <div className="h-full overflow-y-auto">{logic.activeTabContent}</div>}
       </div>
 
       <TestSuite

@@ -50,9 +50,18 @@ const STYLE_MAP = {
 
 export function Tooltip({ label, children }: TooltipProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const lastTouchAtRef = useRef(0)
   const [pos, setPos] = useState<Pos | null>(null)
 
   const show = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Ignore synthetic mouseenter events that can fire after touch on mobile.
+    if (Date.now() - lastTouchAtRef.current < 1000)
+      return
+
+    // Tooltips should only appear on hover-capable pointing devices.
+    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches)
+      return
+
     if (e.pointerType !== 'mouse')
       return
 
@@ -74,6 +83,14 @@ export function Tooltip({ label, children }: TooltipProps) {
     <div
       ref={ref}
       className="relative"
+      onPointerDownCapture={(event) => {
+        if (event.pointerType !== 'mouse') {
+          lastTouchAtRef.current = Date.now()
+        }
+
+        setPos(null)
+      }}
+      onClickCapture={() => setPos(null)}
       onPointerEnter={show}
       onPointerLeave={() => setPos(null)}
     >

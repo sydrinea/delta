@@ -113,7 +113,7 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
 
         adapters.setTests(testsWithFreshIds)
         adapters.setEditorValue(
-          fetchedCode.replace('// @ts-nocheck', '').trim(),
+          fetchedCode.replace('//@ts-nocheck', '').trim(),
         )
         adapters.clearEditorErrors()
         compile(fetchedCode)
