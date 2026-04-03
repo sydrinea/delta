@@ -1,1 +1,1 @@
-export { epsilonClosure } from "@delta/build";
+export { epsilonClosure } from '@delta/build'

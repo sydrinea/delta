@@ -1,10 +1,11 @@
-import { NFA, TuringMachine, EPSILON } from "@delta/build";
+import type { NFA, TuringMachine } from '@delta/build'
+import type { Theme } from './theme'
+import { flavors } from '@catppuccin/palette'
+import { EPSILON } from '@delta/build'
 import {
   buildTMTransitionRows,
   formatReadTuple,
-} from "../components/visualize/metadata";
-import { Theme } from "./theme";
-import { flavors } from "@catppuccin/palette";
+} from '../components/visualize/metadata'
 
 const COLORS = {
   latte: {
@@ -23,13 +24,13 @@ const COLORS = {
     edge: flavors.mocha.colors.text.hex,
     background: flavors.mocha.colors.mantle.hex,
   },
-} as const;
+} as const
 
 interface DotMachineBase {
-  name: string;
-  states: Set<string>;
-  startState: string;
-  acceptStates: Set<string>;
+  name: string
+  states: Set<string>
+  startState: string
+  acceptStates: Set<string>
 }
 
 function dotMachineStateStyle(
@@ -38,52 +39,51 @@ function dotMachineStateStyle(
   theme: Theme,
   activeStates?: Set<string>,
 ): string {
-  const isAccept = machine.acceptStates.has(state);
-  const isActive = activeStates?.has(state) ?? false;
-  const shape = isAccept ? "doublecircle" : "circle";
-  const palette = COLORS[theme];
+  const isAccept = machine.acceptStates.has(state)
+  const isActive = activeStates?.has(state) ?? false
+  const shape = isAccept ? 'doublecircle' : 'circle'
+  const palette = COLORS[theme]
 
   if (isActive) {
-    return `"${state}" [shape=${shape} style=filled fillcolor="${palette.active}" fontcolor="${palette.activeFontColor}" color="${palette.active}"]`;
+    return `"${state}" [shape=${shape} style=filled fillcolor="${palette.active}" fontcolor="${palette.activeFontColor}" color="${palette.active}"]`
   }
 
-  return `"${state}" [shape=${shape} style=filled fillcolor="${palette.background}" fontcolor="${palette.defaultFontColor}" color="${palette.default}"]`;
+  return `"${state}" [shape=${shape} style=filled fillcolor="${palette.background}" fontcolor="${palette.defaultFontColor}" color="${palette.default}"]`
 }
 
 function dotTransitions(nfa: NFA): string {
-  const edgeMap = new Map<string, string[]>();
+  const edgeMap = new Map<string, string[]>()
 
   for (const [from, symbolMap] of nfa.transitions) {
     for (const [symbol, toSet] of symbolMap) {
       for (const to of toSet) {
-        const key = `${from}→${to}`;
+        const key = `${from}→${to}`
         if (!edgeMap.has(key)) {
-          edgeMap.set(key, []);
+          edgeMap.set(key, [])
         }
-        edgeMap.get(key)!.push(symbol === EPSILON ? "ε" : symbol);
+        edgeMap.get(key)!.push(symbol === EPSILON ? 'ε' : symbol)
       }
     }
   }
 
-  return [...edgeMap.entries()]
-    .map(([key, symbols]) => {
-      const [from, to] = key.split("→");
-      return `  "${from}" -> "${to}" [label="${symbols.join(", ")}"]`;
-    })
-    .join("\n");
+  return Array.from(edgeMap.entries(), ([key, symbols]) => {
+    const [from, to] = key.split('→')
+    return `  "${from}" -> "${to}" [label="${symbols.join(', ')}"]`
+  })
+    .join('\n')
 }
 
 function dotTMTransitions(tm: TuringMachine<any>): string {
   const edgeMap = new Map<
     string,
-    { edgeId: string; fromState: string; toState: string; labels: Set<string> }
-  >();
+    { edgeId: string, fromState: string, toState: string, labels: Set<string> }
+  >()
 
   for (const row of buildTMTransitionRows(tm)) {
-    const existing = edgeMap.get(row.edgeKey);
+    const existing = edgeMap.get(row.edgeKey)
     if (existing) {
-      existing.labels.add(formatReadTuple(row.readSymbols));
-      continue;
+      existing.labels.add(formatReadTuple(row.readSymbols))
+      continue
     }
 
     edgeMap.set(row.edgeKey, {
@@ -91,15 +91,14 @@ function dotTMTransitions(tm: TuringMachine<any>): string {
       fromState: row.fromState,
       toState: row.toState,
       labels: new Set([formatReadTuple(row.readSymbols)]),
-    });
+    })
   }
 
-  return [...edgeMap.values()]
-    .map((edge) => {
-      const label = [...edge.labels].sort().join("\\n");
-      return `  "${edge.fromState}" -> "${edge.toState}" [id="${edge.edgeId}" label="${label}"]`;
-    })
-    .join("\n");
+  return Array.from(edgeMap.values(), (edge) => {
+    const label = [...edge.labels].sort().join('\\n')
+    return `  "${edge.fromState}" -> "${edge.toState}" [id="${edge.edgeId}" label="${label}"]`
+  })
+    .join('\n')
 }
 
 function toDotWithStyle<T extends DotMachineBase>(
@@ -109,15 +108,14 @@ function toDotWithStyle<T extends DotMachineBase>(
   activeStates?: Set<string>,
   graphAttributes: string[] = [],
 ): string {
-  const palette = COLORS[theme];
+  const palette = COLORS[theme]
 
-  const states = [...machine.states]
-    .map((s) => `  ${dotMachineStateStyle(s, machine, theme, activeStates)}`)
-    .join("\n");
+  const states = Array.from(machine.states, s => `  ${dotMachineStateStyle(s, machine, theme, activeStates)}`)
+    .join('\n')
 
-  const start = `  __start__ [shape=point fillcolor="${palette.default}" color="${palette.default}"]\n  __start__ -> "${machine.startState}" [color="${palette.edge}"]`;
-  const attrs =
-    graphAttributes.length > 0 ? `\n  ${graphAttributes.join("\n  ")}` : "";
+  const start = `  __start__ [shape=point fillcolor="${palette.default}" color="${palette.default}"]\n  __start__ -> "${machine.startState}" [color="${palette.edge}"]`
+  const attrs
+    = graphAttributes.length > 0 ? `\n  ${graphAttributes.join('\n  ')}` : ''
 
   return `digraph "${machine.name}" {
   rankdir=LR${attrs}
@@ -130,7 +128,7 @@ ${start}
 ${states}
 
 ${transitions(machine)}
-}`;
+}`
 }
 
 export function toDot(
@@ -138,7 +136,7 @@ export function toDot(
   theme: Theme,
   activeStates?: Set<string>,
 ): string {
-  return toDotWithStyle(nfa, dotTransitions, theme, activeStates);
+  return toDotWithStyle(nfa, dotTransitions, theme, activeStates)
 }
 
 export function toDotTM(
@@ -147,10 +145,10 @@ export function toDotTM(
   activeStates?: Set<string>,
 ): string {
   return toDotWithStyle(tm, dotTMTransitions, theme, activeStates, [
-    "splines=true",
-    "overlap=false",
-    "concentrate=false",
-    "nodesep=0.45",
-    "ranksep=0.6",
-  ]);
+    'splines=true',
+    'overlap=false',
+    'concentrate=false',
+    'nodesep=0.45',
+    'ranksep=0.6',
+  ])
 }

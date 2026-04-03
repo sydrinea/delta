@@ -1,20 +1,20 @@
+import type { WorkerRequest, WorkerResponse } from './protocol'
 import {
+  isWorkerResponse,
   WorkerDispatchError,
   WorkerErrorCodes,
-  isWorkerResponse,
-  type WorkerRequest,
-  type WorkerResponse,
-} from "./protocol";
+
+} from './protocol'
 
 export class WorkerTimeoutError extends Error {
   constructor(message: string) {
-    super(message);
-    this.name = "WorkerTimeoutError";
+    super(message)
+    this.name = 'WorkerTimeoutError'
   }
 }
 
 export function createWorkerRequestId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`
 }
 
 export function sendWorkerRequest<TData = unknown, TDetail = unknown>(
@@ -23,46 +23,48 @@ export function sendWorkerRequest<TData = unknown, TDetail = unknown>(
   timeoutMs: number,
 ): Promise<WorkerResponse<TData, TDetail>> {
   return new Promise((resolve, reject) => {
-    const cleanup = () => {
-      clearTimeout(timeout);
-      worker.onmessage = null;
-      worker.onerror = null;
-    };
+    let timeout: ReturnType<typeof setTimeout>
 
-    const timeout = setTimeout(() => {
-      cleanup();
+    const cleanup = () => {
+      clearTimeout(timeout)
+      worker.onmessage = null
+      worker.onerror = null
+    }
+
+    timeout = setTimeout(() => {
+      cleanup()
       reject(
-        new WorkerTimeoutError("Execution timed out (Possible infinite loop)"),
-      );
-    }, timeoutMs);
+        new WorkerTimeoutError('Execution timed out (Possible infinite loop)'),
+      )
+    }, timeoutMs)
 
     worker.onmessage = (event: MessageEvent<unknown>) => {
-      const payload = event.data;
+      const payload = event.data
 
       if (!isWorkerResponse(payload)) {
-        cleanup();
+        cleanup()
         reject(
           new WorkerDispatchError(
             WorkerErrorCodes.InvalidResponse,
-            "Worker returned an invalid response envelope",
+            'Worker returned an invalid response envelope',
           ),
-        );
-        return;
+        )
+        return
       }
 
       if (payload.id !== request.id) {
-        return;
+        return
       }
 
-      cleanup();
-      resolve(payload as WorkerResponse<TData, TDetail>);
-    };
+      cleanup()
+      resolve(payload as WorkerResponse<TData, TDetail>)
+    }
 
     worker.onerror = (error) => {
-      cleanup();
-      reject(new Error(error.message || "Worker error"));
-    };
+      cleanup()
+      reject(new Error(error.message || 'Worker error'))
+    }
 
-    worker.postMessage(request);
-  });
+    worker.postMessage(request)
+  })
 }

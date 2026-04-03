@@ -1,9 +1,9 @@
-import { defineConfig } from "vitest/config";
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   resolve: {
     alias: {
-      "@delta/shared": "../shared/src/index.ts",
+      '@delta/shared': '../shared/src/index.ts',
     },
   },
-});
+})

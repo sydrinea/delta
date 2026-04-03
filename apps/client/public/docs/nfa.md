@@ -5,15 +5,15 @@ Nondeterministic Finite Automata allow multiple transitions on the same symbol a
 ## Basic Structure
 
 ```ts
-import { nfa, EPS } from "@delta/build";
+import { EPS, nfa } from '@delta/build'
 
-const machine = nfa("name")
-  .alphabet("0", "1")
-  .states("q0", "q1", "q2")
-  .start("q0")
-  .accept("q2")
+const machine = nfa('name')
+  .alphabet('0', '1')
+  .states('q0', 'q1', 'q2')
+  .start('q0')
+  .accept('q2')
   // transitions...
-  .build();
+  .build()
 ```
 
 The alphabet must not include `EPS` — epsilon is a reserved symbol used only in transition calls.
@@ -46,9 +46,9 @@ The core transition method. Unlike a DFA, you can add multiple transitions from 
 
 ```ts
 builder
-  .state("q0")
-  .loop("a") // q0 --a--> q0
-  .to("q1", "b"); // q0 --b--> q1
+  .state('q0')
+  .loop('a') // q0 --a--> q0
+  .to('q1', 'b') // q0 --b--> q1
 ```
 
 Call `.done()` on the proxy to return to the builder.
@@ -60,12 +60,12 @@ Call `.done()` on the proxy to return to the builder.
 ```ts
 // Loop on "0" in every state whose name starts with "q"
 builder.batch(
-  (s) => s.startsWith("q"),
-  (proxy) => proxy.loop("0"),
-);
+  s => s.startsWith('q'),
+  proxy => proxy.loop('0'),
+)
 
 // Apply to every state
-builder.all((proxy) => proxy.loop("b"));
+builder.all(proxy => proxy.loop('b'))
 ```
 
 ## Validation

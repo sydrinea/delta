@@ -5,13 +5,13 @@
 The build package lives in the monorepo workspace. Import from `@delta/build`:
 
 ```ts
-import { dfa, nfa, tm, multitape, thompson } from "@delta/build";
+import { dfa, multitape, nfa, thompson, tm } from '@delta/build'
 ```
 
 For epsilon transitions in NFAs, import the constant:
 
 ```ts
-import { EPS } from "@delta/build";
+import { EPS } from '@delta/build'
 ```
 
 ## The Builder Pattern
@@ -26,16 +26,16 @@ All builders share the same lifecycle:
 Every builder throws a typed error (`NFABuildError` / `TMBuildError`) on `.build()` if there are validation errors, and attaches warnings to the returned model for non-fatal issues.
 
 ```ts
-const machine = dfa("example")
-  .alphabet("0", "1")
-  .states("q0", "q1")
-  .start("q0")
-  .accept("q1")
-  .transition("q0", "0", "q1")
-  .transition("q0", "1", "q0")
-  .transition("q1", "0", "q1")
-  .transition("q1", "1", "q1")
-  .build();
+const machine = dfa('example')
+  .alphabet('0', '1')
+  .states('q0', 'q1')
+  .start('q0')
+  .accept('q1')
+  .transition('q0', '0', 'q1')
+  .transition('q0', '1', 'q0')
+  .transition('q1', '0', 'q1')
+  .transition('q1', '1', 'q1')
+  .build()
 ```
 
 ## Shared Methods
@@ -54,7 +54,7 @@ These methods are available on every builder:
 Generates a sequential list of state names `["q0", "q1", ..., "qN"]`, useful when you have many numbered states:
 
 ```ts
-import { q } from "@delta/build";
+import { q } from '@delta/build'
 
-builder.states(...q(0, 7)); // → "q0" through "q7"
+builder.states(...q(0, 7)) // → "q0" through "q7"
 ```

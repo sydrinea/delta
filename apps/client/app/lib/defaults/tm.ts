@@ -62,6 +62,6 @@ const machine = Delta.tm("binary palindrome")
   )
   .build();
 
-export default machine;`;
+export default machine;`
 
-export default source;
+export default source

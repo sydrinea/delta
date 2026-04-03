@@ -1,37 +1,37 @@
-import { type TuringMachine } from "@delta/build";
+import type { TuringMachine } from '@delta/build'
 
 interface TapeTransition {
-  toState: string;
-  writeSymbol: string;
-  direction: "L" | "R" | "S";
+  toState: string
+  writeSymbol: string
+  direction: 'L' | 'R' | 'S'
 }
 
 export interface TMConfiguration {
-  state: string;
-  heads: number[];
-  tapes: Map<number, string>[];
+  state: string
+  heads: number[]
+  tapes: Map<number, string>[]
 }
 
 export interface SimulationStep {
-  step: number;
-  states: Set<string>;
-  configurations: number;
-  tapes: string[][];
+  step: number
+  states: Set<string>
+  configurations: number
+  tapes: string[][]
 }
 
 export interface SimulationResult {
-  accepted: boolean;
-  halted: boolean;
-  exceededStepLimit: boolean;
-  trace: SimulationStep[];
+  accepted: boolean
+  halted: boolean
+  exceededStepLimit: boolean
+  trace: SimulationStep[]
 }
 
 export interface SimulationOptions {
-  maxSteps?: number;
-  maxConfigurations?: number;
+  maxSteps?: number
+  maxConfigurations?: number
 }
 
-const DEFAULT_MAX_STEPS = 10_000;
+const DEFAULT_MAX_STEPS = 10_000
 
 function writeTapeSymbol(
   tape: Map<number, string>,
@@ -40,10 +40,10 @@ function writeTapeSymbol(
   blankSymbol: string,
 ): void {
   if (symbol === blankSymbol) {
-    tape.delete(index);
-    return;
+    tape.delete(index)
+    return
   }
-  tape.set(index, symbol);
+  tape.set(index, symbol)
 }
 
 function applyMultiTapeTransition(
@@ -51,30 +51,30 @@ function applyMultiTapeTransition(
   transitions: TapeTransition[],
   blankSymbol: string,
 ): TMConfiguration {
-  const nextTapes = config.tapes.map((t) => new Map(t));
-  const nextHeads = [...config.heads];
+  const nextTapes = config.tapes.map(t => new Map(t))
+  const nextHeads = [...config.heads]
 
   transitions.forEach((transition, tapeIndex) => {
-    const head = nextHeads[tapeIndex] ?? 0;
-    const tape = nextTapes[tapeIndex] ?? new Map<number, string>();
-    writeTapeSymbol(tape, head, transition.writeSymbol, blankSymbol);
+    const head = nextHeads[tapeIndex] ?? 0
+    const tape = nextTapes[tapeIndex] ?? new Map<number, string>()
+    writeTapeSymbol(tape, head, transition.writeSymbol, blankSymbol)
 
-    nextHeads[tapeIndex] =
-      head +
-      (transition.direction === "L"
-        ? -1
-        : transition.direction === "R"
-          ? 1
-          : 0);
+    nextHeads[tapeIndex]
+      = head
+        + (transition.direction === 'L'
+          ? -1
+          : transition.direction === 'R'
+            ? 1
+            : 0)
 
-    nextTapes[tapeIndex] = tape;
-  });
+    nextTapes[tapeIndex] = tape
+  })
 
   return {
     state: transitions[0]?.toState ?? config.state,
     heads: nextHeads,
     tapes: nextTapes,
-  };
+  }
 }
 
 function resolveMultiTapeStep(
@@ -82,15 +82,13 @@ function resolveMultiTapeStep(
   config: TMConfiguration,
   blankSymbol: string,
 ): TapeTransition[] | null {
-  const readTuple = [...Array(machine.tapeCount).keys()].map(
-    (tapeIndex) =>
-      config.tapes[tapeIndex]?.get(config.heads[tapeIndex] ?? 0) ?? blankSymbol,
-  );
-  const tupleKey = readTuple.join("\u001F");
-  const stateTuples = machine.transitions.get(config.state);
-  const tupleTransition = stateTuples?.get(tupleKey);
+  const readTuple = Array.from({ length: machine.tapeCount }, (_, tapeIndex) =>
+    config.tapes[tapeIndex]?.get(config.heads[tapeIndex] ?? 0) ?? blankSymbol)
+  const tupleKey = readTuple.join('\u001F')
+  const stateTuples = machine.transitions.get(config.state)
+  const tupleTransition = stateTuples?.get(tupleKey)
   if (!tupleTransition) {
-    return null;
+    return null
   }
 
   return tupleTransition.directions.map((direction, tapeIndex) => ({
@@ -98,28 +96,28 @@ function resolveMultiTapeStep(
     writeSymbol:
       tupleTransition.writeSymbols[tapeIndex] ?? readTuple[tapeIndex],
     direction,
-  }));
+  }))
 }
 
 function contentBounds(
   tape: Map<number, string>,
   blankSymbol: string,
 ): [number, number] | null {
-  let min = Infinity;
-  let max = -Infinity;
+  let min = Infinity
+  let max = -Infinity
 
   for (const [index, symbol] of tape.entries()) {
     if (symbol !== blankSymbol) {
       if (index < min) {
-        min = index;
+        min = index
       }
       if (index > max) {
-        max = index;
+        max = index
       }
     }
   }
 
-  return min <= max ? [min, max] : null;
+  return min <= max ? [min, max] : null
 }
 
 function tapeToReadout(
@@ -128,38 +126,38 @@ function tapeToReadout(
   blankSymbol: string,
   padding = 1,
 ): string[] {
-  const bounds = contentBounds(tape, blankSymbol);
-  const [min, max] = bounds ? bounds : [head, head];
+  const bounds = contentBounds(tape, blankSymbol)
+  const [min, max] = bounds || [head, head]
 
-  const start = Math.min(head, min - padding);
-  const end = Math.max(head, max + padding);
-  const out: string[] = [];
+  const start = Math.min(head, min - padding)
+  const end = Math.max(head, max + padding)
+  const out: string[] = []
 
   for (let index = start; index <= end; index += 1) {
-    const symbol = tape.get(index) ?? blankSymbol;
-    out.push(index === head ? `[${symbol}]` : symbol);
+    const symbol = tape.get(index) ?? blankSymbol
+    out.push(index === head ? `[${symbol}]` : symbol)
   }
 
-  return out;
+  return out
 }
 
 function tapesOf(config: TMConfiguration, blankSymbol: string): string[][] {
   return config.tapes.map((tape, index) =>
     tapeToReadout(tape, config.heads[index] ?? 0, blankSymbol),
-  );
+  )
 }
 
 export function formatTrace(trace: SimulationStep[]): string {
   return trace
     .map((step) => {
-      const states = [...step.states].sort().join(", ") || "(none)";
-      const header = `step ${step.step} | states: ${states} | configurations: ${step.configurations}`;
+      const states = [...step.states].sort().join(', ') || '(none)'
+      const header = `step ${step.step} | states: ${states} | configurations: ${step.configurations}`
       const tapes = step.tapes.map(
-        (tape, i) => `  ${i + 1}. ${tape.join(" ")}`,
-      );
-      return [header, ...tapes].join("\n");
+        (tape, i) => `  ${i + 1}. ${tape.join(' ')}`,
+      )
+      return [header, ...tapes].join('\n')
     })
-    .join("\n\n");
+    .join('\n\n')
 }
 
 export function simulate(
@@ -167,26 +165,26 @@ export function simulate(
   input: string,
   options: SimulationOptions = {},
 ): SimulationResult {
-  const maxSteps = options.maxSteps ?? DEFAULT_MAX_STEPS;
+  const maxSteps = options.maxSteps ?? DEFAULT_MAX_STEPS
 
-  const tapeCount = machine.tapeCount;
-  const tapes = [...Array(tapeCount).keys()].map(() => {
-    const tape = new Map<number, string>();
-    tape.set(0, machine.blankSymbol);
-    tape.set(1, machine.blankSymbol);
-    return tape;
-  });
+  const tapeCount = machine.tapeCount
+  const tapes = Array.from({ length: tapeCount }, () => {
+    const tape = new Map<number, string>()
+    tape.set(0, machine.blankSymbol)
+    tape.set(1, machine.blankSymbol)
+    return tape
+  })
 
   for (let i = 0; i < input.length; i += 1) {
-    tapes[0]?.set(i + 1, input[i]);
+    tapes[0]?.set(i + 1, input[i])
   }
-  tapes[0]?.set(input.length + 1, machine.blankSymbol);
+  tapes[0]?.set(input.length + 1, machine.blankSymbol)
 
   const initial: TMConfiguration = {
     state: machine.startState,
-    heads: [...Array(tapeCount).keys()].map(() => 0),
+    heads: Array.from({ length: tapeCount }).fill(0),
     tapes,
-  };
+  }
 
   const trace: SimulationStep[] = [
     {
@@ -195,15 +193,15 @@ export function simulate(
       configurations: 1,
       tapes: tapesOf(initial, machine.blankSymbol),
     },
-  ];
+  ]
 
-  let current = initial;
+  let current = initial
   for (let step = 0; step < maxSteps; step += 1) {
     const transitions = resolveMultiTapeStep(
       machine,
       current,
       machine.blankSymbol,
-    );
+    )
 
     if (!transitions || transitions.length === 0) {
       return {
@@ -211,21 +209,21 @@ export function simulate(
         halted: true,
         exceededStepLimit: false,
         trace,
-      };
+      }
     }
 
     current = applyMultiTapeTransition(
       current,
       transitions,
       machine.blankSymbol,
-    );
+    )
 
     trace.push({
       step: step + 1,
       states: new Set([current.state]),
       configurations: 1,
       tapes: tapesOf(current, machine.blankSymbol),
-    });
+    })
   }
 
   return {
@@ -233,5 +231,5 @@ export function simulate(
     halted: false,
     exceededStepLimit: true,
     trace,
-  };
+  }
 }

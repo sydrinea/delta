@@ -1,17 +1,18 @@
-import { EPS, EPSILON } from "./constants";
+import type { AutomataModel, Message } from './automata'
 import {
   Automata,
   AutomataMessages,
-  type AutomataModel,
-  type Message,
-} from "./automata";
-export type { Message } from "./automata";
+
+} from './automata'
+import { EPS, EPSILON } from './constants'
+
+export type { Message } from './automata'
 
 export interface NFA extends AutomataModel {
   /**
    * The transition function of the NFA (𝛿)
    */
-  transitions: Map<string, Map<string, Set<string>>>;
+  transitions: Map<string, Map<string, Set<string>>>
 }
 
 /**
@@ -24,34 +25,34 @@ export const NFAMessages = {
   missingTransition: (state: string, symbol: string) =>
     `State '${state}' has no transition for symbol '${symbol}'`,
   epsilonInAlphabet: `${EPS} cannot be declared as part of the alphabet`,
-} as const;
+} as const
 
 export class NFABuildError extends Error {
   constructor(public messages: Message[]) {
-    super("NFA Build Failed");
-    this.name = "NFABuildError";
-    Object.setPrototypeOf(this, NFABuildError.prototype);
+    super('NFA Build Failed')
+    this.name = 'NFABuildError'
+    Object.setPrototypeOf(this, NFABuildError.prototype)
   }
 }
 
 export class NFABuilder extends Automata {
-  protected _transitions: Map<string, Map<string, Set<string>>> = new Map();
-  protected _built = false;
+  protected _transitions: Map<string, Map<string, Set<string>>> = new Map()
+  protected _built = false
 
   /**
    * Entrypoint for the builder
    * @param name a name for the {@link NFA}
    */
   constructor(name: string) {
-    super(name);
+    super(name)
   }
 
   protected override startStateNotDeclaredMessage(state: string): string {
-    return NFAMessages.startStateNotDeclared(state);
+    return NFAMessages.startStateNotDeclared(state)
   }
 
   protected override acceptStateNotDeclaredMessage(state: string): string {
-    return NFAMessages.acceptStateNotDeclared(state);
+    return NFAMessages.acceptStateNotDeclared(state)
   }
 
   /**
@@ -62,10 +63,10 @@ export class NFABuilder extends Automata {
   public alphabet(...symbols: string[]): this {
     symbols.forEach((symbol) => {
       if (symbol === EPS) {
-        this.message("error", NFAMessages.epsilonInAlphabet);
+        this.message('error', NFAMessages.epsilonInAlphabet)
       }
-    });
-    return super.alphabet(...symbols);
+    })
+    return super.alphabet(...symbols)
   }
 
   /**
@@ -74,11 +75,11 @@ export class NFABuilder extends Automata {
    * @returns a modified {@link NFABuilder} object
    */
   public states(...states: string[]): this {
-    super.states(...states);
+    super.states(...states)
     states.forEach((state) => {
-      this._transitions.set(state, new Map());
-    });
-    return this;
+      this._transitions.set(state, new Map())
+    })
+    return this
   }
 
   /**
@@ -91,38 +92,38 @@ export class NFABuilder extends Automata {
   public transition(from: string, symbol: string, to: string): this {
     // We want to fail instead of silently adding the state because of potential typos
     if (!this._states.has(from)) {
-      this.message("error", NFAMessages.transitionSourceNotDeclared(from));
+      this.message('error', NFAMessages.transitionSourceNotDeclared(from))
     }
 
     if (!this._states.has(to)) {
-      this.message("error", NFAMessages.transitionTargetNotDeclared(to));
+      this.message('error', NFAMessages.transitionTargetNotDeclared(to))
     }
 
     if (!this._alphabet.has(symbol) && symbol !== EPSILON) {
       this.message(
-        "warning",
+        'warning',
         NFAMessages.transitionSymbolNotInAlphabet(symbol),
-      );
+      )
     }
 
-    const valid =
-      this._states.has(from) &&
-      this._states.has(to) &&
-      (this._alphabet.has(symbol) || symbol === EPSILON);
+    const valid
+      = this._states.has(from)
+        && this._states.has(to)
+        && (this._alphabet.has(symbol) || symbol === EPSILON)
 
     // Prevent improper adding of a transition
     if (!valid) {
-      return this;
+      return this
     }
 
-    const fromMap = this._transitions.get(from)!;
+    const fromMap = this._transitions.get(from)!
 
     if (!fromMap.has(symbol)) {
-      fromMap.set(symbol, new Set());
+      fromMap.set(symbol, new Set())
     }
-    fromMap.get(symbol)!.add(to);
+    fromMap.get(symbol)!.add(to)
 
-    return this;
+    return this
   }
 
   /**
@@ -131,7 +132,7 @@ export class NFABuilder extends Automata {
    * @returns a {@link StateProxy} with its operations
    */
   public state(state: string): StateProxy {
-    return new StateProxy(state, this);
+    return new StateProxy(state, this)
   }
 
   /**
@@ -146,10 +147,10 @@ export class NFABuilder extends Automata {
   ): this {
     for (const state of this._states) {
       if (filter(state)) {
-        apply(new StateProxy(state, this));
+        apply(new StateProxy(state, this))
       }
     }
-    return this;
+    return this
   }
 
   /**
@@ -158,7 +159,7 @@ export class NFABuilder extends Automata {
    * @returns a modified {@link NFABuilder} object
    */
   public all(apply: (builder: StateProxy) => void): this {
-    return this.batch((_) => true, apply);
+    return this.batch(_ => true, apply)
   }
 
   /**
@@ -167,13 +168,13 @@ export class NFABuilder extends Automata {
    * @returns a modified {@link NFABuilder} object
    */
   public increment(...symbols: string[]): this {
-    const states = [...this._states];
+    const states = [...this._states]
     for (const symbol of symbols) {
       for (let i = 0; i < states.length; i++) {
-        this.transition(states[i], symbol, states[(i + 1) % states.length]);
+        this.transition(states[i], symbol, states[(i + 1) % states.length])
       }
     }
-    return this;
+    return this
   }
 
   /**
@@ -190,7 +191,7 @@ export class NFABuilder extends Automata {
     b: string,
     back: string = there,
   ): this {
-    return this.transition(a, there, b).transition(b, back, a);
+    return this.transition(a, there, b).transition(b, back, a)
   }
 
   /**
@@ -202,7 +203,7 @@ export class NFABuilder extends Automata {
    * @returns a modified {@link NFABuilder} object
    */
   public plus(from: string, symbol: string, to: string): this {
-    return this.transition(from, symbol, to).transition(to, symbol, to);
+    return this.transition(from, symbol, to).transition(to, symbol, to)
   }
 
   /**
@@ -214,7 +215,7 @@ export class NFABuilder extends Automata {
    * @returns a modified {@link NFABuilder} object
    */
   public star(from: string, symbol: string, to: string): this {
-    return this.transition(from, symbol, from).plus(from, symbol, to);
+    return this.transition(from, symbol, from).plus(from, symbol, to)
   }
 
   /**
@@ -223,22 +224,23 @@ export class NFABuilder extends Automata {
    * @throws if any {@link Message}s are errors
    */
   public build(): NFA {
-    if (this._built) throw new Error(NFAMessages.alreadyBuilt);
-    this._built = true;
+    if (this._built)
+      throw new Error(NFAMessages.alreadyBuilt)
+    this._built = true
 
     if (!this._startState) {
-      this.message("error", NFAMessages.noStartState);
+      this.message('error', NFAMessages.noStartState)
     }
 
     for (const [state, symbolMap] of this._transitions) {
       for (const symbol of this._alphabet) {
         if (!symbolMap.has(symbol)) {
-          this.message("warning", NFAMessages.missingTransition(state, symbol));
+          this.message('warning', NFAMessages.missingTransition(state, symbol))
         }
       }
     }
 
-    this.throwIfAnyErrors(() => new NFABuildError(this._messages));
+    this.throwIfAnyErrors(() => new NFABuildError(this._messages))
 
     return {
       name: this._name,
@@ -248,34 +250,34 @@ export class NFABuilder extends Automata {
       acceptStates: this._acceptStates,
       transitions: this._transitions,
       messages: this._messages,
-    };
+    }
   }
 
   /**
    * A string repr for the {@link NFA}
    */
   public get repr(): string {
-    const states = [...this._states].join(", ");
-    const alphabet = [...this._alphabet].join(", ");
-    const accept = [...this._acceptStates].join(", ");
+    const states = [...this._states].join(', ')
+    const alphabet = [...this._alphabet].join(', ')
+    const accept = [...this._acceptStates].join(', ')
 
     const transitions = [...this._transitions.entries()].flatMap(
       ([from, symbolMap]) =>
         [...symbolMap.entries()].flatMap(([symbol, toSet]) =>
-          [...toSet].map((to) => `\t${from} ---${symbol}---> ${to}`),
+          Array.from(toSet, to => `\t${from} ---${symbol}---> ${to}`),
         ),
-    );
+    )
 
     return `
 nfa ${this._name} {
     states: ${states}
     alphabet: ${alphabet}
-    start: ${this._startState ?? "(unset)"}
+    start: ${this._startState ?? '(unset)'}
     accept: ${accept}
     transitions:
-${transitions.join("\n")}
+${transitions.join('\n')}
 }
-    `;
+    `
   }
 }
 
@@ -294,30 +296,31 @@ class StateProxy {
    * @returns a {@link StateProxy} with the modified {@link NFABuilder}
    */
   public loop(...symbols: string[]): this {
-    const toLoop = symbols.length > 0 ? symbols : this.builder.alpha;
-    toLoop.forEach((symbol) =>
+    const toLoop = symbols.length > 0 ? symbols : this.builder.alpha
+    toLoop.forEach(symbol =>
       this.builder.transition(this.state, symbol, this.state),
-    );
-    return this;
+    )
+    return this
   }
 
   /**
    * Transition to a target state on one or more symbols
+   * @param target the state to transition to
    * @param symbols the symbol the transition is for
    * @returns a {@link StateProxy} with the modified {@link NFABuilder}
    */
   public to(target: string, ...symbols: string[]): this {
-    symbols.forEach((symbol) =>
+    symbols.forEach(symbol =>
       this.builder.transition(this.state, symbol, target),
-    );
-    return this;
+    )
+    return this
   }
 
   /**
    * Return to the {@link NFABuilder} associated with this proxy
    */
   public done(): NFABuilder {
-    return this.builder;
+    return this.builder
   }
 }
 
@@ -327,5 +330,5 @@ class StateProxy {
  * @returns an {@link NFABuilder} (fluent API)
  */
 export default function nfa(name: string): NFABuilder {
-  return new NFABuilder(name);
+  return new NFABuilder(name)
 }

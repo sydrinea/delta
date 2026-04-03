@@ -7,12 +7,12 @@
 The builder maintains an internal stack of NFA fragments. Primitive operations push a new fragment; combining operations pop fragments, merge them, and push the result. `.build()` pops the final (only remaining) fragment and returns it as an NFA.
 
 ```ts
-import { thompson } from "@delta/build";
+import { thompson } from '@delta/build'
 
-const machine = thompson("name")
+const machine = thompson('name')
   // push primitives...
   // apply operators...
-  .build();
+  .build()
 ```
 
 ## Primitives
@@ -69,7 +69,7 @@ State names in composed machines are automatically renumbered to avoid collision
 The output of `thompson()` is always an ε-NFA. To obtain a deterministic machine, pass it through `convertToDFA` from `@delta/transform`:
 
 ```ts
-import { convertToDFA } from "@delta/transform";
+import { convertToDFA } from '@delta/transform'
 
-const dfa = convertToDFA(nfaMachine, { name: "my DFA", preserveNames: false });
+const dfa = convertToDFA(nfaMachine, { name: 'my DFA', preserveNames: false })
 ```

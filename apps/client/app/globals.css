@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "@catppuccin/tailwindcss/mocha.css";
+@import 'tailwindcss';
+@import '@catppuccin/tailwindcss/mocha.css';
 
 @plugin "@tailwindcss/typography";
 
@@ -9,6 +9,8 @@
 
   --animate-toast-in: toast-in 0.3s ease-out forwards;
   --animate-toast-out: toast-out 0.3s ease-in forwards;
+
+  --spacing-header-adjust: calc(3.5rem + 45px);
 }
 
 @utility font-sans {
@@ -87,7 +89,7 @@
 }
 
 /* Standard CSS Selectors */
-input[type="range"] {
+input[type='range'] {
   -webkit-appearance: none;
   appearance: none;
   accent-color: #8839ef;
@@ -96,7 +98,7 @@ input[type="range"] {
   height: 4px;
 }
 
-input[type="range"]::-webkit-slider-thumb {
+input[type='range']::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 10px;
@@ -106,7 +108,7 @@ input[type="range"]::-webkit-slider-thumb {
   cursor: pointer;
 }
 
-input[type="range"]::-moz-range-thumb {
+input[type='range']::-moz-range-thumb {
   width: 10px;
   height: 10px;
   border-radius: 9999px;
@@ -134,14 +136,14 @@ input[type="range"]::-moz-range-thumb {
   --tw-prose-td-borders: var(--color-ctp-lavender);
 }
 
-html.latte :is(pre, code)[data-theme*=" "],
-html.latte :is(pre, code)[data-theme*=" "] * {
+html.latte :is(pre, code)[data-theme*=' '],
+html.latte :is(pre, code)[data-theme*=' '] * {
   color: var(--shiki-light) !important;
   background-color: var(--shiki-light-bg) !important;
 }
 
-html.mocha :is(pre, code)[data-theme*=" "],
-html.mocha :is(pre, code)[data-theme*=" "] * {
+html.mocha :is(pre, code)[data-theme*=' '],
+html.mocha :is(pre, code)[data-theme*=' '] * {
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
 }

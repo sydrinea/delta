@@ -1,17 +1,18 @@
 {
   "name": "@delta/simulator",
-  "private": "true",
   "version": "0.2.0-beta.1",
-  "types": "src/index.ts",
+  "private": "true",
   "license": "MIT",
+  "types": "src/index.ts",
   "scripts": {
-    "test": "vitest run"
+    "test": "vitest run",
+    "lint": "eslint"
   },
   "dependencies": {
     "@delta/build": "workspace:*",
+    "@delta/examples": "workspace:*",
     "@delta/shared": "workspace:*",
     "@delta/transform": "workspace:*",
-    "@delta/examples": "workspace:*",
     "reactflow": "^11.11.4",
     "vitest": "^4.1.2"
   }

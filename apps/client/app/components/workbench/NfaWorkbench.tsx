@@ -1,65 +1,67 @@
-"use client";
+'use client'
 
-import { ReactFlowProvider } from "reactflow";
-import { useMemo, useState } from "react";
-import { useTheme } from "next-themes";
-import { type NFA } from "@delta/build";
-import { recipes } from "@delta/examples/recipes";
-import { simulate as simulateNFA } from "@delta/simulator";
-import { toDot } from "@/lib/dot";
-import { themeNames } from "@/lib/theme";
-import { containsCustomLogicOrComments } from "@/lib/detect-custom-logic";
-import { nfaToFlow } from "@/lib/flow/toFlow";
-import { useNfaStore } from "@/store/nfaStore";
-import { useCompile } from "@/hooks/useCompile";
-import { useAlert } from "@/components/AlertProvider";
-import { DeltaEditor } from "@/components/editor/DeltaEditor";
-import { FlowEditor } from "@/components/editor/FlowEditor";
-import { Trace } from "@/components/visualize/Trace";
+import type { NFA } from '@delta/build'
+import type { EnabledTabs, TabId, WorkbenchLogic } from './types'
+import type { TraceBottomPanelContext, TraceInputArgs } from '@/components/visualize/TraceContext'
+import { recipes } from '@delta/examples/recipes'
+import { simulate as simulateNFA } from '@delta/simulator'
+import { useTheme } from 'next-themes'
+import { useMemo, useState } from 'react'
+import { ReactFlowProvider } from 'reactflow'
+import { useAlert } from '@/components/AlertProvider'
+import { DeltaEditor } from '@/components/editor/DeltaEditor'
+import { FlowEditor } from '@/components/editor/FlowEditor'
+import { ConfigurationTable } from '@/components/visualize/ConfigurationTable'
+import { Trace } from '@/components/visualize/Trace'
 import {
-  type TraceBottomPanelContext,
-  type TraceInputArgs,
+
   TraceProvider,
   useTraceSimulationContext,
-} from "@/components/visualize/TraceContext";
-import { ConfigurationTable } from "@/components/visualize/ConfigurationTable";
-import type { EnabledTabs, TabId, WorkbenchLogic } from "./types";
-import { WorkbenchScaffold } from "./WorkbenchScaffold";
+} from '@/components/visualize/TraceContext'
+import { useCompile } from '@/hooks/useCompile'
+import { containsCustomLogicOrComments } from '@/lib/detect-custom-logic'
+import { toDot } from '@/lib/dot'
+import { nfaToFlow } from '@/lib/flow/toFlow'
+import { themeNames } from '@/lib/theme'
+import { useNfaStore } from '@/store/nfaStore'
+import { useWorkbenchVariantCore } from './useWorkbenchVariantCore'
 import {
   buildSlidingWindowTokens,
   buildTabs,
   makeStoreAdapters,
   TRACE_WINDOW_SIZE,
-} from "./utils";
-import { useWorkbenchVariantCore } from "./useWorkbenchVariantCore";
+} from './utils'
+import { WorkbenchScaffold } from './WorkbenchScaffold'
 
 interface NfaWorkbenchProps {
-  enabledTabs?: EnabledTabs;
+  enabledTabs?: EnabledTabs
 }
 
 const DEFAULT_TABS: EnabledTabs = {
   editor: true,
   canvas: true,
   visualizer: true,
-};
+}
+
+const LEADING_LOWERCASE_REGEX = /^[a-z]/
 
 function useNfaWorkbenchLogic(
   enabledTabs: EnabledTabs,
   resolvedTheme: string | undefined,
 ): WorkbenchLogic<NFA> {
-  const [showWarning, setShowWarning] = useState(false);
-  const [pendingTab, setPendingTab] = useState<TabId | null>(null);
+  const [showWarning, setShowWarning] = useState(false)
+  const [pendingTab, setPendingTab] = useState<TabId | null>(null)
 
-  const machine = useNfaStore((s) => s.machine);
-  const editorValue = useNfaStore((s) => s.editorValue);
-  const tests = useNfaStore((s) => s.tests);
-  const editorErrors = useNfaStore((s) => s.editorErrors);
-  const patchNfa = useNfaStore((s) => s.patch);
-  const { showAlert } = useAlert();
+  const machine = useNfaStore(s => s.machine)
+  const editorValue = useNfaStore(s => s.editorValue)
+  const tests = useNfaStore(s => s.tests)
+  const editorErrors = useNfaStore(s => s.editorErrors)
+  const patchNfa = useNfaStore(s => s.patch)
+  const { showAlert } = useAlert()
 
-  const compile = useCompile("nfa");
-  const { dot: activeDot } = useTraceSimulationContext<NFA>();
-  const adapters = useMemo(() => makeStoreAdapters(patchNfa), [patchNfa]);
+  const compile = useCompile('nfa')
+  const { dot: activeDot } = useTraceSimulationContext<NFA>()
+  const adapters = useMemo(() => makeStoreAdapters(patchNfa), [patchNfa])
 
   const tabs = useMemo(
     () =>
@@ -73,14 +75,14 @@ function useNfaWorkbenchLogic(
         visualizerContent: <Trace />,
       }),
     [],
-  );
+  )
 
   const core = useWorkbenchVariantCore<NFA>({
     enabledTabs,
     tabs,
     machine,
     recipesMap: recipes.nfa,
-    machineType: "nfa",
+    machineType: 'nfa',
     editorValue,
     adapters,
     compile,
@@ -89,43 +91,43 @@ function useNfaWorkbenchLogic(
     activeDot,
     resolvedTheme,
     onRecipeLoaded: ({ activeTab, setActiveTab }) => {
-      if (activeTab === "canvas") {
-        setActiveTab("editor");
+      if (activeTab === 'canvas') {
+        setActiveTab('editor')
       }
     },
-  });
+  })
 
   const requestTabChange = (tab: TabId) => {
-    if (tab === "canvas" && core.base.activeTab !== "canvas") {
+    if (tab === 'canvas' && core.base.activeTab !== 'canvas') {
       if (containsCustomLogicOrComments(editorValue)) {
-        setPendingTab(tab);
-        setShowWarning(true);
-        return;
+        setPendingTab(tab)
+        setShowWarning(true)
+        return
       }
     }
 
-    core.base.requestTabChange(tab);
-  };
+    core.base.requestTabChange(tab)
+  }
 
   const confirmTabChange = () => {
-    if (pendingTab === "canvas" && machine) {
-      const { nodes, edges } = nfaToFlow(machine);
-      patchNfa({ nodes, edges, startId: machine.startState });
+    if (pendingTab === 'canvas' && machine) {
+      const { nodes, edges } = nfaToFlow(machine)
+      patchNfa({ nodes, edges, startId: machine.startState })
     }
 
     if (pendingTab) {
-      adapters.clearEditorErrors();
-      core.setActiveTab(pendingTab);
+      adapters.clearEditorErrors()
+      core.setActiveTab(pendingTab)
     }
 
-    setShowWarning(false);
-    setPendingTab(null);
-  };
+    setShowWarning(false)
+    setPendingTab(null)
+  }
 
   const cancelTabChange = () => {
-    setShowWarning(false);
-    setPendingTab(null);
-  };
+    setShowWarning(false)
+    setPendingTab(null)
+  }
 
   return {
     ...core.base,
@@ -140,15 +142,15 @@ function useNfaWorkbenchLogic(
       simulateNFA(targetMachine, input).accepted,
     confirmModal: {
       isOpen: showWarning,
-      title: "Switching to Canvas",
+      title: 'Switching to Canvas',
       message:
-        "Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?",
-      confirmText: "Convert to Canvas",
-      cancelText: `Stay in ${core.base.activeTab.replace(/^[a-z]/, (s) => s.toUpperCase())}`,
+        'Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?',
+      confirmText: 'Convert to Canvas',
+      cancelText: `Stay in ${core.base.activeTab.replace(LEADING_LOWERCASE_REGEX, s => s.toUpperCase())}`,
       onConfirm: confirmTabChange,
       onCancel: cancelTabChange,
     },
-  };
+  }
 }
 
 function getNfaInputTokens(args: TraceInputArgs) {
@@ -158,44 +160,44 @@ function getNfaInputTokens(args: TraceInputArgs) {
     makeKey: (charIndex, slotIndex) => `nfa-${slotIndex}-${charIndex}`,
     resolveToken: (charIndex, slotIndex) => {
       if (charIndex < 0 || charIndex >= args.input.length) {
-        return null;
+        return null
       }
 
-      const isActive =
-        !args.isLast && slotIndex === Math.floor(TRACE_WINDOW_SIZE / 2);
-      const isPast = args.isLast || charIndex < args.step;
+      const isActive
+        = !args.isLast && slotIndex === Math.floor(TRACE_WINDOW_SIZE / 2)
+      const isPast = args.isLast || charIndex < args.step
 
       return {
         text: args.input[charIndex],
         isActive,
         className: isActive
-          ? "text-ctp-mauve font-bold bg-ctp-surface0 ring-1 ring-ctp-mauve"
+          ? 'text-ctp-mauve font-bold bg-ctp-surface0 ring-1 ring-ctp-mauve'
           : isPast
-            ? "text-ctp-surface2"
-            : "text-ctp-subtext1",
-      };
+            ? 'text-ctp-surface2'
+            : 'text-ctp-subtext1',
+      }
     },
-  });
+  })
 }
 
 function NfaWorkbenchInner({
   enabledTabs,
   resolvedTheme,
 }: {
-  enabledTabs: EnabledTabs;
-  resolvedTheme: string | undefined;
+  enabledTabs: EnabledTabs
+  resolvedTheme: string | undefined
 }) {
-  const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme);
-  return <WorkbenchScaffold logic={logic} />;
+  const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme)
+  return <WorkbenchScaffold logic={logic} />
 }
 
 export function NfaWorkbench({
   enabledTabs = DEFAULT_TABS,
 }: NfaWorkbenchProps) {
-  const machine = useNfaStore((s) => s.machine);
-  const tests = useNfaStore((s) => s.tests);
-  const { resolvedTheme } = useTheme();
-  const theme = themeNames[resolvedTheme ?? "light"];
+  const machine = useNfaStore(s => s.machine)
+  const tests = useNfaStore(s => s.tests)
+  const { resolvedTheme } = useTheme()
+  const theme = themeNames[resolvedTheme ?? 'light']
 
   return (
     <TraceProvider<NFA>
@@ -225,5 +227,5 @@ export function NfaWorkbench({
         resolvedTheme={resolvedTheme}
       />
     </TraceProvider>
-  );
+  )
 }

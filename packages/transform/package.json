@@ -1,11 +1,12 @@
 {
   "name": "@delta/transform",
-  "private": "true",
   "version": "0.2.0-beta.1",
-  "types": "src/index.ts",
+  "private": "true",
   "license": "MIT",
+  "types": "src/index.ts",
   "scripts": {
     "generate": "tsdown --dts",
+    "lint": "eslint",
     "test": "vitest run"
   },
   "dependencies": {

@@ -1,2 +1,2 @@
-"use client";
-export { SerwistProvider } from "@serwist/turbopack/react";
+'use client'
+export { SerwistProvider } from '@serwist/turbopack/react'

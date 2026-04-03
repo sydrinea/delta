@@ -1,107 +1,110 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
-import { useStoreHydration } from "@/hooks/useStoreHydration";
+import { usePathname } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { useStoreHydration } from '@/hooks/useStoreHydration'
 import {
   shouldAnimateLoader,
   shouldEnableLoader,
-} from "@/lib/navigation-loader-config";
+} from '@/lib/navigation-loader-config'
 
-const MIN_NAVIGATION_LOADER_MS = 500;
-const NAVIGATION_FALLBACK_TIMEOUT_MS = 1200;
+const MIN_NAVIGATION_LOADER_MS = 500
+const NAVIGATION_FALLBACK_TIMEOUT_MS = 1200
 
 interface NavigationStartEventDetail {
-  to?: string;
-  animate?: boolean;
+  to?: string
+  animate?: boolean
 }
 
 export function Loader() {
-  const isReady = useStoreHydration();
-  const pathname = usePathname();
-  const isLoaderEnabled = shouldEnableLoader(pathname);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [shouldAnimate, setShouldAnimate] = useState(() =>
-    shouldAnimateLoader(pathname),
-  );
-  const startedAtRef = useRef<number | null>(null);
-  const fallbackTimeoutRef = useRef<number | null>(null);
-  const settleTimeoutRef = useRef<number | null>(null);
+  const isReady = useStoreHydration()
+  const pathname = usePathname()
+  const isLoaderEnabled = shouldEnableLoader(pathname)
+  const [isNavigating, setIsNavigating] = useState(false)
+  const animateOverrideRef = useRef<boolean | null>(null)
+  const startedAtRef = useRef<number | null>(null)
+  const fallbackTimeoutRef = useRef<number | null>(null)
+  const settleTimeoutRef = useRef<number | null>(null)
+  const shouldAnimate = animateOverrideRef.current ?? shouldAnimateLoader(pathname)
 
   useEffect(() => {
     const startNavigation = (event: Event) => {
-      const detail = (event as CustomEvent<NavigationStartEventDetail>).detail;
-      const to = detail?.to;
-      const eventAnimate = detail?.animate;
+      const detail = (event as CustomEvent<NavigationStartEventDetail>).detail
+      const to = detail?.to
+      const eventAnimate = detail?.animate
+      const nextAnimate = typeof eventAnimate === 'boolean' ? eventAnimate : shouldAnimateLoader(to ?? window.location.pathname)
 
-      setShouldAnimate(
-        typeof eventAnimate === "boolean"
-          ? eventAnimate
-          : shouldAnimateLoader(to ?? pathname),
-      );
+      animateOverrideRef.current = nextAnimate
 
-      startedAtRef.current = Date.now();
-      setIsNavigating(true);
+      startedAtRef.current = Date.now()
+      setIsNavigating(true)
 
       if (settleTimeoutRef.current !== null) {
-        window.clearTimeout(settleTimeoutRef.current);
-        settleTimeoutRef.current = null;
+        window.clearTimeout(settleTimeoutRef.current)
+        settleTimeoutRef.current = null
       }
 
       if (fallbackTimeoutRef.current !== null) {
-        window.clearTimeout(fallbackTimeoutRef.current);
+        window.clearTimeout(fallbackTimeoutRef.current)
       }
 
       fallbackTimeoutRef.current = window.setTimeout(() => {
-        setIsNavigating(false);
-        fallbackTimeoutRef.current = null;
-        startedAtRef.current = null;
-      }, NAVIGATION_FALLBACK_TIMEOUT_MS);
-    };
-
-    window.addEventListener("delta:navigation-start", startNavigation);
-
-    return () => {
-      window.removeEventListener("delta:navigation-start", startNavigation);
-      if (fallbackTimeoutRef.current !== null) {
-        window.clearTimeout(fallbackTimeoutRef.current);
-      }
-      if (settleTimeoutRef.current !== null) {
-        window.clearTimeout(settleTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const startedAt = startedAtRef.current;
-    setShouldAnimate(shouldAnimateLoader(pathname));
-
-    if (!startedAt) {
-      setIsNavigating(false);
-      return;
+        animateOverrideRef.current = null
+        setIsNavigating(false)
+        fallbackTimeoutRef.current = null
+        startedAtRef.current = null
+      }, NAVIGATION_FALLBACK_TIMEOUT_MS)
     }
 
-    const elapsed = Date.now() - startedAt;
-    const remaining = Math.max(0, MIN_NAVIGATION_LOADER_MS - elapsed);
+    window.addEventListener('delta:navigation-start', startNavigation)
+
+    return () => {
+      window.removeEventListener('delta:navigation-start', startNavigation)
+      if (fallbackTimeoutRef.current !== null) {
+        window.clearTimeout(fallbackTimeoutRef.current)
+      }
+      if (settleTimeoutRef.current !== null) {
+        window.clearTimeout(settleTimeoutRef.current)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    const startedAt = startedAtRef.current
 
     if (fallbackTimeoutRef.current !== null) {
-      window.clearTimeout(fallbackTimeoutRef.current);
-      fallbackTimeoutRef.current = null;
+      window.clearTimeout(fallbackTimeoutRef.current)
+      fallbackTimeoutRef.current = null
     }
 
     if (settleTimeoutRef.current !== null) {
-      window.clearTimeout(settleTimeoutRef.current);
+      window.clearTimeout(settleTimeoutRef.current)
     }
 
+    if (!startedAt) {
+      const idleSettleTimeout = window.setTimeout(() => {
+        animateOverrideRef.current = null
+        setIsNavigating(false)
+      }, 0)
+
+      return () => {
+        window.clearTimeout(idleSettleTimeout)
+      }
+    }
+
+    const elapsed = Date.now() - startedAt
+    const remaining = Math.max(0, MIN_NAVIGATION_LOADER_MS - elapsed)
+
     settleTimeoutRef.current = window.setTimeout(() => {
-      setIsNavigating(false);
-      settleTimeoutRef.current = null;
-      startedAtRef.current = null;
-    }, remaining);
-  }, [pathname]);
+      animateOverrideRef.current = null
+      setIsNavigating(false)
+      settleTimeoutRef.current = null
+      startedAtRef.current = null
+    }, remaining)
+  }, [pathname])
 
   if (!isLoaderEnabled || (isReady && !isNavigating)) {
-    return null;
+    return null
   }
 
   return (
@@ -112,13 +115,13 @@ export function Loader() {
         aria-live="polite"
         aria-label="Loading workbench"
       >
-        {[0, 1, 2].map((index) => (
+        {[0, 1, 2].map(index => (
           <span
             key={index}
             className={
               shouldAnimate
-                ? "workbench-loader-dot bg-ctp-surface0"
-                : "h-2 w-2 rounded-full bg-ctp-surface0"
+                ? 'workbench-loader-dot bg-ctp-surface0'
+                : 'h-2 w-2 rounded-full bg-ctp-surface0'
             }
             style={
               shouldAnimate ? { animationDelay: `${index * 220}ms` } : undefined
@@ -127,5 +130,5 @@ export function Loader() {
         ))}
       </div>
     </div>
-  );
+  )
 }

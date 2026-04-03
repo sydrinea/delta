@@ -39,9 +39,9 @@ Every declared state must have **exactly one** outgoing transition for every sym
 This helper is particularly useful for DFAs that count modular sequences. It wires all declared states into a circular chain — each state advances to the next on the given symbol, and the last state wraps back to the first:
 
 ```ts
-dfa("mod-3")
+dfa('mod-3')
   .states(...q(0, 2)) // q0, q1, q2
-  .increment("a"); // q0→q1→q2→q0
+  .increment('a') // q0→q1→q2→q0
 ```
 
 ## Validation

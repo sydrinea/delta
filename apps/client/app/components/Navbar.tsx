@@ -1,50 +1,58 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { Heart } from 'lucide-react'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
 import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
-} from "@/lib/navigation-loader-config";
-import { Heart } from "lucide-react";
-import { version } from "../../package.json";
+} from '@/lib/navigation-loader-config'
+import { version } from '../../package.json'
 
 const TABS = [
-  { label: "NFA / DFA", href: "/nfa" },
-  { label: "PDA", href: "/pda" },
-  { label: "TM", href: "/tm" },
-] as const;
+  { label: 'NFA / DFA', href: '/nfa' },
+  { label: 'PDA', href: '/pda' },
+  { label: 'TM', href: '/tm' },
+] as const
 
-const MadeBy = () => (
-  <a
-    href="https://github.com/sydrinea"
-    target="_blank"
-    rel="noopener noreferrer"
-    className="flex items-center gap-1.5 text-ctp-overlay1 hover:text-ctp-text transition-colors text-xs"
-  >
-    made with <Heart className="w-3 h-3 text-ctp-pink" fill="currentColor" /> by
-    @sydrinea
-  </a>
-);
+function MadeBy() {
+  return (
+    <a
+      href="https://github.com/sydrinea"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-1.5 text-ctp-overlay1 hover:text-ctp-text transition-colors text-xs"
+    >
+      made with
+      {' '}
+      <Heart className="w-3 h-3 text-ctp-pink" fill="currentColor" />
+      {' '}
+      by
+      @sydrinea
+    </a>
+  )
+}
 
 export default function Navbar() {
-  const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const pathname = usePathname()
+  const [open, setOpen] = useState(false)
 
   const handleNavigationStart = (href: string) => {
-    if (pathname === href) return;
-    if (!shouldTriggerNavigationLoader(href)) return;
+    if (pathname === href)
+      return
+    if (!shouldTriggerNavigationLoader(href))
+      return
 
     window.dispatchEvent(
-      new CustomEvent("delta:navigation-start", {
+      new CustomEvent('delta:navigation-start', {
         detail: {
           to: href,
           animate: shouldAnimateLoader(href),
         },
       }),
-    );
-  };
+    )
+  }
 
   return (
     <>
@@ -59,7 +67,7 @@ export default function Navbar() {
 
             <nav className="flex items-center gap-1">
               {TABS.map((tab) => {
-                const isActive = pathname === tab.href;
+                const isActive = pathname === tab.href
                 return (
                   <Link
                     key={tab.href}
@@ -67,8 +75,8 @@ export default function Navbar() {
                     onClick={() => handleNavigationStart(tab.href)}
                     className={`relative px-3 py-1.5 text-xs rounded-lg transition-all duration-200 ${
                       isActive
-                        ? "text-ctp-text"
-                        : "text-ctp-subtext0 hover:text-ctp-text"
+                        ? 'text-ctp-text'
+                        : 'text-ctp-subtext0 hover:text-ctp-text'
                     }`}
                   >
                     {isActive && (
@@ -76,7 +84,7 @@ export default function Navbar() {
                     )}
                     <span className="relative">{tab.label}</span>
                   </Link>
-                );
+                )
               })}
             </nav>
           </div>
@@ -84,30 +92,33 @@ export default function Navbar() {
           <div className="flex items-center gap-1.5">
             <MadeBy />
             <span className="text-ctp-overlay1 text-xs">·</span>
-            <span className="text-ctp-overlay0 text-xs">v{version}</span>
+            <span className="text-ctp-overlay0 text-xs">
+              v
+              {version}
+            </span>
           </div>
         </div>
 
         <div className="grid h-full grid-cols-3 items-center px-6 md:hidden">
           <div className="flex justify-start">
             <button
-              onClick={() => setOpen((o) => !o)}
+              onClick={() => setOpen(o => !o)}
               className="text-ctp-text w-5 h-5 relative cursor-pointer"
-              aria-label={open ? "close menu" : "open menu"}
+              aria-label={open ? 'close menu' : 'open menu'}
             >
               <span
                 className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? "top-2 rotate-45" : "top-0.5"
+                  open ? 'top-2 rotate-45' : 'top-0.5'
                 }`}
               />
               <span
                 className={`absolute left-0 top-2 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? "opacity-0 scale-x-0" : "opacity-100 scale-x-100"
+                  open ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'
                 }`}
               />
               <span
                 className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? "top-2 -rotate-45" : "top-3.5"
+                  open ? 'top-2 -rotate-45' : 'top-3.5'
                 }`}
               />
             </button>
@@ -128,8 +139,8 @@ export default function Navbar() {
       <div
         className={`fixed inset-0 z-20 md:hidden transition-all duration-75 ${
           open
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
         }`}
       >
         {/* glassy blur backdrop */}
@@ -141,29 +152,29 @@ export default function Navbar() {
         {/* menu panel */}
         <div
           className={`absolute inset-x-0 top-0 flex flex-col p-8 transition-all duration-300 ${
-            open ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            open ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
           }`}
         >
           <nav className="flex flex-col gap-2 mt-10">
             {TABS.map((tab) => {
-              const isActive = pathname === tab.href;
+              const isActive = pathname === tab.href
               return (
                 <Link
                   key={tab.href}
                   href={tab.href}
                   onClick={() => {
-                    handleNavigationStart(tab.href);
-                    setOpen(false);
+                    handleNavigationStart(tab.href)
+                    setOpen(false)
                   }}
                   className={`px-4 py-3 rounded-lg text-sm transition-colors ${
                     isActive
-                      ? "bg-ctp-surface0/80 text-ctp-text"
-                      : "text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0/60"
+                      ? 'bg-ctp-surface0/80 text-ctp-text'
+                      : 'text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0/60'
                   }`}
                 >
                   {tab.label}
                 </Link>
-              );
+              )
             })}
           </nav>
 
@@ -171,13 +182,14 @@ export default function Navbar() {
             <MadeBy />
             <span
               className="text-ctp-overlay0 text-sm"
-              style={{ fontSize: "0.65rem" }}
+              style={{ fontSize: '0.65rem' }}
             >
-              v{version}
+              v
+              {version}
             </span>
           </div>
         </div>
       </div>
     </>
-  );
+  )
 }

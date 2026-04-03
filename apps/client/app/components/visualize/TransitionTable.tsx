@@ -1,28 +1,28 @@
-"use client";
+'use client'
 
-import { useEffect, useMemo, useState } from "react";
-import { type TuringMachine } from "@delta/build";
+import type { TuringMachine } from '@delta/build'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useScrollableTable } from '@/components/visualize/hooks/useScrollableTable'
 import {
   activeTupleFromTapes,
   buildTMTransitionRows,
   formatReadTuple,
-} from "@/components/visualize/metadata";
-import { useScrollableTable } from "@/components/visualize/hooks/useScrollableTable";
+} from '@/components/visualize/metadata'
 
 interface TransitionTableCurrentStep {
-  states: Set<string>;
-  tapes?: string[][];
+  states: Set<string>
+  tapes?: string[][]
 }
 
 interface TransitionTableProps {
-  machine: TuringMachine<any>;
-  current: TransitionTableCurrentStep;
-  hoveredEdgeId: string | null;
-  isLast: boolean;
-  accepted: boolean;
+  machine: TuringMachine<any>
+  current: TransitionTableCurrentStep
+  hoveredEdgeId: string | null
+  isLast: boolean
+  accepted: boolean
 }
 
-type TMTableMode = "all" | "state";
+type TMTableMode = 'all' | 'state'
 
 export function TransitionTable({
   machine,
@@ -31,76 +31,76 @@ export function TransitionTable({
   isLast,
   accepted,
 }: TransitionTableProps) {
-  const [tableMode, setTableMode] = useState<TMTableMode>("state");
-  const { scrollContainerRef, rowRefs, scrollRowToCenter } =
-    useScrollableTable();
+  const [tableMode, setTableMode] = useState<TMTableMode>('state')
+  const { scrollContainerRef, rowRef, scrollRowToCenter }
+    = useScrollableTable()
 
   const transitionRows = useMemo(
     () => buildTMTransitionRows(machine),
     [machine],
-  );
+  )
 
   const currentState = useMemo(() => {
-    const states = [...current.states].sort();
-    return states[0] ?? null;
-  }, [current]);
+    const states = [...current.states].sort()
+    return states[0] ?? null
+  }, [current])
 
   const currentReadTuple = useMemo(
     () => activeTupleFromTapes(current.tapes),
     [current],
-  );
+  )
 
   const stateRelevantRows = useMemo(() => {
     if (!currentState) {
-      return [];
+      return []
     }
 
-    return transitionRows.filter((row) => row.fromState === currentState);
-  }, [transitionRows, currentState]);
+    return transitionRows.filter(row => row.fromState === currentState)
+  }, [transitionRows, currentState])
 
-  const visibleRows = tableMode === "all" ? transitionRows : stateRelevantRows;
+  const visibleRows = tableMode === 'all' ? transitionRows : stateRelevantRows
 
-  const isCurrentTransition = (
+  const isCurrentTransition = useCallback((
     row: (typeof transitionRows)[number],
   ): boolean => {
     if (!currentState || !currentReadTuple) {
-      return false;
+      return false
     }
 
     if (row.fromState !== currentState) {
-      return false;
+      return false
     }
 
     if (row.readSymbols.length !== currentReadTuple.length) {
-      return false;
+      return false
     }
 
     return row.readSymbols.every(
       (symbol, index) => symbol === currentReadTuple[index],
-    );
-  };
+    )
+  }, [currentReadTuple, currentState])
 
   useEffect(() => {
     if (!hoveredEdgeId) {
-      return;
+      return
     }
 
-    const hoveredRow = visibleRows.find((row) => row.edgeId === hoveredEdgeId);
+    const hoveredRow = visibleRows.find(row => row.edgeId === hoveredEdgeId)
     if (!hoveredRow) {
-      return;
+      return
     }
 
-    scrollRowToCenter(hoveredRow.id);
-  }, [hoveredEdgeId, visibleRows]);
+    scrollRowToCenter(hoveredRow.id)
+  }, [hoveredEdgeId, scrollRowToCenter, visibleRows])
 
   useEffect(() => {
-    const activeRow = visibleRows.find((row) => isCurrentTransition(row));
+    const activeRow = visibleRows.find(row => isCurrentTransition(row))
     if (!activeRow) {
-      return;
+      return
     }
 
-    scrollRowToCenter(activeRow.id);
-  }, [visibleRows, currentState, currentReadTuple]);
+    scrollRowToCenter(activeRow.id)
+  }, [isCurrentTransition, scrollRowToCenter, visibleRows])
 
   return (
     <div className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl border border-ctp-surface0 bg-ctp-mantle flex flex-col">
@@ -112,22 +112,22 @@ export function TransitionTable({
           {isLast && (
             <span
               className={`px-2 py-0.5 rounded text-xs font-bold ${
-                accepted ? "text-ctp-green" : "text-ctp-red"
+                accepted ? 'text-ctp-green' : 'text-ctp-red'
               }`}
             >
-              {accepted ? "✓ accepted" : "✗ rejected"}
+              {accepted ? '✓ accepted' : '✗ rejected'}
             </span>
           )}
           <div className="inline-flex rounded-lg border border-ctp-surface1 overflow-hidden text-xs">
             <button
-              className={`cursor-pointer px-2 py-1 border-l border-ctp-surface1 ${tableMode === "state" ? "bg-ctp-surface0 text-ctp-text" : "text-ctp-subtext0 hover:text-ctp-text"}`}
-              onClick={() => setTableMode("state")}
+              className={`cursor-pointer px-2 py-1 border-l border-ctp-surface1 ${tableMode === 'state' ? 'bg-ctp-surface0 text-ctp-text' : 'text-ctp-subtext0 hover:text-ctp-text'}`}
+              onClick={() => setTableMode('state')}
             >
               state
             </button>
             <button
-              className={`cursor-pointer px-2 py-1 ${tableMode === "all" ? "bg-ctp-surface0 text-ctp-text" : "text-ctp-subtext0 hover:text-ctp-text"}`}
-              onClick={() => setTableMode("all")}
+              className={`cursor-pointer px-2 py-1 ${tableMode === 'all' ? 'bg-ctp-surface0 text-ctp-text' : 'text-ctp-subtext0 hover:text-ctp-text'}`}
+              onClick={() => setTableMode('all')}
             >
               all
             </button>
@@ -145,31 +145,33 @@ export function TransitionTable({
               <th className="px-2 py-2 border-b border-ctp-surface1">ID</th>
               <th className="px-2 py-2 border-b border-ctp-surface1">From</th>
               <th className="px-2 py-2 border-b border-ctp-surface1">To</th>
-              {[...Array(machine.tapeCount).keys()].map((index) => (
+              {Array.from({ length: machine.tapeCount }, (_, index) => (
                 <th
                   key={`tape-col-${index}`}
                   className="px-2 py-2 border-b border-ctp-surface1"
                 >
-                  Tape {index + 1}
+                  Tape
+                  {' '}
+                  {index + 1}
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {visibleRows.map((row) => {
-              const isHovered = row.edgeId === hoveredEdgeId;
-              const isCurrent = isCurrentTransition(row);
+              const isHovered = row.edgeId === hoveredEdgeId
+              const isCurrent = isCurrentTransition(row)
               const rowClassName = isCurrent
-                ? "bg-ctp-green/20"
+                ? 'bg-ctp-green/20'
                 : isHovered
-                  ? "bg-ctp-surface0/70"
-                  : "";
+                  ? 'bg-ctp-surface0/70'
+                  : ''
 
               return (
                 <tr
                   key={row.id}
                   ref={(element) => {
-                    rowRefs.current[row.id] = element;
+                    rowRef.current[row.id] = element
                   }}
                   className={rowClassName}
                 >
@@ -182,10 +184,10 @@ export function TransitionTable({
                   <td className="px-2 py-1.5 border-b border-ctp-surface0 text-ctp-text">
                     {row.toState}
                   </td>
-                  {[...Array(machine.tapeCount).keys()].map((index) => {
-                    const read = row.readSymbols[index] ?? "_";
-                    const write = row.writeSymbols[index] ?? read;
-                    const direction = row.directions[index] ?? "S";
+                  {Array.from({ length: machine.tapeCount }, (_, index) => {
+                    const read = row.readSymbols[index] ?? '_'
+                    const write = row.writeSymbols[index] ?? read
+                    const direction = row.directions[index] ?? 'S'
 
                     return (
                       <td
@@ -197,10 +199,10 @@ export function TransitionTable({
                         <span className="text-ctp-text">{write}</span>
                         <span className="pl-1 text-ctp-mauve">{direction}</span>
                       </td>
-                    );
+                    )
                   })}
                 </tr>
-              );
+              )
             })}
 
             {visibleRows.length === 0 && (
@@ -209,9 +211,9 @@ export function TransitionTable({
                   colSpan={3 + machine.tapeCount}
                   className="px-2 py-4 text-center text-ctp-subtext0"
                 >
-                  {tableMode === "state"
-                    ? "No transitions from the current state."
-                    : "No transitions available."}
+                  {tableMode === 'state'
+                    ? 'No transitions from the current state.'
+                    : 'No transitions available.'}
                 </td>
               </tr>
             )}
@@ -220,10 +222,10 @@ export function TransitionTable({
       </div>
 
       <div className="px-3 py-2 border-t border-ctp-surface0 text-[11px] text-ctp-subtext1">
-        {tableMode === "state" && currentReadTuple
-          ? `state ${currentState ?? "?"} · read ${formatReadTuple(currentReadTuple)}`
+        {tableMode === 'state' && currentReadTuple
+          ? `state ${currentState ?? '?'} · read ${formatReadTuple(currentReadTuple)}`
           : `${transitionRows.length} transitions`}
       </div>
     </div>
-  );
+  )
 }

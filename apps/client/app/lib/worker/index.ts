@@ -1,24 +1,24 @@
-import { dispatch } from "./dispatcher";
+import { dispatch } from './dispatcher'
 import {
-  WorkerErrorCodes,
   isWorkerRequest,
-} from "./protocol";
+  WorkerErrorCodes,
+} from './protocol'
 
-self.onmessage = async (event: MessageEvent<unknown>) => {
-  const incoming = event.data;
+globalThis.onmessage = async (event: MessageEvent<unknown>) => {
+  const incoming = event.data
 
   if (!isWorkerRequest(incoming)) {
-    self.postMessage({
-      id: "unknown",
-      status: "error",
+    globalThis.postMessage({
+      id: 'unknown',
+      status: 'error',
       error: {
         code: WorkerErrorCodes.InvalidRequest,
-        message: "Worker received an invalid request envelope",
+        message: 'Worker received an invalid request envelope',
       },
-    });
-    return;
+    })
+    return
   }
 
-  const response = await dispatch(incoming);
-  self.postMessage(response);
-};
+  const response = await dispatch(incoming)
+  globalThis.postMessage(response)
+}

@@ -1,37 +1,30 @@
-import { z } from "zod";
+import type { NFA, TuringMachine } from '@delta/build'
+import type { z } from 'zod'
+import type { CompileErrorDetail, CompileSuccessData, MachineType } from '@/lib/worker/protocol'
 import {
-  type NFA,
-  type TuringMachine,
-  TMSchema,
+
   NFASchema,
-} from "@delta/build";
+  TMSchema,
+} from '@delta/build'
 import {
   createWorkerRequestId,
   sendWorkerRequest,
   WorkerTimeoutError,
-} from "@/lib/worker/client";
+} from '@/lib/worker/client'
 import {
+
   WorkerErrorCodes,
   WorkerMethods,
-  type MachineType,
-  type CompileErrorDetail,
-  type CompileSuccessData,
-} from "@/lib/worker/protocol";
+} from '@/lib/worker/protocol'
 
 export interface ExecutionError {
-  message: string;
-  line: number;
-  column: number;
+  message: string
+  line: number
+  column: number
 }
 
-const validateMachine = <M extends NFA | TuringMachine>(
-  payload: unknown,
-  schema: z.ZodType,
-  machineType: MachineType,
-  onError: (errors: ExecutionError[] | null) => void,
-  onValidMachine: (machine: M) => void,
-): boolean => {
-  const parse = schema.safeParse(payload);
+function validateMachine<M extends NFA | TuringMachine>(payload: unknown, schema: z.ZodType, machineType: MachineType, onError: (errors: ExecutionError[] | null) => void, onValidMachine: (machine: M) => void): boolean {
+  const parse = schema.safeParse(payload)
   if (!parse.success) {
     onError([
       {
@@ -39,24 +32,19 @@ const validateMachine = <M extends NFA | TuringMachine>(
         line: 0,
         column: 0,
       },
-    ]);
-    return false;
+    ])
+    return false
   }
 
-  onError(null);
-  onValidMachine(parse.data as M);
-  return true;
-};
+  onError(null)
+  onValidMachine(parse.data as M)
+  return true
+}
 
-export const runCode = async <M extends NFA | TuringMachine>(
-  value: string,
-  machineType: MachineType,
-  onValidMachine: (machine: M) => void,
-  onError: (errors: ExecutionError[] | null) => void,
-) => {
-  const worker = new Worker(new URL("./worker/index.ts", import.meta.url), {
-    type: "module",
-  });
+export async function runCode<M extends NFA | TuringMachine>(value: string, machineType: MachineType, onValidMachine: (machine: M) => void, onError: (errors: ExecutionError[] | null) => void) {
+  const worker = new Worker(new URL('./worker/index.ts', import.meta.url), {
+    type: 'module',
+  })
 
   try {
     const response = await sendWorkerRequest<
@@ -73,30 +61,30 @@ export const runCode = async <M extends NFA | TuringMachine>(
         },
       },
       5000,
-    );
+    )
 
-    if (response.status === "error") {
-      const compilationErrors = response.error.details?.errors;
+    if (response.status === 'error') {
+      const compilationErrors = response.error.details?.errors
       if (Array.isArray(compilationErrors) && compilationErrors.length > 0) {
         onError(
           compilationErrors.map((error: ExecutionError) => ({
-            message: error.message.split("\n").join("; "),
+            message: error.message.split('\n').join('; '),
             line: error.line,
             column: error.column,
           })),
-        );
-        return;
+        )
+        return
       }
 
       if (response.error.code === WorkerErrorCodes.Timeout) {
         onError([
           {
-            message: "Execution timed out (Possible infinite loop)",
+            message: 'Execution timed out (Possible infinite loop)',
             line: 0,
             column: 0,
           },
-        ]);
-        return;
+        ])
+        return
       }
 
       onError([
@@ -105,29 +93,30 @@ export const runCode = async <M extends NFA | TuringMachine>(
           line: 0,
           column: 0,
         },
-      ]);
-      return;
+      ])
+      return
     }
 
-    const payload = response.data.machine;
-    const schema = { nfa: NFASchema, tm: TMSchema };
+    const payload = response.data.machine
+    const schema = { nfa: NFASchema, tm: TMSchema }
     validateMachine(
       payload,
       schema[machineType],
       machineType,
       onError,
       onValidMachine,
-    );
-  } catch (err) {
+    )
+  }
+  catch (err) {
     if (err instanceof WorkerTimeoutError) {
       onError([
         {
-          message: "Execution timed out (Possible infinite loop)",
+          message: 'Execution timed out (Possible infinite loop)',
           line: 0,
           column: 0,
         },
-      ]);
-      return;
+      ])
+      return
     }
 
     onError([
@@ -136,8 +125,9 @@ export const runCode = async <M extends NFA | TuringMachine>(
         line: 1,
         column: 1,
       },
-    ]);
-  } finally {
-    worker.terminate();
+    ])
   }
-};
+  finally {
+    worker.terminate()
+  }
+}

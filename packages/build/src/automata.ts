@@ -2,21 +2,21 @@
  * Represents a construction warning or error.
  */
 export interface Message {
-  content: string;
-  severity: "warning" | "error";
-  stack?: string;
+  content: string
+  severity: 'warning' | 'error'
+  stack?: string
 }
 
 /**
  * Common properties shared by automata models.
  */
 export interface AutomataModel {
-  name: string;
-  alphabet: Set<string>;
-  states: Set<string>;
-  startState: string;
-  acceptStates: Set<string>;
-  messages: Message[];
+  name: string
+  alphabet: Set<string>
+  states: Set<string>
+  startState: string
+  acceptStates: Set<string>
+  messages: Message[]
 }
 
 /**
@@ -31,41 +31,41 @@ export const AutomataMessages = {
     `Transition source '${state}' is not a declared state`,
   transitionTargetNotDeclared: (state: string) =>
     `Transition target '${state}' is not a declared state`,
-  noStartState: "No start state defined",
-  alreadyBuilt: "build() already called",
-} as const;
+  noStartState: 'No start state defined',
+  alreadyBuilt: 'build() already called',
+} as const
 
 /**
  * Base class for automata builders that share common state and operations.
  */
 export abstract class Automata {
-  protected readonly _name: string;
-  protected _alphabet: Set<string> = new Set();
-  public _states: Set<string> = new Set();
-  protected _startState: string | null = null;
-  protected _acceptStates: Set<string> = new Set();
-  protected _messages: Message[] = [];
+  protected readonly _name: string
+  protected _alphabet: Set<string> = new Set()
+  public _states: Set<string> = new Set()
+  protected _startState: string | null = null
+  protected _acceptStates: Set<string> = new Set()
+  protected _messages: Message[] = []
 
   constructor(name: string) {
-    this._name = name;
+    this._name = name
   }
 
-  protected abstract startStateNotDeclaredMessage(state: string): string;
-  protected abstract acceptStateNotDeclaredMessage(state: string): string;
+  protected abstract startStateNotDeclaredMessage(state: string): string
+  protected abstract acceptStateNotDeclaredMessage(state: string): string
 
   /**
    * Records a {@link Message} for the automaton.
    */
-  protected message(severity: Message["severity"], content: string): void {
-    const stack = new Error().stack;
-    this._messages.push({ severity, content, stack });
+  protected message(severity: Message['severity'], content: string): void {
+    const stack = new Error(content).stack
+    this._messages.push({ severity, content, stack })
   }
 
   /**
    * Returns all error-severity messages collected so far.
    */
   protected errors(): Message[] {
-    return this._messages.filter((m) => m.severity === "error");
+    return this._messages.filter(m => m.severity === 'error')
   }
 
   /**
@@ -73,7 +73,7 @@ export abstract class Automata {
    */
   protected throwIfAnyErrors<E extends Error>(createError: () => E): void {
     if (this.errors().length > 0) {
-      throw createError();
+      throw createError()
     }
   }
 
@@ -82,9 +82,9 @@ export abstract class Automata {
    */
   public alphabet(...symbols: string[]): this {
     symbols.forEach((symbol) => {
-      this._alphabet.add(symbol);
-    });
-    return this;
+      this._alphabet.add(symbol)
+    })
+    return this
   }
 
   /**
@@ -92,9 +92,9 @@ export abstract class Automata {
    */
   public states(...states: string[]): this {
     states.forEach((state) => {
-      this._states.add(state);
-    });
-    return this;
+      this._states.add(state)
+    })
+    return this
   }
 
   /**
@@ -102,10 +102,10 @@ export abstract class Automata {
    */
   public start(state: string): this {
     if (!this._states.has(state)) {
-      this.message("error", this.startStateNotDeclaredMessage(state));
+      this.message('error', this.startStateNotDeclaredMessage(state))
     }
-    this._startState = state;
-    return this;
+    this._startState = state
+    return this
   }
 
   /**
@@ -114,24 +114,24 @@ export abstract class Automata {
   public accept(...states: string[]): this {
     states.forEach((state) => {
       if (!this._states.has(state)) {
-        this.message("error", this.acceptStateNotDeclaredMessage(state));
+        this.message('error', this.acceptStateNotDeclaredMessage(state))
       }
-      this._acceptStates.add(state);
-    });
-    return this;
+      this._acceptStates.add(state)
+    })
+    return this
   }
 
   /**
    * Retrieve all messages.
    */
   public get messages(): readonly Message[] {
-    return this._messages;
+    return this._messages
   }
 
   /**
    * Retrieve the current alphabet.
    */
   public get alpha(): readonly string[] {
-    return [...this._alphabet];
+    return [...this._alphabet]
   }
 }

@@ -1,34 +1,35 @@
-"use client";
+'use client'
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import ReactFlow, {
-  Background,
-  useNodesState,
-  useEdgesState,
+import type {
   Connection,
-  Handle,
-  Position,
-  NodeProps,
-  EdgeProps,
-  getBezierPath,
-  EdgeLabelRenderer,
-  BaseEdge,
-  MarkerType,
-  Node,
   Edge,
-  ConnectionMode,
-  applyNodeChanges,
+  EdgeProps,
+  Node,
+  NodeProps,
+} from 'reactflow'
+import { flavors } from '@catppuccin/palette'
+import { useTheme } from 'next-themes'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import ReactFlow, {
   applyEdgeChanges,
+  applyNodeChanges,
+  Background,
+  BaseEdge,
+  ConnectionMode,
+  EdgeLabelRenderer,
+  getBezierPath,
+  Handle,
+  MarkerType,
+  Position,
+  useEdgesState,
+  useNodesState,
   useReactFlow,
   useStoreApi,
-} from "reactflow";
-import { flavors } from "@catppuccin/palette";
-import "reactflow/dist/style.css";
-import { useNfaStore } from "@/store/nfaStore";
-import { getFlowElementsFromDot } from "./layoutNFA";
-import { toDot } from "@/lib/dot";
-import { themeNames } from "@/lib/theme";
-import { useTheme } from "next-themes";
+} from 'reactflow'
+import { toDot } from '@/lib/dot'
+import { themeNames } from '@/lib/theme'
+import { useNfaStore } from '@/store/nfaStore'
+import { getFlowElementsFromDot } from './layoutNFA'
 
 function AutomataEdge({
   id,
@@ -41,16 +42,16 @@ function AutomataEdge({
   data,
   markerEnd,
 }: EdgeProps) {
-  const [editing, setEditing] = useState(false);
-  const [label, setLabel] = useState(data?.label ?? "a");
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [editing, setEditing] = useState(false)
+  const [label, setLabel] = useState(data?.label ?? 'a')
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  const nodes = useNfaStore((s) => s.nodes);
-  const edges = useNfaStore((s) => s.edges);
-  const startId = useNfaStore((s) => s.startId);
-  const syncFromFlow = useNfaStore((s) => s.syncFromFlow);
+  const nodes = useNfaStore(s => s.nodes)
+  const edges = useNfaStore(s => s.edges)
+  const startId = useNfaStore(s => s.startId)
+  const syncFromFlow = useNfaStore(s => s.syncFromFlow)
 
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme } = useTheme()
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -59,25 +60,25 @@ function AutomataEdge({
     targetX,
     targetY,
     targetPosition,
-  });
+  })
+
+  const updateEdges = () => {
+    const newEdges = edges.map(e =>
+      e.id === id ? { ...e, data: { ...e.data, label } } : e,
+    )
+    syncFromFlow(nodes, newEdges, startId)
+  }
 
   const handleBlur = (e: React.FocusEvent) => {
     if (!containerRef.current?.contains(e.relatedTarget as Element)) {
-      setEditing(false);
-      updateEdges();
+      setEditing(false)
+      updateEdges()
     }
-  };
+  }
 
   const handleLabelChange = (value: string) => {
-    setLabel(value);
-  };
-
-  const updateEdges = () => {
-    const newEdges = edges.map((e) =>
-      e.id === id ? { ...e, data: { ...e.data, label } } : e,
-    );
-    syncFromFlow(nodes, newEdges, startId);
-  };
+    setLabel(value)
+  }
 
   return (
     <>
@@ -85,61 +86,62 @@ function AutomataEdge({
         path={edgePath}
         markerEnd={markerEnd}
         style={{
-          stroke: flavors[themeNames[resolvedTheme ?? "light"]].colors.text.hex,
+          stroke: flavors[themeNames[resolvedTheme ?? 'light']].colors.text.hex,
           strokeWidth: 1.5,
         }}
       />
       <EdgeLabelRenderer>
         <div
           style={{
-            position: "absolute",
+            position: 'absolute',
             transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-            pointerEvents: "all",
+            pointerEvents: 'all',
             zIndex: editing ? 1000 : 1,
           }}
           className="nodrag nopan"
         >
-          {editing ? (
-            <div
-              ref={containerRef}
-              onBlur={handleBlur}
-              className="flex flex-col gap-1 bg-ctp-base border border-ctp-surface1 rounded p-1"
-            >
-              <input
-                autoFocus
-                value={label}
-                onChange={(e) => handleLabelChange(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    setEditing(false);
-                    updateEdges();
-                  }
-                }}
-                className="w-16 text-xs text-center bg-transparent text-ctp-text focus:outline-none"
-              />
-            </div>
-          ) : (
-            <span
-              onDoubleClick={() => setEditing(true)}
-              className="text-xs text-ctp-text bg-ctp-mantle/80 px-1.5 py-0.5 rounded cursor-pointer hover:bg-ctp-surface0 transition-colors"
-            >
-              {label}
-            </span>
-          )}
+          {editing
+            ? (
+                <div
+                  ref={containerRef}
+                  onBlur={handleBlur}
+                  className="flex flex-col gap-1 bg-ctp-base border border-ctp-surface1 rounded p-1"
+                >
+                  <input
+                    autoFocus
+                    value={label}
+                    onChange={e => handleLabelChange(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        setEditing(false)
+                        updateEdges()
+                      }
+                    }}
+                    className="w-16 text-xs text-center bg-transparent text-ctp-text focus:outline-none"
+                  />
+                </div>
+              )
+            : (
+                <span
+                  onDoubleClick={() => setEditing(true)}
+                  className="text-xs text-ctp-text bg-ctp-mantle/80 px-1.5 py-0.5 rounded cursor-pointer hover:bg-ctp-surface0 transition-colors"
+                >
+                  {label}
+                </span>
+              )}
         </div>
       </EdgeLabelRenderer>
     </>
-  );
+  )
 }
 
 function StateNode({ data, selected }: NodeProps) {
   return (
     <div
-      className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm transition-colors ${
-        data.isAccept
-          ? "border-4 border-double border-ctp-text bg-ctp-mantle text-ctp-text"
-          : "border-2 border-ctp-text bg-ctp-mantle text-ctp-text"
-      } ${selected ? "border-ctp-mauve!" : ""}`}
+      className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm transition-colors ${data.isAccept
+        ? 'border-4 border-double border-ctp-text bg-ctp-mantle text-ctp-text'
+        : 'border-2 border-ctp-text bg-ctp-mantle text-ctp-text'
+      } ${selected ? 'border-ctp-mauve!' : ''}`}
     >
       <Handle
         id="target-top"
@@ -167,110 +169,99 @@ function StateNode({ data, selected }: NodeProps) {
         className="bg-ctp-mauve/45! border-0! w-1! h-1!"
       />
     </div>
-  );
+  )
 }
 
-const nodeTypes = { state: StateNode };
-const edgeTypes = { automata: AutomataEdge };
+const nodeTypes = { state: StateNode }
+const edgeTypes = { automata: AutomataEdge }
 
 export function FlowEditor() {
-  const machine = useNfaStore((s) => s.machine);
-  const storeNodes = useNfaStore((s) => s.nodes);
-  const storeEdges = useNfaStore((s) => s.edges);
-  const startId = useNfaStore((s) => s.startId);
-  const patchNfa = useNfaStore((s) => s.patch);
-  const syncFromFlow = useNfaStore((s) => s.syncFromFlow);
+  const machine = useNfaStore(s => s.machine)
+  const storeNodes = useNfaStore(s => s.nodes)
+  const storeEdges = useNfaStore(s => s.edges)
+  const startId = useNfaStore(s => s.startId)
+  const patchNfa = useNfaStore(s => s.patch)
+  const syncFromFlow = useNfaStore(s => s.syncFromFlow)
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes)
+  const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges)
   const [inUseStates, setInUseStates] = useState(
     storeNodes.map((_, index) => index),
-  );
-  const [hasInitialLayout, setHasInitialLayout] = useState(false);
-  const { screenToFlowPosition, getNodes } = useReactFlow();
-  const store = useStoreApi();
+  )
+  const [hasInitialLayout, setHasInitialLayout] = useState(false)
+  const { screenToFlowPosition, getNodes } = useReactFlow()
+  const store = useStoreApi()
 
-  const { resolvedTheme } = useTheme();
-
-  const getCenter = () => {
-    const { domNode } = store.getState();
-    if (!domNode) return { x: 0, y: 0 };
-
-    const rect = domNode.getBoundingClientRect();
-
-    const centerX = rect.x + rect.width / 2;
-    const centerY = rect.y + rect.height / 2;
-
-    return screenToFlowPosition({ x: centerX, y: centerY });
-  };
+  const { resolvedTheme } = useTheme()
 
   const pendingStateRef = useRef<{
-    nodes: Node[];
-    edges: Edge[];
-    startId: string | null;
-  } | null>(null);
-  const isMicrotaskQueued = useRef(false);
+    nodes: Node[]
+    edges: Edge[]
+    startId: string | null
+  } | null>(null)
+  const isMicrotaskQueuedRef = useRef(false)
 
   const batchStoreUpdate = useCallback(
     (
       updater: (prev: {
-        nodes: Node[];
-        edges: Edge[];
-        startId: string | null;
+        nodes: Node[]
+        edges: Edge[]
+        startId: string | null
       }) => {
-        nodes: Node[];
-        edges: Edge[];
-        startId: string | null;
+        nodes: Node[]
+        edges: Edge[]
+        startId: string | null
       },
     ) => {
       if (!pendingStateRef.current) {
-        const state = useNfaStore.getState();
+        const state = useNfaStore.getState()
         pendingStateRef.current = {
           nodes: state.nodes,
           edges: state.edges,
           startId: state.startId,
-        };
+        }
       }
 
-      pendingStateRef.current = updater(pendingStateRef.current);
+      pendingStateRef.current = updater(pendingStateRef.current)
 
-      if (!isMicrotaskQueued.current) {
-        isMicrotaskQueued.current = true;
+      if (!isMicrotaskQueuedRef.current) {
+        isMicrotaskQueuedRef.current = true
         queueMicrotask(() => {
           if (pendingStateRef.current) {
             syncFromFlow(
               pendingStateRef.current.nodes,
               pendingStateRef.current.edges,
               pendingStateRef.current.startId,
-            );
-            pendingStateRef.current = null;
+            )
+            pendingStateRef.current = null
           }
-          isMicrotaskQueued.current = false;
-        });
+          isMicrotaskQueuedRef.current = false
+        })
       }
     },
     [syncFromFlow],
-  );
+  )
 
   useEffect(() => {
     async function initializeLayout() {
       if (machine) {
-        const dotString = toDot(machine, themeNames[resolvedTheme ?? "light"]);
-        const { nodes: layoutedNodes, edges: layoutedEdges } =
-          await getFlowElementsFromDot(dotString);
+        const dotString = toDot(machine, themeNames[resolvedTheme ?? 'light'])
+        const { nodes: layoutedNodes, edges: layoutedEdges }
+          = await getFlowElementsFromDot(dotString)
 
-        setNodes(layoutedNodes);
-        setEdges(layoutedEdges);
-        syncFromFlow(layoutedNodes, layoutedEdges, startId);
-        setHasInitialLayout(true);
+        setNodes(layoutedNodes)
+        setEdges(layoutedEdges)
+        syncFromFlow(layoutedNodes, layoutedEdges, startId)
+        setHasInitialLayout(true)
       }
     }
 
     if (!hasInitialLayout) {
-      initializeLayout();
-    } else {
-      setNodes(storeNodes);
-      setEdges(storeEdges);
+      initializeLayout()
+    }
+    else {
+      setNodes(storeNodes)
+      setEdges(storeEdges)
     }
   }, [
     machine,
@@ -281,146 +272,165 @@ export function FlowEditor() {
     setEdges,
     syncFromFlow,
     startId,
-  ]);
+    resolvedTheme,
+  ])
 
   const onNodeDragStop = useCallback(() => {
-    const globalState = useNfaStore.getState();
-    syncFromFlow(getNodes(), globalState.edges, globalState.startId);
-  }, [getNodes, syncFromFlow]);
+    const globalState = useNfaStore.getState()
+    syncFromFlow(getNodes(), globalState.edges, globalState.startId)
+  }, [getNodes, syncFromFlow])
 
   const handleNodesChange = useCallback(
     (changes: any) => {
-      onNodesChange(changes);
+      onNodesChange(changes)
 
-      const removals = changes.filter((c: any) => c.type === "remove") as any[];
+      const removals = changes.filter((c: any) => c.type === 'remove') as any[]
 
       const requiresStoreSync = changes.some(
-        (c: any) => c.type === "remove" || c.type === "select",
-      );
+        (c: any) => c.type === 'remove' || c.type === 'select',
+      )
 
       if (!requiresStoreSync) {
-        return;
+        return
       }
 
       if (removals.length) {
         batchStoreUpdate((prev) => {
-          const nextNodes = applyNodeChanges(changes, prev.nodes);
+          const nextNodes = applyNodeChanges(changes, prev.nodes)
 
           const removedIds = new Set<string>(
             removals.map((r: any) => r.id as string),
-          );
+          )
 
-          const nextStartId = removedIds.has(prev.startId ?? "")
+          const nextStartId = removedIds.has(prev.startId ?? '')
             ? null
-            : prev.startId;
+            : prev.startId
 
           const validEdges = prev.edges.filter(
-            (e) => !removedIds.has(e.source) && !removedIds.has(e.target),
-          );
+            e => !removedIds.has(e.source) && !removedIds.has(e.target),
+          )
 
           const removedNums = new Set(
-            Array.from(removedIds).map((value) =>
-              parseInt(value.replace("q", "").trim()),
+            Array.from(removedIds).map(value =>
+              Number.parseInt(value.replace('q', '').trim()),
             ),
-          );
-          setInUseStates((prev) => prev.filter((id) => !removedNums.has(id)));
+          )
+          setInUseStates(prev => prev.filter(id => !removedNums.has(id)))
 
-          return { nodes: nextNodes, edges: validEdges, startId: nextStartId };
-        });
-      } else {
-        const state = useNfaStore.getState();
-        const nextNodes = applyNodeChanges(changes, state.nodes);
-        syncFromFlow(nextNodes, state.edges, state.startId);
+          return { nodes: nextNodes, edges: validEdges, startId: nextStartId }
+        })
+      }
+      else {
+        const state = useNfaStore.getState()
+        const nextNodes = applyNodeChanges(changes, state.nodes)
+        syncFromFlow(nextNodes, state.edges, state.startId)
       }
     },
     [onNodesChange, batchStoreUpdate, syncFromFlow],
-  );
+  )
 
   const handleEdgesChange = useCallback(
     (changes: any) => {
-      onEdgesChange(changes);
+      onEdgesChange(changes)
 
-      const removals = changes.filter((c: any) => c.type === "remove");
+      const removals = changes.filter((c: any) => c.type === 'remove')
 
       if (removals.length) {
         batchStoreUpdate((prev) => {
-          const nextEdges = applyEdgeChanges(changes, prev.edges);
-          return { ...prev, edges: nextEdges };
-        });
-      } else {
-        const state = useNfaStore.getState();
-        const nextEdges = applyEdgeChanges(changes, state.edges);
-        syncFromFlow(state.nodes, nextEdges, state.startId);
+          const nextEdges = applyEdgeChanges(changes, prev.edges)
+          return { ...prev, edges: nextEdges }
+        })
+      }
+      else {
+        const state = useNfaStore.getState()
+        const nextEdges = applyEdgeChanges(changes, state.edges)
+        syncFromFlow(state.nodes, nextEdges, state.startId)
       }
     },
     [onEdgesChange, batchStoreUpdate, syncFromFlow],
-  );
+  )
 
   const onConnect = useCallback(
     (connection: Connection) => {
-      const { source, target } = connection;
-      if (!source || !target) return;
+      const { source, target } = connection
+      if (!source || !target)
+        return
 
       const newEdge: Edge = {
         ...connection,
         source,
         target,
-        type: "automata",
-        data: { label: "a" },
+        type: 'automata',
+        data: { label: 'a' },
         id: `edge-${connection.sourceHandle}-${connection.targetHandle}-${Date.now()}`,
-        markerEnd: { type: MarkerType.ArrowClosed, color: "#4c4f69" },
-      };
+        markerEnd: { type: MarkerType.ArrowClosed, color: '#4c4f69' },
+      }
 
-      const newEdges = [...edges, newEdge];
-      syncFromFlow(nodes, newEdges, startId);
+      const newEdges = [...edges, newEdge]
+      syncFromFlow(nodes, newEdges, startId)
     },
     [nodes, edges, startId, syncFromFlow],
-  );
+  )
 
   const addState = useCallback(() => {
-    const smallestGap = findSmallestGap(inUseStates);
-    const id = `q${smallestGap}`;
+    const getCenter = () => {
+      const { domNode } = store.getState()
+      if (!domNode)
+        return { x: 0, y: 0 }
 
-    const { x: centerX, y: centerY } = getCenter();
+      const rect = domNode.getBoundingClientRect()
+
+      const centerX = rect.x + rect.width / 2
+      const centerY = rect.y + rect.height / 2
+
+      return screenToFlowPosition({ x: centerX, y: centerY })
+    }
+
+    const smallestGap = findSmallestGap(inUseStates)
+    const id = `q${smallestGap}`
+
+    const { x: centerX, y: centerY } = getCenter()
 
     const newNode: Node = {
       id,
-      type: "state",
+      type: 'state',
       position: {
         x: centerX + (smallestGap - 1) * 20,
         y: centerY + (smallestGap - 1) * 20,
       },
       data: { label: id, isAccept: false },
-    };
+    }
 
-    const newNodes = [...nodes, newNode];
-    const newStartId = startId ?? id;
+    const newNodes = [...nodes, newNode]
+    const newStartId = startId ?? id
 
-    if (!startId) patchNfa({ startId: id });
+    if (!startId)
+      patchNfa({ startId: id })
 
-    setInUseStates((prev) => [...prev, smallestGap]);
-    syncFromFlow(newNodes, edges, newStartId);
-  }, [inUseStates, nodes, edges, startId, patchNfa, syncFromFlow]);
+    setInUseStates(prev => [...prev, smallestGap])
+    syncFromFlow(newNodes, edges, newStartId)
+  }, [inUseStates, nodes, edges, startId, patchNfa, syncFromFlow, screenToFlowPosition, store])
 
   const toggleAccept = useCallback(() => {
-    const newNodes = nodes.map((n) =>
+    const newNodes = nodes.map(n =>
       n.selected
         ? { ...n, data: { ...n.data, isAccept: !n.data.isAccept } }
         : n,
-    );
-    syncFromFlow(newNodes, edges, startId);
-  }, [nodes, edges, startId, syncFromFlow]);
+    )
+    syncFromFlow(newNodes, edges, startId)
+  }, [nodes, edges, startId, syncFromFlow])
 
   const setStart = useCallback(() => {
-    const selected = nodes.find((n) => n.selected);
-    if (!selected) return;
-    syncFromFlow(nodes, edges, selected.id);
-  }, [nodes, edges, syncFromFlow]);
+    const selected = nodes.find(n => n.selected)
+    if (!selected)
+      return
+    syncFromFlow(nodes, edges, selected.id)
+  }, [nodes, edges, syncFromFlow])
 
   const clearGraph = useCallback(() => {
-    setInUseStates([]);
-    syncFromFlow([], [], null);
-  }, [syncFromFlow]);
+    setInUseStates([])
+    syncFromFlow([], [], null)
+  }, [syncFromFlow])
 
   return (
     <div className="flex flex-col h-full">
@@ -474,20 +484,22 @@ export function FlowEditor() {
         )}
       </div>
     </div>
-  );
+  )
 }
 
 function findSmallestGap(numbers: number[]): number {
-  if (numbers.length === 0) return 0;
+  if (numbers.length === 0)
+    return 0
 
-  const sorted = [...new Set(numbers)].sort((a, b) => a - b);
+  const sorted = [...new Set(numbers)].sort((a, b) => a - b)
 
   const elementBeforeGap = sorted.find((num, index, arr) => {
-    if (index === arr.length - 1) return false;
-    return arr[index + 1] > num + 1;
-  });
+    if (index === arr.length - 1)
+      return false
+    return arr[index + 1] > num + 1
+  })
 
   return elementBeforeGap !== undefined
     ? elementBeforeGap + 1
-    : sorted[sorted.length - 1] + 1;
+    : sorted.at(-1)! + 1
 }

@@ -1,22 +1,10 @@
 {
   "extends": "../../packages/tsconfig/base.json",
   "compilerOptions": {
-    "module": "esnext",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
+    "jsx": "react-jsx",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "paths": {
       // workspace deps
       "@delta/build": ["../../packages/build/src/index.ts"],
@@ -30,7 +18,19 @@
       "@/hooks/*": ["./app/hooks/*"],
       "@/lib/*": ["./app/lib/*"],
       "@/app/*": ["./app/*"]
-    }
+    },
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",

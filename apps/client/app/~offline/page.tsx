@@ -10,5 +10,5 @@ export default function Offline() {
         delta still works — try the editor or visualizer
       </p>
     </div>
-  );
+  )
 }

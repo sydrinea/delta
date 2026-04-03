@@ -1,96 +1,98 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import Link from "next/link";
-import { type Heading, NAV } from "../guide/nav";
-import { GitHubIcon } from "./GitHubIcon";
+import type { Heading } from '../guide/nav'
+import Link from 'next/link'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { NAV } from '../guide/nav'
+import { GitHubIcon } from './GitHubIcon'
 
 interface ToCProps {
-  headings: Heading[];
-  activeId: string;
-  onNavigate: (id: string) => void;
+  headings: Heading[]
+  activeId: string
+  onNavigate: (id: string) => void
 }
 
 function TableOfContents({ headings, activeId, onNavigate }: ToCProps) {
-  if (!headings.length) return null;
+  if (!headings.length)
+    return null
 
   return (
     <nav className="space-y-0.5">
       <p className="text-[10px] font-semibold uppercase tracking-widest text-ctp-overlay0 mb-2 px-1">
         On this page
       </p>
-      {headings.map((h) => (
+      {headings.map(h => (
         <a
           key={h.id}
           href={`#${h.id}`}
           onClick={() => onNavigate(h.id)}
           className={[
-            "block text-[13px] leading-snug py-0.5 rounded transition-colors duration-150",
+            'block text-[13px] leading-snug py-0.5 rounded transition-colors duration-150',
             h.level === 1
-              ? "pl-1 font-medium"
+              ? 'pl-1 font-medium'
               : h.level === 2
-                ? "pl-3"
-                : "pl-5 text-[12px]",
+                ? 'pl-3'
+                : 'pl-5 text-[12px]',
             activeId === h.id
-              ? "text-ctp-mauve font-semibold"
-              : "text-ctp-subtext0 hover:text-ctp-text",
-          ].join(" ")}
+              ? 'text-ctp-mauve font-semibold'
+              : 'text-ctp-subtext0 hover:text-ctp-text',
+          ].join(' ')}
         >
           {h.text}
         </a>
       ))}
     </nav>
-  );
+  )
 }
 
 interface SidebarContentProps {
-  activePage: string;
-  onNavigate: (id: string) => void;
+  activePage: string
+  onNavigate: (id: string) => void
 }
 
 function SidebarContent({ activePage, onNavigate }: SidebarContentProps) {
   return (
     <div className="py-6 px-4 space-y-6">
-      {NAV.map((group) => (
+      {NAV.map(group => (
         <div key={group.section}>
           <p className="text-[10px] font-bold uppercase tracking-widest text-ctp-overlay0 mb-1.5 px-1">
             {group.section}
           </p>
           <ul className="space-y-0.5">
             {group.pages.map((page) => {
-              const isActive = activePage === page.id;
+              const isActive = activePage === page.id
               return (
                 <li key={page.id}>
                   <Link
-                    href={`/guide/${page.id === "quick-start" ? "" : page.id}`}
-                    onClick={() => onNavigate("")}
+                    href={`/guide/${page.id === 'quick-start' ? '' : page.id}`}
+                    onClick={() => onNavigate('')}
                     className={[
-                      "block w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors duration-150 cursor-pointer",
+                      'block w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors duration-150 cursor-pointer',
                       isActive
-                        ? "bg-ctp-surface0 text-ctp-text font-semibold"
-                        : "text-ctp-subtext0 hover:bg-ctp-surface0/60 hover:text-ctp-text",
-                    ].join(" ")}
+                        ? 'bg-ctp-surface0 text-ctp-text font-semibold'
+                        : 'text-ctp-subtext0 hover:bg-ctp-surface0/60 hover:text-ctp-text',
+                    ].join(' ')}
                   >
                     {page.label}
                   </Link>
                 </li>
-              );
+              )
             })}
           </ul>
         </div>
       ))}
     </div>
-  );
+  )
 }
 
 interface DocsLayoutProps {
-  activePage: string;
-  html: string;
-  headings: Heading[];
-  editUrl: string;
-  issueUrl: string;
-  previousPage: { label: string; href: string } | null;
-  nextPage: { label: string; href: string } | null;
+  activePage: string
+  html: string
+  headings: Heading[]
+  editUrl: string
+  issueUrl: string
+  previousPage: { label: string, href: string } | null
+  nextPage: { label: string, href: string } | null
 }
 
 export default function DocsLayout({
@@ -102,80 +104,82 @@ export default function DocsLayout({
   previousPage,
   nextPage,
 }: DocsLayoutProps) {
-  const [activeHeading, setActiveHeading] = useState(headings[0]?.id ?? "");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [activeHeading, setActiveHeading] = useState(headings[0]?.id ?? '')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
-  const contentRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (sidebarOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = 'hidden'
+    }
+    else {
+      document.body.style.overflow = ''
     }
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, [sidebarOpen]);
+      document.body.style.overflow = ''
+    }
+  }, [sidebarOpen])
 
   useEffect(() => {
-    const root = contentRef.current;
-    if (!root) return;
-
-    setActiveHeading(headings[0]?.id ?? "");
+    const root = contentRef.current
+    if (!root)
+      return
 
     const handleHeadingClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      const heading = target.closest("h1, h2, h3") as HTMLElement | null;
-      if (!heading?.id) return;
+      const target = e.target as HTMLElement
+      const heading = target.closest('h1, h2, h3') as HTMLElement | null
+      if (!heading?.id)
+        return
 
-      setActiveHeading(heading.id);
+      setActiveHeading(heading.id)
 
       const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)",
-      ).matches;
+        '(prefers-reduced-motion: reduce)',
+      ).matches
 
       heading.scrollIntoView({
-        behavior: prefersReducedMotion ? "auto" : "smooth",
-        block: "start",
-      });
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'start',
+      })
 
       window.history.replaceState(
         null,
-        "",
+        '',
         `#${encodeURIComponent(heading.id)}`,
-      );
-    };
+      )
+    }
 
-    root.addEventListener("click", handleHeadingClick);
-    return () => root.removeEventListener("click", handleHeadingClick);
-  }, [html, headings]);
+    root.addEventListener('click', handleHeadingClick)
+    return () => root.removeEventListener('click', handleHeadingClick)
+  }, [html, headings])
 
   const navigate = useCallback((id: string) => {
-    setActiveHeading(id);
-    setSidebarOpen(false);
-  }, []);
+    setActiveHeading(id)
+    setSidebarOpen(false)
+  }, [])
 
   return (
     <>
       <div className="min-h-screen bg-ctp-base">
         <div className="sticky top-14 z-10 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md lg:hidden">
           <button
-            onClick={() => setSidebarOpen((o) => !o)}
+            onClick={() => setSidebarOpen(o => !o)}
             className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-ctp-subtext0 hover:bg-ctp-surface0/40 hover:text-ctp-text transition-colors cursor-pointer"
           >
             <span className="font-mono text-ctp-mauve font-bold">
-              {sidebarOpen ? "v" : ">"}
-            </span>{" "}
+              {sidebarOpen ? 'v' : '>'}
+            </span>
+            {' '}
             Menu
           </button>
         </div>
 
         <aside
           className={[
-            "fixed inset-0 top-[calc(3.5rem+45px)] z-10 bg-ctp-base overflow-y-auto lg:hidden",
-            sidebarOpen ? "block" : "hidden",
-          ].join(" ")}
+            'fixed inset-0 top-header-adjust z-10 bg-ctp-base overflow-y-auto lg:hidden',
+            sidebarOpen ? 'block' : 'hidden',
+          ].join(' ')}
         >
           <div className="py-2 pb-24">
             <SidebarContent activePage={activePage} onNavigate={navigate} />
@@ -189,10 +193,12 @@ export default function DocsLayout({
 
           <main className="flex-1 min-w-0 px-6 py-10 lg:px-12">
             <div ref={contentRef} className="mx-auto max-w-2xl">
+              {/* eslint-disable react-dom/no-dangerously-set-innerhtml -- Content is generated from project markdown via a controlled unified/rehype pipeline on the server. */}
               <article
                 className="prose doc-prose"
                 dangerouslySetInnerHTML={{ __html: html }}
               />
+              {/* eslint-enable react-dom/no-dangerously-set-innerhtml */}
 
               <footer className="mt-12 border-t border-ctp-surface0 pt-6 pb-10 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
@@ -217,39 +223,43 @@ export default function DocsLayout({
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                  {previousPage ? (
-                    <Link
-                      href={previousPage.href}
-                      onClick={() => navigate("")}
-                      className="rounded-lg border border-ctp-surface1 bg-ctp-mantle/70 px-3 py-2 text-xs text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
-                    >
-                      <span className="block text-[10px] uppercase tracking-widest text-ctp-overlay0">
-                        Previous
-                      </span>
-                      <span className="block mt-0.5 font-semibold">
-                        {previousPage.label}
-                      </span>
-                    </Link>
-                  ) : (
-                    <div />
-                  )}
+                  {previousPage
+                    ? (
+                        <Link
+                          href={previousPage.href}
+                          onClick={() => navigate('')}
+                          className="rounded-lg border border-ctp-surface1 bg-ctp-mantle/70 px-3 py-2 text-xs text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors"
+                        >
+                          <span className="block text-[10px] uppercase tracking-widest text-ctp-overlay0">
+                            Previous
+                          </span>
+                          <span className="block mt-0.5 font-semibold">
+                            {previousPage.label}
+                          </span>
+                        </Link>
+                      )
+                    : (
+                        <div />
+                      )}
 
-                  {nextPage ? (
-                    <Link
-                      href={nextPage.href}
-                      onClick={() => navigate("")}
-                      className="rounded-lg border border-ctp-surface1 bg-ctp-mantle/70 px-3 py-2 text-xs text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors sm:text-right"
-                    >
-                      <span className="block text-[10px] uppercase tracking-widest text-ctp-overlay0">
-                        Next
-                      </span>
-                      <span className="block mt-0.5 font-semibold">
-                        {nextPage.label}
-                      </span>
-                    </Link>
-                  ) : (
-                    <div />
-                  )}
+                  {nextPage
+                    ? (
+                        <Link
+                          href={nextPage.href}
+                          onClick={() => navigate('')}
+                          className="rounded-lg border border-ctp-surface1 bg-ctp-mantle/70 px-3 py-2 text-xs text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0 transition-colors sm:text-right"
+                        >
+                          <span className="block text-[10px] uppercase tracking-widest text-ctp-overlay0">
+                            Next
+                          </span>
+                          <span className="block mt-0.5 font-semibold">
+                            {nextPage.label}
+                          </span>
+                        </Link>
+                      )
+                    : (
+                        <div />
+                      )}
                 </div>
               </footer>
             </div>
@@ -265,5 +275,5 @@ export default function DocsLayout({
         </div>
       </div>
     </>
-  );
+  )
 }

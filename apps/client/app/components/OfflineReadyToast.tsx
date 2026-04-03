@@ -1,20 +1,21 @@
-"use client";
+'use client'
 
-import { useEffect } from "react";
-import { useToast } from "@/components/ToastProvider";
+import { useEffect } from 'react'
+import { useToast } from '@/components/ToastProvider'
 
 export function OfflineReadyToast() {
-  const { setToast } = useToast();
+  const { setToast } = useToast()
 
   useEffect(() => {
-    if (!("serviceWorker" in navigator)) return;
+    if (!('serviceWorker' in navigator))
+      return
 
     navigator.serviceWorker.ready.then((reg) => {
       if (reg.active) {
-        setToast("Ready to use offline", 3000);
+        setToast('Ready to use offline', 3000)
       }
-    });
-  }, [setToast]);
+    })
+  }, [setToast])
 
-  return null;
+  return null
 }

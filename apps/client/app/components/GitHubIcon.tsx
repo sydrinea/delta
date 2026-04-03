@@ -1,4 +1,4 @@
-import { siGithub } from "simple-icons/icons";
+import { siGithub } from 'simple-icons/icons'
 
 export function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -7,7 +7,8 @@ export function GitHubIcon({ className }: { className?: string }) {
       className={className}
       fill="currentColor"
       aria-hidden="true"
+      // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml -- simple-icons provides trusted static SVG markup for the official GitHub icon.
       dangerouslySetInnerHTML={{ __html: siGithub.svg }}
     />
-  );
+  )
 }

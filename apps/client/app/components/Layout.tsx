@@ -1,8 +1,8 @@
-import Navbar from "@/components/Navbar";
-import { AlertProvider } from "@/components/AlertProvider";
-import { Loader } from "@/components/Loader";
-import { ToastProvider } from "./ToastProvider";
-import { OfflineReadyToast } from "./OfflineReadyToast";
+import { AlertProvider } from '@/components/AlertProvider'
+import { Loader } from '@/components/Loader'
+import Navbar from '@/components/Navbar'
+import { OfflineReadyToast } from './OfflineReadyToast'
+import { ToastProvider } from './ToastProvider'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -16,5 +16,5 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </main>
       </AlertProvider>
     </ToastProvider>
-  );
+  )
 }

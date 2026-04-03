@@ -1,30 +1,31 @@
-import z from "zod";
+import z from 'zod'
 
 const MessageSchema = z.object({
   content: z.string(),
-  severity: z.enum(["warning", "error"]),
-});
+  severity: z.enum(['warning', 'error']),
+})
 
 const stringSetAdapter = z
   .union([z.set(z.string()), z.array(z.string())])
   .transform<
-    Set<string>
-  >((value) => (value instanceof Set ? new Set(value) : new Set(value)));
+  Set<string>
+>(value => (value instanceof Set ? new Set(value) : new Set(value)))
 
-const stringKeyMapAdapter = <V>(valueSchema: z.ZodType<V>) =>
-  z
+function stringKeyMapAdapter<V>(valueSchema: z.ZodType<V>) {
+  return z
     .union([z.map(z.string(), valueSchema), z.record(z.string(), valueSchema)])
     .transform<
-      Map<string, V>
-    >((value) => (value instanceof Map ? new Map(value) : new Map(Object.entries(value) as [string, V][])));
+    Map<string, V>
+  >(value => (value instanceof Map ? new Map(value) : new Map(Object.entries(value) as [string, V][])))
+}
 
 const nfaTransitionsAdapter = stringKeyMapAdapter(
   stringKeyMapAdapter(stringSetAdapter),
-);
+)
 
 const tmTransitionsAdapter = stringKeyMapAdapter(
   stringKeyMapAdapter(z.unknown()),
-);
+)
 
 export const NFASchema = z.strictObject({
   name: z.string(),
@@ -34,7 +35,7 @@ export const NFASchema = z.strictObject({
   acceptStates: stringSetAdapter,
   transitions: nfaTransitionsAdapter,
   messages: z.array(MessageSchema),
-});
+})
 
 export const TMSchema = z.strictObject({
   name: z.string(),
@@ -47,4 +48,4 @@ export const TMSchema = z.strictObject({
   blankSymbol: z.string(),
   transitions: tmTransitionsAdapter,
   messages: z.array(MessageSchema),
-});
+})

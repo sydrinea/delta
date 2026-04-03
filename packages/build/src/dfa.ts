@@ -1,5 +1,6 @@
-import { EPSILON } from "./constants";
-import { NFABuilder, NFA, NFAMessages, NFABuildError } from "./nfa";
+import type { NFA } from './nfa'
+import { EPSILON } from './constants'
+import { NFABuilder, NFABuildError, NFAMessages } from './nfa'
 
 /**
  * Everything that may fail when constructing the DFA
@@ -11,8 +12,8 @@ export const DFAMessages = {
     `DFA state '${state}' must have exactly one transition for symbol '${symbol}'`,
   nondeterministicTransition: (from: string, symbol: string) =>
     `DFA transition from '${from}' on '${symbol}' is nondeterministic`,
-  epsilonTransitionNotAllowed: "DFA transitions cannot use epsilon",
-} as const;
+  epsilonTransitionNotAllowed: 'DFA transitions cannot use epsilon',
+} as const
 
 /**
  * Construct a new DFA with validation.
@@ -21,43 +22,40 @@ class DFABuilder extends NFABuilder {
   public override transition(from: string, symbol: string, to: string): this {
     // (1) we disallow epsilon transitions
     if (symbol === EPSILON) {
-      this.message("error", DFAMessages.epsilonTransitionNotAllowed);
-      return this;
+      this.message('error', DFAMessages.epsilonTransitionNotAllowed)
+      return this
     }
 
     // (2) we don't allow nondeterminism
-    const existing = this._transitions.get(from)?.get(symbol);
+    const existing = this._transitions.get(from)?.get(symbol)
     if (existing !== undefined && existing.size > 0) {
       this.message(
-        "error",
+        'error',
         DFAMessages.nondeterministicTransition(from, symbol),
-      );
-      return this;
+      )
+      return this
     }
-    return super.transition(from, symbol, to);
+    return super.transition(from, symbol, to)
   }
 
-  /**
-   * @inheritdoc We duplicate the work because we want warnings from the
-   * NFA builder to become errors here
-   */
   public override build(): NFA {
-    if (this._built) throw new Error(DFAMessages.alreadyBuilt);
-    this._built = true;
+    if (this._built)
+      throw new Error(DFAMessages.alreadyBuilt)
+    this._built = true
 
     if (!this._startState) {
-      this.message("error", DFAMessages.noStartState);
+      this.message('error', DFAMessages.noStartState)
     }
 
     for (const [state, symbolMap] of this._transitions) {
       for (const symbol of this._alphabet) {
         if (!symbolMap.has(symbol)) {
-          this.message("error", DFAMessages.missingTransition(state, symbol));
+          this.message('error', DFAMessages.missingTransition(state, symbol))
         }
       }
     }
 
-    this.throwIfAnyErrors(() => new NFABuildError(this._messages));
+    this.throwIfAnyErrors(() => new NFABuildError(this._messages))
 
     return {
       name: this._name,
@@ -67,7 +65,7 @@ class DFABuilder extends NFABuilder {
       acceptStates: this._acceptStates,
       transitions: this._transitions,
       messages: this._messages,
-    };
+    }
   }
 }
 
@@ -77,5 +75,5 @@ class DFABuilder extends NFABuilder {
  * @returns a {@link DFABuilder} (fluent API)
  */
 export default function dfa(name: string): DFABuilder {
-  return new DFABuilder(name);
+  return new DFABuilder(name)
 }

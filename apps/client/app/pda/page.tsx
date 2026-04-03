@@ -1,4 +1,4 @@
-"use client";
+'use client'
 
 export default function PDAPage() {
   return (
@@ -7,5 +7,5 @@ export default function PDAPage() {
         <p className="text-ctp-subtext0 text-sm">PDA — coming soon</p>
       </div>
     </main>
-  );
+  )
 }

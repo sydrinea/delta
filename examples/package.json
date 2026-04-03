@@ -1,9 +1,14 @@
 {
   "name": "@delta/examples",
   "private": true,
-  "types": "./generated/index.ts",
   "license": "MIT",
+  "exports": {
+    ".": "./generated/index.ts",
+    "./recipes": "./generated/recipes.ts"
+  },
+  "types": "./generated/index.ts",
   "scripts": {
+    "lint": "eslint",
     "generate:recipes": "tsx scripts/recipes.ts",
     "generate:exports": "tsx scripts/exports.ts",
     "generate": "pnpm run generate:recipes && pnpm run generate:exports"
@@ -23,9 +28,5 @@
     "@types/node": "^25.5.0",
     "tsx": "^4.7.1",
     "typescript": "^6.0.2"
-  },
-  "exports": {
-    ".": "./generated/index.ts",
-    "./recipes": "./generated/recipes.ts"
   }
 }

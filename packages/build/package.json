@@ -1,10 +1,11 @@
 {
   "name": "@delta/build",
-  "private": "true",
   "version": "0.2.0-beta.1",
-  "types": "src/index.ts",
+  "private": "true",
   "license": "MIT",
+  "types": "src/index.ts",
   "scripts": {
+    "lint": "eslint",
     "generate": "tsdown --dts",
     "test": "vitest run"
   },

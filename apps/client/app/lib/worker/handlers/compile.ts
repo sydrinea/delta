@@ -1,71 +1,70 @@
-import * as transform from "@delta/transform";
-import * as build from "@delta/build";
+import type { CompileErrorDetail, CompileParams, CompileSuccessData, ExecutionErrorPayload } from '../protocol'
+import * as build from '@delta/build'
+import * as transform from '@delta/transform'
 import {
+
   WorkerDispatchError,
   WorkerErrorCodes,
-  type CompileErrorDetail,
-  type CompileParams,
-  type CompileSuccessData,
-  type ExecutionErrorPayload,
-} from "../protocol";
+} from '../protocol'
 
 const api = {
   ...build,
   ...transform,
-};
+}
 
-const workerScope = self as typeof self & { _deltaAPI?: typeof api };
-workerScope._deltaAPI = api;
+const workerScope = globalThis as typeof globalThis & { _deltaAPI?: typeof api }
+workerScope._deltaAPI = api
 
 const virtualLibraryCode = `
-  const api = self._deltaAPI;
+  const api = globalThis._deltaAPI;
   ${Object.keys(api)
-    .map((key) => `export const ${key} = api.${key};`)
-    .join("\n  ")}
+    .map(key => `export const ${key} = api.${key};`)
+    .join('\n  ')}
   export default api;
-`;
+`
 
-const libBlob = new Blob([virtualLibraryCode], { type: "text/javascript" });
-const libUrl = URL.createObjectURL(libBlob);
+const libBlob = new Blob([virtualLibraryCode], { type: 'text/javascript' })
+const libUrl = URL.createObjectURL(libBlob)
 
 interface BuildMessageShape {
-  severity?: string;
-  content?: string;
-  stack?: string;
+  severity?: string
+  content?: string
+  stack?: string
 }
 
 interface BuildErrorShape {
-  name?: string;
-  message?: string;
-  stack?: string;
-  messages?: BuildMessageShape[];
+  name?: string
+  message?: string
+  stack?: string
+  messages?: BuildMessageShape[]
 }
 
 const BUILD_ERROR_NAMES = new Set([
-  "NFABuildError",
-  "TMBuildError",
-  "RegularGrammarBuildError",
-]);
+  'NFABuildError',
+  'TMBuildError',
+  'RegularGrammarBuildError',
+])
 
 function isBuildErrorShape(value: unknown): value is BuildErrorShape {
-  if (!value || typeof value !== "object") return false;
-  return true;
+  if (!value || typeof value !== 'object')
+    return false
+  return true
 }
 
 function parseLocation(stack: string | undefined, userUrl: string) {
-  let line = 0;
-  let column = 0;
+  let line = 0
+  let column = 0
 
   if (stack && userUrl) {
-    const escapedUrl = userUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    const match = stack.match(new RegExp(`${escapedUrl}:(\\d+):(\\d+)`));
+    const escapedUrl = userUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const match = stack.match(new RegExp(`${escapedUrl}:(\\d+):(\\d+)`))
     if (match) {
-      line = parseInt(match[1], 10);
-      column = parseInt(match[2], 10);
+      line = Number.parseInt(match[1], 10)
+      column = Number.parseInt(match[2], 10)
     }
   }
 
-  return { line, column };
+  return { line, column }
 }
 
 function toExecutionErrors(
@@ -73,85 +72,86 @@ function toExecutionErrors(
   userUrl: string,
 ): ExecutionErrorPayload[] {
   if (
-    isBuildErrorShape(err) &&
-    err.name &&
-    BUILD_ERROR_NAMES.has(err.name) &&
-    Array.isArray(err.messages)
+    isBuildErrorShape(err)
+    && err.name
+    && BUILD_ERROR_NAMES.has(err.name)
+    && Array.isArray(err.messages)
   ) {
     return err.messages
-      .filter((m) => m.severity === "error")
+      .filter(m => m.severity === 'error')
       .map((m) => {
-        const { line, column } = parseLocation(m.stack, userUrl);
-        return { message: m.content ?? "Build error", line, column };
-      });
+        const { line, column } = parseLocation(m.stack, userUrl)
+        return { message: m.content ?? 'Build error', line, column }
+      })
   }
 
-  const fallbackMessage =
-    err instanceof Error
+  const fallbackMessage
+    = err instanceof Error
       ? err.message
       : isBuildErrorShape(err)
         ? err.message || String(err)
-        : String(err);
-  const fallbackStack =
-    err instanceof Error
+        : String(err)
+  const fallbackStack
+    = err instanceof Error
       ? err.stack
       : isBuildErrorShape(err)
         ? err.stack
-        : undefined;
+        : undefined
 
-  const { line, column } = parseLocation(fallbackStack, userUrl);
+  const { line, column } = parseLocation(fallbackStack, userUrl)
   return [
     {
       message: fallbackMessage,
       line,
       column,
     },
-  ];
+  ]
 }
 
 export async function compileHandler(
   params: CompileParams,
 ): Promise<CompileSuccessData> {
-  if (!params?.code || typeof params.code !== "string") {
+  if (!params?.code || typeof params.code !== 'string') {
     throw new WorkerDispatchError(
       WorkerErrorCodes.InvalidRequest,
-      "Missing required compile parameter: code",
-    );
+      'Missing required compile parameter: code',
+    )
   }
 
-  let userUrl = "";
+  let userUrl = ''
 
   try {
     const executableCode = params.code.replace(
-      /(import\s+[\s\S]*?\s+from\s+)["'](@delta\/lib|delta:lib)["']/g,
+      /(import\s[\s\S]*?\sfrom\s+)["'](@delta\/lib|delta:lib)["']/g,
       `$1"${libUrl}"`,
-    );
+    )
 
-    const userBlob = new Blob([executableCode], { type: "text/javascript" });
-    userUrl = URL.createObjectURL(userBlob);
+    const userBlob = new Blob([executableCode], { type: 'text/javascript' })
+    userUrl = URL.createObjectURL(userBlob)
 
-    const nativeImport = new Function("url", "return import(url);");
-    const userModule = await nativeImport(userUrl);
+    const userModule = await import(/* webpackIgnore: true */ userUrl)
 
-    const machine = userModule.default;
+    const machine = userModule.default
     if (!machine) {
       throw new Error(
-        "No default export found. Did you use `export default machine;`?",
-      );
+        'No default export found. Did you use `export default machine;`?',
+      )
     }
 
-    return { machine };
-  } catch (err: unknown) {
-    const errors = toExecutionErrors(err, userUrl);
+    return { machine }
+  }
+  catch (err: unknown) {
+    const errors = toExecutionErrors(err, userUrl)
 
     throw new WorkerDispatchError<CompileErrorDetail>(
       WorkerErrorCodes.ExecutionError,
-      "Compilation failed",
+      'Compilation failed',
       { errors },
-    );
-  } finally {
+    )
+  }
+  finally {
     if (userUrl) {
-      URL.revokeObjectURL(userUrl);
+      URL.revokeObjectURL(userUrl)
     }
   }
 }

@@ -11,10 +11,10 @@ TMs distinguish between two symbol sets:
 - **Blank symbol** (`.blank()`) — a single tape symbol that represents empty cells. Must be in the tape alphabet and must **not** be in the input alphabet.
 
 ```ts
-tm("name")
-  .alphabet("0", "1") // input symbols
-  .tape("X", "_") // tape alphabet minus the input alphabet (no need to redeclare input alphabet)
-  .blank("_"); // blank must already be in tape
+tm('name')
+  .alphabet('0', '1') // input symbols
+  .tape('X', '_') // tape alphabet minus the input alphabet (no need to redeclare input alphabet)
+  .blank('_') // blank must already be in tape
 ```
 
 Calling `.alphabet()` after `.blank()` has been set will automatically add the declared symbols to the tape alphabet as well.
@@ -49,21 +49,21 @@ Multi-tape machines operate on `N` tapes simultaneously. Transitions read one sy
 The `.on()` signature becomes tuple-based — arrays of length `N` for reads, writes, and moves:
 
 ```ts
-multitape("name", 2)
+multitape('name', 2)
   // ...
   .state(
-    "q0",
-    (s) => s.on(["0", "_"], ["R", "S"], "q1", ["0", "0"]),
+    'q0',
+    s => s.on(['0', '_'], ['R', 'S'], 'q1', ['0', '0']),
     //          ^ tape reads  --------        ----------
     //                           ^ directions ^
     //                                        ^ writes (optional)
-  );
+  )
 ```
 
 Read symbols can be **arrays** to match multiple possible values on a single tape in one call:
 
 ```ts
-s.on([["0", "1"], "_"], ["R", "S"], "q0");
+s.on([['0', '1'], '_'], ['R', 'S'], 'q0')
 // matches tape 0 reading either "0" or "1", tape 1 reading blank
 ```
 

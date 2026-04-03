@@ -1,129 +1,136 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
-import { Tooltip } from "./Tooltip";
-import { useAlert } from "./AlertProvider";
-import { TestCase, TestCaseArraySchema } from "@delta/examples";
+import type { TestCase } from '@delta/examples'
+import { TestCaseArraySchema } from '@delta/examples'
+import { useEffect, useState } from 'react'
+import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
+import { useAlert } from './AlertProvider'
+import { Tooltip } from './Tooltip'
 
 interface TestResult {
-  id: string;
-  passed: boolean;
-  actual: boolean;
+  id: string
+  passed: boolean
+  actual: boolean
 }
 
-const TESTS_PER_PAGE = 6;
-const ROW_HEIGHT = 36;
+const TESTS_PER_PAGE = 6
+const ROW_HEIGHT = 36
 
 interface TestSuiteProps {
-  tests: TestCase[];
-  setTests: (tests: TestCase[]) => void;
-  evaluateInput?: (input: string) => boolean;
-  machineName?: string;
-  resetKeys?: unknown[];
-  inputPlaceholder?: string;
+  tests: TestCase[]
+  setTests: (tests: TestCase[]) => void
+  evaluateInput?: (input: string) => boolean
+  machineName?: string
+  resetKeys?: unknown[]
+  inputPlaceholder?: string
 }
 
 export function TestSuite({
   tests,
   setTests,
   evaluateInput,
-  machineName = "delta",
+  machineName = 'delta',
   resetKeys,
-  inputPlaceholder = "input string",
+  inputPlaceholder = 'input string',
 }: TestSuiteProps) {
-  const [results, setResults] = useState<Record<string, TestResult>>({});
-  const { showAlert } = useAlert();
+  const [results, setResults] = useState<Record<string, TestResult>>({})
+  const { showAlert } = useAlert()
 
   const runTests = () => {
-    if (!evaluateInput) return;
+    if (!evaluateInput)
+      return
 
-    const newResults: Record<string, TestResult> = {};
+    const newResults: Record<string, TestResult> = {}
     for (const test of tests) {
-      const actual = evaluateInput(test.input);
+      const actual = evaluateInput(test.input)
       newResults[test.id] = {
         id: test.id,
         passed: actual === test.expected,
         actual,
-      };
+      }
     }
-    setResults(newResults);
-  };
+    setResults(newResults)
+  }
 
   useKeyboardShortcut([
     {
       shift: true,
       meta: true,
-      key: "t",
+      key: 't',
       handler: () => runTests(),
     },
     {
       meta: true,
       shift: true,
-      key: "r",
+      key: 'r',
       handler: () => setResults({}),
     },
-  ]);
+  ])
 
+  /* eslint-disable react/set-state-in-effect, react/exhaustive-deps -- Reset triggers are external machine/recipe keys and intentionally clear prior run results. */
   useEffect(() => {
-    setResults({});
-  }, resetKeys);
+    setResults({})
+  }, resetKeys)
+  /* eslint-enable react/set-state-in-effect, react/exhaustive-deps */
 
   const handleTestImport = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const file = e.target.files?.[0]
+    if (!file)
+      return
 
-    const reader = new FileReader();
+    const reader = new FileReader()
     reader.onload = (event) => {
       try {
-        const parsed = JSON.parse(event.target?.result as string);
-        const result = TestCaseArraySchema.safeParse(parsed);
+        const parsed = JSON.parse(event.target?.result as string)
+        const result = TestCaseArraySchema.safeParse(parsed)
         if (!result.success) {
           showAlert({
-            title: "Invalid Test Format",
-            message: `Expected an array of { input: string, expected: boolean }.\n\n${result.error.issues.map((i) => i.message).join("\n")}`,
-          });
-          return;
+            title: 'Invalid Test Format',
+            message: `Expected an array of { input: string, expected: boolean }.\n\n${result.error.issues.map(i => i.message).join('\n')}`,
+          })
+          return
         }
-        setTests(result.data.map((t) => ({ ...t, id: crypto.randomUUID() })));
-      } catch {
-        showAlert({
-          title: "Invalid JSON",
-          message: "The selected file is not valid JSON.",
-        });
+        setTests(result.data.map(t => ({ ...t, id: crypto.randomUUID() })))
       }
-    };
+      catch {
+        showAlert({
+          title: 'Invalid JSON',
+          message: 'The selected file is not valid JSON.',
+        })
+      }
+    }
 
-    reader.readAsText(file);
-    e.target.value = "";
-  };
+    reader.readAsText(file)
+    e.target.value = ''
+  }
 
   const handleTestExport = () => {
-    if (tests.length === 0) return;
+    if (tests.length === 0)
+      return
 
     const exportData = tests.map(({ input, expected }) => ({
       input,
       expected,
-    }));
+    }))
 
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
+      type: 'application/json',
+    })
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${machineName || "delta"}_tests.json`;
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `${machineName || 'delta'}_tests.json`
 
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  }
 
-  const hasResults = Object.keys(results).length > 0;
-  const allPassed = hasResults && tests.every((t) => results[t.id]?.passed);
-  const passCount = tests.filter((t) => results[t.id]?.passed).length;
+  const hasResults = Object.keys(results).length > 0
+  const allPassed = hasResults && tests.every(t => results[t.id]?.passed)
+  const passCount = tests.filter(t => results[t.id]?.passed).length
 
   return (
     <div className="flex flex-col gap-3">
@@ -134,9 +141,15 @@ export function TestSuite({
           </span>
           {hasResults && (
             <span
-              className={`text-xs font-bold ${allPassed ? "text-ctp-green" : "text-ctp-red"}`}
+              className={`text-xs font-bold ${allPassed ? 'text-ctp-green' : 'text-ctp-red'}`}
             >
-              ({passCount} of {tests.length})
+              (
+              {passCount}
+              {' '}
+              of
+              {' '}
+              {tests.length}
+              )
             </span>
           )}
         </div>
@@ -180,31 +193,31 @@ export function TestSuite({
         tests={tests}
         results={results}
         onRemove={(id) => {
-          const updated = tests.filter((t) => t.id !== id);
-          setTests(updated);
+          const updated = tests.filter(t => t.id !== id)
+          setTests(updated)
           setResults((prev) => {
-            const next = { ...prev };
-            delete next[id];
-            return next;
-          });
+            const next = { ...prev }
+            delete next[id]
+            return next
+          })
         }}
       />
 
       <NewTestForm
         inputPlaceholder={inputPlaceholder}
         onSubmit={(input, expected) => {
-          const id = crypto.randomUUID();
-          setTests([...tests, { id, input, expected }]);
+          const id = crypto.randomUUID()
+          setTests([...tests, { id, input, expected }])
         }}
       />
     </div>
-  );
+  )
 }
 
 interface TestProps {
-  result?: TestResult;
-  test: TestCase;
-  onRemove: (id: string) => void;
+  result?: TestResult
+  test: TestCase
+  onRemove: (id: string) => void
 }
 
 function Test({ result, test, onRemove }: TestProps) {
@@ -214,24 +227,24 @@ function Test({ result, test, onRemove }: TestProps) {
       className={`flex items-center gap-2 px-3 rounded-lg border text-sm transition-colors ${
         result
           ? result.passed
-            ? "bg-ctp-green/10 border-ctp-green/30"
-            : "bg-ctp-red/10 border-ctp-red/30"
-          : "bg-ctp-mantle border-ctp-surface1"
+            ? 'bg-ctp-green/10 border-ctp-green/30'
+            : 'bg-ctp-red/10 border-ctp-red/30'
+          : 'bg-ctp-mantle border-ctp-surface1'
       }`}
     >
       <span className="flex-1 text-ctp-text truncate">
         {test.input || <span className="text-ctp-overlay0">ε</span>}
       </span>
       <span
-        className={`text-xs ${test.expected ? "text-ctp-green" : "text-ctp-red"}`}
+        className={`text-xs ${test.expected ? 'text-ctp-green' : 'text-ctp-red'}`}
       >
-        {test.expected ? "accept" : "reject"}
+        {test.expected ? 'accept' : 'reject'}
       </span>
       {result && (
         <span
-          className={`text-xs font-bold ${result.passed ? "text-ctp-green" : "text-ctp-red"}`}
+          className={`text-xs font-bold ${result.passed ? 'text-ctp-green' : 'text-ctp-red'}`}
         >
-          {result.passed ? "✓" : "✗"}
+          {result.passed ? '✓' : '✗'}
         </span>
       )}
       <button
@@ -241,42 +254,42 @@ function Test({ result, test, onRemove }: TestProps) {
         ×
       </button>
     </div>
-  );
+  )
 }
 
 interface NewTestFormProps {
-  onSubmit: (input: string, expected: boolean) => void;
-  inputPlaceholder: string;
+  onSubmit: (input: string, expected: boolean) => void
+  inputPlaceholder: string
 }
 
 function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
-  const [input, setInput] = useState("");
-  const [expected, setExpected] = useState(true);
+  const [input, setInput] = useState('')
+  const [expected, setExpected] = useState(true)
 
   const handleSubmit = () => {
-    onSubmit(input, expected);
-    setInput("");
-  };
+    onSubmit(input, expected)
+    setInput('')
+  }
 
   return (
     <div className="flex items-center gap-2 border-t border-ctp-surface0 pt-3">
       <input
         type="text"
         value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+        onChange={e => setInput(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && handleSubmit()}
         placeholder={inputPlaceholder}
         className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
       />
       <button
-        onClick={() => setExpected((e) => !e)}
+        onClick={() => setExpected(e => !e)}
         className={`text-xs px-3 py-1.5 rounded-lg border font-bold transition-colors ${
           expected
-            ? "bg-ctp-green/20 border-ctp-green text-ctp-green"
-            : "bg-ctp-red/20 border-ctp-red text-ctp-red"
+            ? 'bg-ctp-green/20 border-ctp-green text-ctp-green'
+            : 'bg-ctp-red/20 border-ctp-red text-ctp-red'
         }`}
       >
-        {expected ? "accept" : "reject"}
+        {expected ? 'accept' : 'reject'}
       </button>
       <button
         onClick={handleSubmit}
@@ -285,27 +298,29 @@ function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
         +
       </button>
     </div>
-  );
+  )
 }
 
 interface TestCaseListProps {
-  tests: TestCase[];
-  results: Record<string, TestResult>;
-  onRemove: (id: string) => void;
+  tests: TestCase[]
+  results: Record<string, TestResult>
+  onRemove: (id: string) => void
 }
 
 function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
-  const [page, setPage] = useState(0);
-  const totalPages = Math.ceil(tests.length / TESTS_PER_PAGE);
+  const [page, setPage] = useState(0)
+  const totalPages = Math.ceil(tests.length / TESTS_PER_PAGE)
+  const maxPage = Math.max(0, totalPages - 1)
+  const safePage = Math.min(page, maxPage)
   const visibleTests = tests.slice(
-    page * TESTS_PER_PAGE,
-    (page + 1) * TESTS_PER_PAGE,
-  );
-  const emptyRows = TESTS_PER_PAGE - visibleTests.length;
-
-  useEffect(() => {
-    setPage((p) => Math.min(p, Math.max(0, totalPages - 1)));
-  }, [totalPages]);
+    safePage * TESTS_PER_PAGE,
+    (safePage + 1) * TESTS_PER_PAGE,
+  )
+  const emptyRows = TESTS_PER_PAGE - visibleTests.length
+  const emptyRowSlots = Array.from(
+    { length: emptyRows },
+    (_, offset) => safePage * TESTS_PER_PAGE + visibleTests.length + offset,
+  )
 
   return (
     <>
@@ -315,7 +330,7 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
           height: TESTS_PER_PAGE * ROW_HEIGHT + (TESTS_PER_PAGE - 1) * 4,
         }}
       >
-        {visibleTests.map((test) => (
+        {visibleTests.map(test => (
           <Test
             key={test.id}
             test={test}
@@ -324,9 +339,9 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
           />
         ))}
 
-        {Array.from({ length: emptyRows }).map((_, i) => (
+        {emptyRowSlots.map(slot => (
           <div
-            key={`empty-${i}`}
+            key={`empty-${slot}`}
             style={{ height: ROW_HEIGHT }}
             className="rounded-lg border border-dashed border-ctp-surface0"
           />
@@ -337,18 +352,21 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
         {totalPages > 1 && (
           <>
             <button
-              onClick={() => setPage((p) => Math.max(p - 1, 0))}
-              disabled={page === 0}
+              onClick={() => setPage(Math.max(safePage - 1, 0))}
+              disabled={safePage === 0}
               className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
             >
               ←
             </button>
             <span className="text-ctp-overlay0 text-xs">
-              {page + 1} / {totalPages}
+              {safePage + 1}
+              {' '}
+              /
+              {totalPages}
             </span>
             <button
-              onClick={() => setPage((p) => Math.min(p + 1, totalPages - 1))}
-              disabled={page === totalPages - 1}
+              onClick={() => setPage(Math.min(safePage + 1, maxPage))}
+              disabled={safePage === maxPage}
               className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
             >
               →
@@ -357,5 +375,5 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
         )}
       </div>
     </>
-  );
+  )
 }

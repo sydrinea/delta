@@ -1,14 +1,14 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
-import type { MachineType } from "@/lib/worker/protocol";
+import type { MachineType } from '@/lib/worker/protocol'
+import { useEffect, useState } from 'react'
 
 interface UseMachineShareOptions {
-  machineType: MachineType;
-  code: string;
-  canShare: boolean;
-  onLoadCode: (code: string) => void;
-  onShareError: () => void;
+  machineType: MachineType
+  code: string
+  canShare: boolean
+  onLoadCode: (code: string) => void
+  onShareError: () => void
 }
 
 export function useMachineShare({
@@ -18,61 +18,63 @@ export function useMachineShare({
   onLoadCode,
   onShareError,
 }: UseMachineShareOptions) {
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const machineId = params.get("m");
+    const params = new URLSearchParams(window.location.search)
+    const machineId = params.get('m')
 
-    const SHARE_URL = window.location.hostname.includes("comptheory.tools")
-      ? "https://share.comptheory.tools"
-      : "https://share.delta.sydneyn.dev";
+    const SHARE_URL = window.location.hostname.includes('comptheory.tools')
+      ? 'https://share.comptheory.tools'
+      : 'https://share.delta.sydneyn.dev'
 
     if (machineId) {
       fetch(`${SHARE_URL}/machine/${machineId}`)
         .then(
-          (res) =>
-            res.json() as Promise<{ machineType: "nfa" | "tm"; code: string }>,
+          res =>
+            res.json() as Promise<{ machineType: 'nfa' | 'tm', code: string }>,
         )
         .then((payload) => {
           if (payload.machineType !== machineType) {
-            return;
+            return
           }
 
-          onLoadCode(payload.code);
+          onLoadCode(payload.code)
         })
         .catch(() => {})
         .finally(() => {
-          window.history.replaceState({}, "", window.location.pathname);
-        });
+          window.history.replaceState({}, '', window.location.pathname)
+        })
     }
-  }, [machineType, onLoadCode]);
+  }, [machineType, onLoadCode])
 
   const handleShare = async () => {
-    if (!canShare) return;
+    if (!canShare)
+      return
 
-    const SHARE_URL = window.location.hostname.includes("comptheory.tools")
-      ? "https://share.comptheory.tools"
-      : "https://share.delta.sydneyn.dev";
+    const SHARE_URL = window.location.hostname.includes('comptheory.tools')
+      ? 'https://share.comptheory.tools'
+      : 'https://share.delta.sydneyn.dev'
 
     try {
       const res = await fetch(`${SHARE_URL}/machine`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ machineType, code }),
-      });
-      const { id } = (await res.json()) as { id: string };
-      const url = `${window.location.origin}/${machineType}?m=${id}`;
-      navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      onShareError();
+      })
+      const { id } = (await res.json()) as { id: string }
+      const url = `${window.location.origin}/${machineType}?m=${id}`
+      navigator.clipboard.writeText(url)
+      setCopied(true)
+      setTimeout(setCopied, 2000, false)
     }
-  };
+    catch {
+      onShareError()
+    }
+  }
 
   return {
     copied,
     handleShare,
-  };
+  }
 }

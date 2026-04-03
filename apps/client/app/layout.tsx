@@ -1,63 +1,64 @@
-import type { Metadata, Viewport } from "next";
-import { Syne, Recursive, Cormorant } from "next/font/google";
-import Layout from "@/components/Layout";
-import "./globals.css";
-import { ThemeProvider } from "next-themes";
-import { flavors } from "@catppuccin/palette";
-import { SerwistProvider } from "./serwist";
+import type { Metadata, Viewport } from 'next'
+import { flavors } from '@catppuccin/palette'
+import { ThemeProvider } from 'next-themes'
+import { Cormorant, Recursive, Syne } from 'next/font/google'
+import Layout from '@/components/Layout'
+import { SerwistProvider } from './serwist'
+import './globals.css'
+import 'reactflow/dist/style.css'
 
 const syne = Syne({
-  variable: "--font-syne",
-  subsets: ["latin"],
-});
+  variable: '--font-syne',
+  subsets: ['latin'],
+})
 
 const recursiveMono = Recursive({
-  variable: "--font-recursive-mono",
-  subsets: ["latin"],
-});
+  variable: '--font-recursive-mono',
+  subsets: ['latin'],
+})
 
 const cormorant = Cormorant({
-  variable: "--font-cormorant",
-  subsets: ["latin"],
-});
+  variable: '--font-cormorant',
+  subsets: ['latin'],
+})
 
 export const metadata: Metadata = {
-  applicationName: "Delta — theory of computation tools",
-  title: "Delta — theory of computation tools",
-  description: "Create, test, and visualize DFAs and NFAs, with more to come!",
-  creator: "Sydney Newmark",
-  metadataBase: new URL("https://comptheory.tools"),
+  applicationName: 'Delta — theory of computation tools',
+  title: 'Delta — theory of computation tools',
+  description: 'Create, test, and visualize DFAs and NFAs, with more to come!',
+  creator: 'Sydney Newmark',
+  metadataBase: new URL('https://comptheory.tools'),
   alternates: {
-    canonical: "/",
+    canonical: '/',
   },
   openGraph: {
-    type: "website",
-    url: "https://comptheory.tools",
-    title: "Delta — theory of computation tools",
+    type: 'website',
+    url: 'https://comptheory.tools',
+    title: 'Delta — theory of computation tools',
     description:
-      "Create, test, and visualize DFAs and NFAs, with more to come!",
-    siteName: "Delta — theory of computation tools",
+      'Create, test, and visualize DFAs and NFAs, with more to come!',
+    siteName: 'Delta — theory of computation tools',
     images: [
       {
-        url: "/android-chrome-192x192.png",
+        url: '/android-chrome-192x192.png',
         width: 64,
         height: 64,
       },
     ],
   },
-};
+}
 
 export const viewport: Viewport = {
   themeColor: flavors.latte.colors.mauve.hex,
   initialScale: 1,
-  width: "device-width",
-  colorScheme: "light",
-};
+  width: 'device-width',
+  colorScheme: 'light',
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html
@@ -73,8 +74,8 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem={true}
             value={{
-              light: "latte",
-              dark: "mocha",
+              light: 'latte',
+              dark: 'mocha',
             }}
           >
             <div id="dark-mode-root">
@@ -84,5 +85,5 @@ export default function RootLayout({
         </SerwistProvider>
       </body>
     </html>
-  );
+  )
 }

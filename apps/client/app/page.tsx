@@ -1,97 +1,99 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Image from 'next/image'
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { GitHubIcon } from '@/components/GitHubIcon'
 import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
-} from "@/lib/navigation-loader-config";
-import { GitHubIcon } from "@/components/GitHubIcon";
-import deltaLogo from "../public/android-chrome-192x192.png";
-import Image from "next/image";
+} from '@/lib/navigation-loader-config'
+import deltaLogo from '../public/android-chrome-192x192.png'
 
 interface FeatureBlock {
-  title: string;
-  description: string;
-  bg: string;
-  labelColor: string;
-  bgHover: string;
-  border: string;
-  shadow: string;
-  href: string;
-  label: string;
-  external?: boolean;
+  title: string
+  description: string
+  bg: string
+  labelColor: string
+  bgHover: string
+  border: string
+  shadow: string
+  href: string
+  label: string
+  external?: boolean
 }
 
 const blocks: FeatureBlock[] = [
   {
-    title: "NFA / DFA",
+    title: 'NFA / DFA',
     description:
-      "Build nondeterministic and deterministic finite automata with a fluent API. Step through execution, run test suites, and edit machines visually on the canvas.",
-    bg: "bg-ctp-sapphire/10",
-    bgHover: "hover:bg-ctp-sapphire/20",
-    border: "border-ctp-sapphire/25",
-    shadow: "shadow-ctp-sapphire/10",
-    labelColor: "text-ctp-sapphire",
-    href: "/nfa",
-    label: "open →",
+      'Build nondeterministic and deterministic finite automata with a fluent API. Step through execution, run test suites, and edit machines visually on the canvas.',
+    bg: 'bg-ctp-sapphire/10',
+    bgHover: 'hover:bg-ctp-sapphire/20',
+    border: 'border-ctp-sapphire/25',
+    shadow: 'shadow-ctp-sapphire/10',
+    labelColor: 'text-ctp-sapphire',
+    href: '/nfa',
+    label: 'open →',
   },
   {
-    title: "Turing Machines",
+    title: 'Turing Machines',
     description:
-      "Single and multitape Turing machines with full step-through visualization. The transition table highlights the active rule at every step.",
-    bg: "bg-ctp-blue/10",
-    bgHover: "hover:bg-ctp-blue/20",
-    border: "border-ctp-blue/25",
-    shadow: "shadow-ctp-blue/10",
-    labelColor: "text-ctp-blue",
-    href: "/tm",
-    label: "open →",
+      'Single and multitape Turing machines with full step-through visualization. The transition table highlights the active rule at every step.',
+    bg: 'bg-ctp-blue/10',
+    bgHover: 'hover:bg-ctp-blue/20',
+    border: 'border-ctp-blue/25',
+    shadow: 'shadow-ctp-blue/10',
+    labelColor: 'text-ctp-blue',
+    href: '/tm',
+    label: 'open →',
   },
   {
-    title: "Quick Start",
+    title: 'Quick Start',
     description:
-      "Builder lifecycle, shared methods, the q() helper, and everything you need to write your first machine in under five minutes.",
-    bg: "bg-ctp-green/10",
-    bgHover: "hover:bg-ctp-green/20",
-    border: "border-ctp-green/25",
-    shadow: "shadow-ctp-green/10",
-    labelColor: "text-ctp-green",
-    href: "/guide/quick-start",
-    label: "read →",
+      'Builder lifecycle, shared methods, the q() helper, and everything you need to write your first machine in under five minutes.',
+    bg: 'bg-ctp-green/10',
+    bgHover: 'hover:bg-ctp-green/20',
+    border: 'border-ctp-green/25',
+    shadow: 'shadow-ctp-green/10',
+    labelColor: 'text-ctp-green',
+    href: '/guide/quick-start',
+    label: 'read →',
     external: true,
   },
   {
-    title: "Demo",
+    title: 'Demo',
     description:
-      "A five-minute walkthrough of the main features — writing machines, stepping through execution, and building on the canvas.",
-    bg: "bg-ctp-red/10",
-    bgHover: "hover:bg-ctp-red/20",
-    border: "border-ctp-red/25",
-    shadow: "shadow-ctp-red/10",
-    labelColor: "text-ctp-red",
-    href: "https://www.youtube.com/watch?v=zOM9aVSUVi0",
-    label: "watch →",
+      'A five-minute walkthrough of the main features — writing machines, stepping through execution, and building on the canvas.',
+    bg: 'bg-ctp-red/10',
+    bgHover: 'hover:bg-ctp-red/20',
+    border: 'border-ctp-red/25',
+    shadow: 'shadow-ctp-red/10',
+    labelColor: 'text-ctp-red',
+    href: 'https://www.youtube.com/watch?v=zOM9aVSUVi0',
+    label: 'watch →',
     external: true,
   },
-];
+]
 
 export default function Home() {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   const handleNavigationStart = (href: string) => {
-    if (pathname === href) return;
-    if (!shouldTriggerNavigationLoader(href)) return;
+    if (pathname === href)
+      return
+    if (!shouldTriggerNavigationLoader(href))
+      return
 
     window.dispatchEvent(
-      new CustomEvent("delta:navigation-start", {
+      new CustomEvent('delta:navigation-start', {
         detail: {
           to: href,
           animate: shouldAnimateLoader(href),
         },
       }),
-    );
-  };
+    )
+  }
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-3xl mx-auto">
@@ -114,7 +116,7 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mb-10">
-        {blocks.map((block) => (
+        {blocks.map(block => (
           <Link
             key={block.title}
             href={block.href}
@@ -153,5 +155,5 @@ export default function Home() {
         </a>
       </div>
     </div>
-  );
+  )
 }

@@ -1,129 +1,140 @@
-"use client";
+'use client'
 
-import { useEffect, useRef } from "react";
-import Editor, { OnChange, OnMount, useMonaco } from "@monaco-editor/react";
-import * as MonacoEditor from "monaco-editor";
-import defineThemes from "./defineTheme";
-import { useNfaStore } from "@/store/nfaStore";
-import { useTmStore } from "@/store/tmStore";
-import { useCompile } from "@/hooks/useCompile";
-import { AlertTriangle } from "lucide-react";
-import { useTheme } from "next-themes";
-import { themeNames } from "@/lib/theme";
+import type { OnChange, OnMount } from '@monaco-editor/react'
+import type * as MonacoEditor from 'monaco-editor'
+import Editor, { useMonaco } from '@monaco-editor/react'
+import { AlertTriangle } from 'lucide-react'
+import { useTheme } from 'next-themes'
+import { useEffect, useRef } from 'react'
+import { useCompile } from '@/hooks/useCompile'
+import { themeNames } from '@/lib/theme'
+import { useNfaStore } from '@/store/nfaStore'
+import { useTmStore } from '@/store/tmStore'
+import defineThemes from './defineTheme'
 
 interface DeltaEditorProps {
-  scope?: "nfa" | "tm";
+  scope?: 'nfa' | 'tm'
 }
 
-export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
+export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
   const editorRef = useRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(
     null,
-  );
-  const { resolvedTheme } = useTheme();
+  )
+  const { resolvedTheme } = useTheme()
 
-  const patchNfa = useNfaStore((s) => s.patch);
-  const patchTm = useTmStore((s) => s.patch);
+  const patchNfa = useNfaStore(s => s.patch)
+  const patchTm = useTmStore(s => s.patch)
   const editorValue = {
-    nfa: useNfaStore((s) => s.editorValue),
-    tm: useTmStore((s) => s.editorValue),
-  }[scope];
+    nfa: useNfaStore(s => s.editorValue),
+    tm: useTmStore(s => s.editorValue),
+  }[scope]
   const editorErrors = {
-    nfa: useNfaStore((s) => s.editorErrors),
-    tm: useTmStore((s) => s.editorErrors),
-  }[scope];
+    nfa: useNfaStore(s => s.editorErrors),
+    tm: useTmStore(s => s.editorErrors),
+  }[scope]
   const editorPath = {
-    nfa: "file:///main.nfa.ts",
-    tm: "file:///main.tm.ts",
-  }[scope];
+    nfa: 'file:///main.nfa.ts',
+    tm: 'file:///main.tm.ts',
+  }[scope]
 
-  const monaco = useMonaco();
-  const compile = useCompile(scope);
+  const monaco = useMonaco()
+  const compile = useCompile(scope)
+  // eslint-disable-next-line node/prefer-global/process -- Next injects DELTA_TYPES via process.env at build/runtime, and this lookup safely guards browser access.
+  const runtimeProcess = (globalThis as Record<string, unknown>).process as
+    | { env?: { DELTA_TYPES?: string } }
+    | undefined
+  const deltaTypesRef = useRef(runtimeProcess?.env?.DELTA_TYPES ?? '')
 
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
-    editorRef.current = editor;
+    editorRef.current = editor
 
     if (editor.getValue() !== editorValue) {
-      editor.setValue(editorValue);
+      editor.setValue(editorValue)
     }
 
-    compile(editorValue);
+    compile(editorValue)
 
-    defineThemes(monaco);
+    defineThemes(monaco)
 
     monaco.editor.setTheme(
-      `catppuccin-${themeNames[resolvedTheme ?? "light"]}`,
-    );
+      `catppuccin-${themeNames[resolvedTheme ?? 'light']}`,
+    )
 
     monaco.typescript.typescriptDefaults.setCompilerOptions({
       target: monaco.typescript.ScriptTarget.ESNext,
       module: monaco.typescript.ModuleKind.ESNext,
       allowNonTsExtensions: true,
-    });
+    })
 
     monaco.typescript.typescriptDefaults.addExtraLib(
-      process.env["DELTA_TYPES"]!,
-      "ts:delta/lib.d.ts",
-    );
+      deltaTypesRef.current,
+      'ts:delta/lib.d.ts',
+    )
 
-    if (!monaco.editor.getModel(monaco.Uri.parse("ts:delta/lib.d.ts"))) {
+    if (!monaco.editor.getModel(monaco.Uri.parse('ts:delta/lib.d.ts'))) {
       monaco.editor.createModel(
-        process.env["DELTA_TYPES"]!,
-        "typescript",
-        monaco.Uri.parse("ts:delta/lib.d.ts"),
-      );
+        deltaTypesRef.current,
+        'typescript',
+        monaco.Uri.parse('ts:delta/lib.d.ts'),
+      )
     }
 
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, async () => {
-      const model = editor.getModel();
-      if (!model) return;
+      const model = editor.getModel()
+      if (!model)
+        return
 
       try {
-        const getWorker = await monaco.typescript.getTypeScriptWorker();
-        const worker = await getWorker(model.uri);
+        const getWorker = await monaco.typescript.getTypeScriptWorker()
+        const worker = await getWorker(model.uri)
 
         const syntactic = await worker.getSyntacticDiagnostics(
           model.uri.toString(),
-        );
+        )
         const semantic = await worker.getSemanticDiagnostics(
           model.uri.toString(),
-        );
-        const allDiagnostics = [...syntactic, ...semantic];
+        )
+        const allDiagnostics = [...syntactic, ...semantic]
 
-        const tsErrors = allDiagnostics.filter((d) => d.category === 1);
+        const tsErrors = allDiagnostics.filter(d => d.category === 1)
 
-        if (tsErrors.length > 0) return;
+        if (tsErrors.length > 0)
+          return
 
-        compile(editor.getValue());
-      } catch {
-        compile(editor.getValue());
+        compile(editor.getValue())
       }
-    });
-  };
+      catch {
+        compile(editor.getValue())
+      }
+    })
+  }
 
   useEffect(() => {
     if (editorRef.current && editorValue) {
-      const current = editorRef.current.getValue();
+      const current = editorRef.current.getValue()
       if (current !== editorValue) {
-        editorRef.current.setValue(editorValue);
-        compile(editorValue);
+        editorRef.current.setValue(editorValue)
+        compile(editorValue)
       }
     }
-  }, [editorValue, editorRef?.current]);
+  }, [compile, editorValue])
 
   useEffect(() => {
-    if (!editorRef.current) return;
+    if (!editorRef.current)
+      return
 
-    const model = editorRef.current.getModel();
+    const model = editorRef.current.getModel()
 
-    if (!model || !monaco) return;
+    if (!model || !monaco)
+      return
 
     if (editorErrors) {
       monaco.editor.setModelMarkers(
         model,
-        "delta-runtime",
+        'delta-runtime',
         editorErrors
-          .filter((editorError) => editorError.line !== 0)
-          .map((editorError) => ({
+          .filter(editorError => editorError.line !== 0)
+          .map(editorError => ({
             startLineNumber: editorError.line,
             startColumn: editorError.column,
             endLineNumber: editorError.line,
@@ -131,24 +142,25 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
             message: editorError.message,
             severity: monaco.MarkerSeverity.Error,
           })),
-      );
-    } else {
-      monaco.editor.setModelMarkers(model, "delta-runtime", []);
+      )
     }
-  }, [monaco, editorErrors, editorRef?.current]);
+    else {
+      monaco.editor.setModelMarkers(model, 'delta-runtime', [])
+    }
+  }, [monaco, editorErrors])
 
   const handleChange: OnChange = (value) => {
     const set = {
       tm: patchTm,
       nfa: patchNfa,
-    };
-    set[scope]({ editorValue: value ?? "" });
-  };
+    }
+    set[scope]({ editorValue: value ?? '' })
+  }
 
   return (
     <div className="relative w-full h-full">
       <Editor
-        theme={`catppuccin-${themeNames[resolvedTheme ?? "light"]}`}
+        theme={`catppuccin-${themeNames[resolvedTheme ?? 'light']}`}
         path={editorPath}
         height="100%"
         width="100%"
@@ -164,22 +176,22 @@ export function DeltaEditor({ scope = "nfa" }: DeltaEditorProps) {
         }}
       />
 
-      {editorErrors &&
-        editorErrors.filter((err) => err.line === 0).length > 0 && (
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-ctp-base/95 backdrop-blur-md border border-ctp-red/30 shadow-sm rounded-lg z-10 flex items-start gap-3 px-4 py-3 transition-all">
-            <AlertTriangle className="w-5 h-5 text-ctp-red mt-0.5 shrink-0" />
+      {editorErrors
+        && editorErrors.filter(err => err.line === 0).length > 0 && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-ctp-base/95 backdrop-blur-md border border-ctp-red/30 shadow-sm rounded-lg z-10 flex items-start gap-3 px-4 py-3 transition-all">
+          <AlertTriangle className="w-5 h-5 text-ctp-red mt-0.5 shrink-0" />
 
-            <div className="flex flex-col">
-              <span className="font-semibold text-sm text-ctp-text">
-                Build Failed
-              </span>
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm text-ctp-text">
+              Build Failed
+            </span>
 
-              <span className="text-xs mt-1 text-ctp-red/90 leading-relaxed">
-                {editorErrors.find((err) => err.line === 0)!.message}
-              </span>
-            </div>
+            <span className="text-xs mt-1 text-ctp-red/90 leading-relaxed">
+              {editorErrors.find(err => err.line === 0)!.message}
+            </span>
           </div>
-        )}
+        </div>
+      )}
     </div>
-  );
+  )
 }

@@ -1,49 +1,49 @@
-"use client";
+'use client'
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { type TestCase } from "@delta/examples";
-import { type MachineType } from "@/lib/worker/protocol";
-import { themeNames } from "@/lib/theme";
-import type { Theme } from "@/lib/theme";
-import { useMachineShare } from "@/hooks/useMachineShare";
+import type { TestCase } from '@delta/examples'
 import type {
   EnabledTabs,
   TabId,
   VisibleTab,
   WorkbenchCoreLogicBase,
   WorkbenchStoreAdapters,
-} from "./types";
-import { getInitialTab, isTabEnabled } from "./utils";
+} from './types'
+import type { Theme } from '@/lib/theme'
+import type { MachineType } from '@/lib/worker/protocol'
+import { useCallback, useMemo, useState } from 'react'
+import { useMachineShare } from '@/hooks/useMachineShare'
+import { themeNames } from '@/lib/theme'
+import { getInitialTab, isTabEnabled } from './utils'
 
 interface Recipe {
-  label: string;
-  path: string;
-  tests: TestCase[];
+  label: string
+  path: string
+  tests: TestCase[]
 }
 
 interface AlertPayload {
-  title: string;
-  message: string;
-  confirmText?: string;
+  title: string
+  message: string
+  confirmText?: string
 }
 
 interface UseWorkbenchVariantCoreOptions<M extends { name?: string }> {
-  enabledTabs: EnabledTabs;
-  tabs: VisibleTab[];
-  machine: M | null;
-  recipesMap: Record<string, Recipe>;
-  machineType: MachineType;
-  editorValue: string;
-  adapters: WorkbenchStoreAdapters;
-  compile: (code: string) => void;
-  showAlert: (payload: AlertPayload) => void;
-  dotFromMachine: (machine: M, themeName: Theme) => string;
-  activeDot: string | null;
-  resolvedTheme: string | undefined;
+  enabledTabs: EnabledTabs
+  tabs: VisibleTab[]
+  machine: M | null
+  recipesMap: Record<string, Recipe>
+  machineType: MachineType
+  editorValue: string
+  adapters: WorkbenchStoreAdapters
+  compile: (code: string) => void
+  showAlert: (payload: AlertPayload) => void
+  dotFromMachine: (machine: M, themeName: Theme) => string
+  activeDot: string | null
+  resolvedTheme: string | undefined
   onRecipeLoaded?: (args: {
-    activeTab: TabId;
-    setActiveTab: (tab: TabId) => void;
-  }) => void;
+    activeTab: TabId
+    setActiveTab: (tab: TabId) => void
+  }) => void
 }
 
 export function useWorkbenchVariantCore<M extends { name?: string }>({
@@ -63,104 +63,110 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
 }: UseWorkbenchVariantCoreOptions<M>) {
   const [activeTab, setActiveTab] = useState<TabId>(() =>
     getInitialTab(enabledTabs),
-  );
-  const [selectedRecipeKey, setSelectedRecipeKey] = useState("");
+  )
+  const [selectedRecipeKey, setSelectedRecipeKey] = useState('')
 
-  const recipeEntries = useMemo(() => Object.entries(recipesMap), [recipesMap]);
-  const selectedRecipeLabel =
-    recipesMap[selectedRecipeKey]?.label ?? "load example";
-
-  const applyRecipe = useCallback(
-    async (recipeKey: string) => {
-      const recipe = recipesMap[recipeKey];
-      if (!recipe) return;
-
-      setSelectedRecipeKey(recipeKey);
-
-      const testsWithFreshIds = recipe.tests.map((test) => ({
-        ...test,
-        id: crypto.randomUUID(),
-      }));
-
-      try {
-        const response = await fetch(recipe.path);
-        if (!response.ok) {
-          throw new Error(`Failed to load recipe at ${recipe.path}`);
-        }
-
-        const fetchedCode = await response.text();
-        onRecipeLoaded?.({ activeTab, setActiveTab });
-
-        adapters.setTests(testsWithFreshIds);
-        adapters.setEditorValue(
-          fetchedCode.replace("//@ts-nocheck", "").trim(),
-        );
-        adapters.clearEditorErrors();
-        compile(fetchedCode);
-      } catch {
-        showAlert({
-          title: "Recipe Import Failed",
-          message:
-            "Could not load the example code right now. Please try again later.",
-          confirmText: "OK",
-        });
-      }
-    },
-    [activeTab, adapters, compile, onRecipeLoaded, recipesMap, showAlert],
-  );
-
-  const requestTabChange = useCallback(
-    (tab: TabId) => {
-      if (!isTabEnabled(enabledTabs, tab)) return;
-      setActiveTab(tab);
-    },
-    [enabledTabs],
-  );
+  const recipeEntries = useMemo(() => Object.entries(recipesMap), [recipesMap])
+  const selectedRecipeLabel
+    = recipesMap[selectedRecipeKey]?.label ?? 'load example'
 
   const visibleTabs = useMemo(
-    () => tabs.filter((tab) => isTabEnabled(enabledTabs, tab.id)),
+    () => tabs.filter(tab => isTabEnabled(enabledTabs, tab.id)),
     [enabledTabs, tabs],
-  );
+  )
+  const activeTabForUI = useMemo(() => {
+    if (visibleTabs.some(tab => tab.id === activeTab)) {
+      return activeTab
+    }
+
+    return visibleTabs[0]?.id ?? activeTab
+  }, [activeTab, visibleTabs])
 
   const activeTabContent = useMemo(
     () =>
-      visibleTabs.find((tab) => tab.id === activeTab)?.content ??
-      visibleTabs[0]?.content,
-    [activeTab, visibleTabs],
-  );
+      visibleTabs.find(tab => tab.id === activeTabForUI)?.content
+      ?? visibleTabs[0]?.content,
+    [activeTabForUI, visibleTabs],
+  )
 
-  useEffect(() => {
-    if (visibleTabs.some((tab) => tab.id === activeTab)) return;
-    if (!visibleTabs[0]) return;
-    setActiveTab(visibleTabs[0].id);
-  }, [activeTab, visibleTabs]);
+  const applyRecipe = useCallback(
+    async (recipeKey: string) => {
+      const recipe = recipesMap[recipeKey]
+      if (!recipe)
+        return
+
+      setSelectedRecipeKey(recipeKey)
+
+      const testsWithFreshIds = recipe.tests.map(test => ({
+        ...test,
+        id: crypto.randomUUID(),
+      }))
+
+      try {
+        const response = await fetch(recipe.path)
+        if (!response.ok) {
+          throw new Error(`Failed to load recipe at ${recipe.path}`)
+        }
+
+        const fetchedCode = await response.text()
+        onRecipeLoaded?.({ activeTab: activeTabForUI, setActiveTab })
+
+        adapters.setTests(testsWithFreshIds)
+        adapters.setEditorValue(
+          fetchedCode.replace('// @ts-nocheck', '').trim(),
+        )
+        adapters.clearEditorErrors()
+        compile(fetchedCode)
+      }
+      catch {
+        showAlert({
+          title: 'Recipe Import Failed',
+          message:
+            'Could not load the example code right now. Please try again later.',
+          confirmText: 'OK',
+        })
+      }
+    },
+    [activeTabForUI, adapters, compile, onRecipeLoaded, recipesMap, showAlert],
+  )
+
+  const requestTabChange = useCallback(
+    (tab: TabId) => {
+      if (!isTabEnabled(enabledTabs, tab))
+        return
+      setActiveTab(tab)
+    },
+    [enabledTabs],
+  )
 
   const machineDot = useMemo(() => {
-    if (activeDot) return activeDot;
-    if (!machine) return null;
+    if (activeDot)
+      return activeDot
+    if (!machine)
+      return null
 
-    return dotFromMachine(machine, themeNames[resolvedTheme ?? "light"]);
-  }, [activeDot, dotFromMachine, machine, resolvedTheme]);
+    return dotFromMachine(machine, themeNames[resolvedTheme ?? 'light'])
+  }, [activeDot, dotFromMachine, machine, resolvedTheme])
 
   const { copied, handleShare } = useMachineShare({
     machineType,
     code: editorValue,
     canShare: machine !== null,
     onLoadCode: (code) => {
-      adapters.setEditorValue(code);
-      compile(code);
+      adapters.setEditorValue(code)
+      compile(code)
     },
     onShareError: () => {
       showAlert({
-        title: "Share Failed",
+        title: 'Share Failed',
         message:
-          "Could not generate a share link right now. Please try again later.",
-      });
+          'Could not generate a share link right now. Please try again later.',
+      })
     },
-  });
+  })
 
   const base: WorkbenchCoreLogicBase = {
-    activeTab,
+    activeTab: activeTabForUI,
     requestTabChange,
     visibleTabs,
     activeTabContent,
@@ -171,10 +177,10 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     machineDot,
     copied,
     handleShare,
-  };
+  }
 
   return {
     base,
     setActiveTab,
-  };
+  }
 }

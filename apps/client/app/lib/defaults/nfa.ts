@@ -16,6 +16,6 @@ const machine = Delta.dfa("# of a's divisible by 2 or 3")
   .all((s) => s.loop("b"))
   .build();
 
-export default machine;`;
+export default machine;`
 
-export default source;
+export default source

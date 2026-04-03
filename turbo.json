@@ -1,11 +1,14 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "tasks": {
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
     "test": {
       "dependsOn": ["^test", "^generate"]
     },
     "build": {
-      "dependsOn": ["^build", "^generate"],
+      "dependsOn": ["^lint", "^test", "^build", "^generate"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
     "dev": {

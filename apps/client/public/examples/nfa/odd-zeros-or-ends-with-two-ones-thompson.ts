@@ -1,34 +1,34 @@
 //@ts-nocheck
 import { thompson } from "delta:lib";
 
-const zeroOrOneStar = thompson("0|1")
-  .char("0")
-  .char("1")
+const zeroOrOneStar = thompson('0|1')
+  .char('0')
+  .char('1')
   .union()
   .star()
-  .build();
+  .build()
 
-const endsWith11 = thompson("Σ*11")
+const endsWith11 = thompson('Σ*11')
   .machine(zeroOrOneStar)
-  .char("1")
-  .char("1")
+  .char('1')
+  .char('1')
   .concat()
   .concat()
-  .build();
+  .build()
 
-const oddZeros = thompson("0(00)*")
-  .char("0")
-  .char("0")
+const oddZeros = thompson('0(00)*')
+  .char('0')
+  .char('0')
   .concat()
   .star()
-  .char("0")
+  .char('0')
   .concat()
-  .build();
+  .build()
 
-const machine = thompson("0(00)* U Σ*11")
+const machine = thompson('0(00)* U Σ*11')
   .machine(endsWith11)
   .machine(oddZeros)
   .union()
-  .build();
+  .build()
 
-export default machine;
+export default machine

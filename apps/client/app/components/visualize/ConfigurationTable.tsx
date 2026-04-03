@@ -1,16 +1,15 @@
-"use client";
+'use client'
 
-import { useEffect, useMemo } from "react";
-import { type NFA } from "@delta/build";
-import { useScrollableTable } from "@/components/visualize/hooks/useScrollableTable";
-import { type TraceStep } from "@/components/visualize/TraceContext";
+import type { TraceStep } from '@/components/visualize/TraceContext'
+import { useEffect, useMemo } from 'react'
+import { useScrollableTable } from '@/components/visualize/hooks/useScrollableTable'
 
 interface ConfigurationTableProps {
-  trace: TraceStep[];
-  step: number;
-  input: string;
-  isLast: boolean;
-  accepted: boolean;
+  trace: TraceStep[]
+  step: number
+  input: string
+  isLast: boolean
+  accepted: boolean
 }
 
 export function ConfigurationTable({
@@ -20,32 +19,32 @@ export function ConfigurationTable({
   isLast,
   accepted,
 }: ConfigurationTableProps) {
-  const { scrollContainerRef, rowRefs, scrollRowToCenter } =
-    useScrollableTable();
+  const { scrollContainerRef, rowRef, scrollRowToCenter }
+    = useScrollableTable()
 
   const configurations = useMemo(() => {
     // Only show configurations up to the current step
-    const currentTrace = trace.slice(0, step + 1);
+    const currentTrace = trace.slice(0, step + 1)
 
     return currentTrace
       .map((t, index) => {
-        const remainingInput = input.slice(index);
+        const remainingInput = input.slice(index)
         return {
           index,
           states: [...t.states].sort(),
-          remainingInput: remainingInput === "" ? "ε" : remainingInput,
-        };
+          remainingInput: remainingInput === '' ? 'ε' : remainingInput,
+        }
       })
-      .reverse(); // Most recent at the top
-  }, [trace, step, input]);
+      .reverse() // Most recent at the top
+  }, [trace, step, input])
 
   useEffect(() => {
     // Scroll to the most recent step whenever it changes
-    scrollRowToCenter(step.toString());
-  }, [step, scrollRowToCenter]);
+    scrollRowToCenter(step.toString())
+  }, [step, scrollRowToCenter])
 
   if (configurations.length === 0) {
-    return null;
+    return null
   }
 
   return (
@@ -57,10 +56,10 @@ export function ConfigurationTable({
         {isLast && (
           <span
             className={`px-2 py-0.5 rounded text-xs font-bold ${
-              accepted ? "text-ctp-green" : "text-ctp-red"
+              accepted ? 'text-ctp-green' : 'text-ctp-red'
             }`}
           >
-            {accepted ? "✓ accepted" : "✗ rejected"}
+            {accepted ? '✓ accepted' : '✗ rejected'}
           </span>
         )}
       </div>
@@ -82,15 +81,15 @@ export function ConfigurationTable({
           </thead>
           <tbody>
             {configurations.map((config) => {
-              const isCurrent = config.index === step;
-              const rowClassName = isCurrent ? "bg-ctp-green/20" : "";
-              const prefix = config.index > 0 ? "⊢ " : "  ";
+              const isCurrent = config.index === step
+              const rowClassName = isCurrent ? 'bg-ctp-green/20' : ''
+              const prefix = config.index > 0 ? '⊢ ' : '  '
 
               return (
                 <tr
                   key={config.index}
                   ref={(element) => {
-                    rowRefs.current[config.index.toString()] = element;
+                    rowRef.current[config.index.toString()] = element
                   }}
                   className={rowClassName}
                 >
@@ -103,20 +102,21 @@ export function ConfigurationTable({
                     </span>
                     (
                     <span className="text-ctp-mauve">
-                      {"{" + config.states.join(", ") + "}"}
+                      {`{${config.states.join(', ')}}`}
                     </span>
-                    ,{" "}
+                    ,
+                    {' '}
                     <span className="text-ctp-green">
                       {config.remainingInput}
                     </span>
                     )
                   </td>
                 </tr>
-              );
+              )
             })}
           </tbody>
         </table>
       </div>
     </div>
-  );
+  )
 }

@@ -1,22 +1,22 @@
-"use client";
+'use client'
 
-import { Fragment } from "react";
+import type { WorkbenchLogic } from './types'
 import {
   Listbox,
   ListboxButton,
   ListboxOption,
   ListboxOptions,
   Transition,
-} from "@headlessui/react";
-import { Check, Share2 } from "lucide-react";
-import { GraphvizViewer } from "@/components/visualize/GraphvizViewer";
-import { TestSuite } from "@/components/TestSuite";
-import { Tooltip } from "@/components/Tooltip";
-import { ConfirmModal } from "@/components/ConfirmModal";
-import type { WorkbenchLogic } from "./types";
+} from '@headlessui/react'
+import { Check, Share2 } from 'lucide-react'
+import { Fragment } from 'react'
+import { ConfirmModal } from '@/components/ConfirmModal'
+import { TestSuite } from '@/components/TestSuite'
+import { Tooltip } from '@/components/Tooltip'
+import { GraphvizViewer } from '@/components/visualize/GraphvizViewer'
 
 interface WorkbenchScaffoldProps<M extends { name?: string }> {
-  logic: WorkbenchLogic<M>;
+  logic: WorkbenchLogic<M>
 }
 
 export function WorkbenchScaffold<M extends { name?: string }>({
@@ -27,13 +27,13 @@ export function WorkbenchScaffold<M extends { name?: string }>({
       <DesktopWorkbench logic={logic} />
       <MobileWorkbench logic={logic} />
     </>
-  );
+  )
 }
 
 function MobileWorkbench<M extends { name?: string }>({
   logic,
 }: WorkbenchScaffoldProps<M>) {
-  const { machine, tests, setTests, simulate } = logic;
+  const { machine, tests, setTests, simulate } = logic
 
   return (
     <div className="flex flex-col md:hidden w-full h-full overflow-y-auto min-w-0 p-4 gap-6">
@@ -49,11 +49,11 @@ function MobileWorkbench<M extends { name?: string }>({
         evaluateInput={
           machine ? (input: string) => simulate(machine, input) : undefined
         }
-        machineName={machine?.name ?? "delta"}
+        machineName={machine?.name ?? 'delta'}
         resetKeys={[machine, logic.selectedRecipeKey]}
       />
     </div>
-  );
+  )
 }
 
 function DesktopWorkbench<M extends { name?: string }>({
@@ -75,21 +75,21 @@ function DesktopWorkbench<M extends { name?: string }>({
     setTests,
     simulate,
     confirmModal,
-  } = logic;
+  } = logic
 
   return (
     <div className="hidden md:flex flex-row flex-1 overflow-hidden">
       <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
         <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0 relative z-50">
           <div className="flex items-center gap-4 shrink-0">
-            {visibleTabs.map((tab) => (
+            {visibleTabs.map(tab => (
               <button
                 key={tab.id}
                 onClick={() => requestTabChange(tab.id)}
                 className={`tracking-wide pb-2 text-xs transition-colors border-b-2 cursor-pointer ${
                   activeTab === tab.id
-                    ? "text-ctp-text border-ctp-mauve"
-                    : "text-ctp-subtext0 border-transparent hover:text-ctp-text"
+                    ? 'text-ctp-text border-ctp-mauve'
+                    : 'text-ctp-subtext0 border-transparent hover:text-ctp-text'
                 }`}
               >
                 {tab.id}
@@ -119,7 +119,7 @@ function DesktopWorkbench<M extends { name?: string }>({
             {machine && machineDot && (
               <GraphvizViewer
                 dot={machineDot}
-                machineName={machine.name ?? "machine"}
+                machineName={machine.name ?? 'machine'}
                 showExportActions
                 onEdgeHover={graphvizOnEdgeHover}
               />
@@ -133,14 +133,14 @@ function DesktopWorkbench<M extends { name?: string }>({
                   ? (input: string) => simulate(machine, input)
                   : undefined
               }
-              machineName={machine?.name ?? "delta"}
+              machineName={machine?.name ?? 'delta'}
               resetKeys={[machine, selectedRecipeKey]}
             />
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function WorkbenchHeader<M extends { name?: string }>({
@@ -157,7 +157,7 @@ function WorkbenchHeader<M extends { name?: string }>({
     selectedRecipeKey,
     applyRecipe,
     selectedRecipeLabel,
-  } = logic;
+  } = logic
 
   return (
     <div className="flex flex-col-reverse lg:flex-row justify-between gap-3 relative">
@@ -171,29 +171,31 @@ function WorkbenchHeader<M extends { name?: string }>({
           </button>
         </Tooltip>
         <p
-          className={`font-bold text-xs px-3 py-1 rounded-lg ${editorErrors && editorErrors.length > 0 ? "text-ctp-red" : "text-ctp-green"} transition-colors whitespace-nowrap`}
+          className={`font-bold text-xs px-3 py-1 rounded-lg ${editorErrors && editorErrors.length > 0 ? 'text-ctp-red' : 'text-ctp-green'} transition-colors whitespace-nowrap`}
         >
           {editorErrors && editorErrors.length > 0
-            ? "✗ check errors"
-            : "✓ valid"}
+            ? '✗ check errors'
+            : '✓ valid'}
         </p>
       </div>
 
       <div className="flex items-center justify-between w-full lg:w-auto gap-4">
         <div className="flex items-center gap-2 overflow-hidden">
           <h1 className="text-ctp-text text-sm lg:text-end font-bold uppercase tracking-widest max-w-40 md:max-w-56 xl:max-w-80 text-nowrap overflow-x-auto">
-            {machine?.name ?? "untitled"}
+            {machine?.name ?? 'untitled'}
           </h1>
           <Tooltip label="Share Machine">
             <button
               onClick={handleShare}
               className="text-ctp-overlay0 hover:text-ctp-text transition-colors flex items-center shrink-0"
             >
-              {copied ? (
-                <Check className="w-4 h-4" />
-              ) : (
-                <Share2 className="w-4 h-4" />
-              )}
+              {copied
+                ? (
+                    <Check className="w-4 h-4" />
+                  )
+                : (
+                    <Share2 className="w-4 h-4" />
+                  )}
             </button>
           </Tooltip>
         </div>
@@ -208,7 +210,7 @@ function WorkbenchHeader<M extends { name?: string }>({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 function RecipeDropdown({
@@ -216,15 +218,16 @@ function RecipeDropdown({
   selectedRecipeKey,
   applyRecipe,
   selectedRecipeLabel,
-  className = "",
+  className = '',
 }: {
-  recipeEntries: [string, { label: string }][];
-  selectedRecipeKey: string;
-  applyRecipe: (key: string) => void;
-  selectedRecipeLabel: string;
-  className?: string;
+  recipeEntries: [string, { label: string }][]
+  selectedRecipeKey: string
+  applyRecipe: (key: string) => void
+  selectedRecipeLabel: string
+  className?: string
 }) {
-  if (recipeEntries.length === 0) return null;
+  if (recipeEntries.length === 0)
+    return null
 
   return (
     <Listbox
@@ -237,7 +240,7 @@ function RecipeDropdown({
         <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1 text-xs text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve overflow-hidden">
           <span
             className={`block overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-              selectedRecipeKey ? "" : "text-ctp-subtext1"
+              selectedRecipeKey ? '' : 'text-ctp-subtext1'
             }`}
           >
             {selectedRecipeLabel}
@@ -275,5 +278,5 @@ function RecipeDropdown({
         </Transition>
       </div>
     </Listbox>
-  );
+  )
 }

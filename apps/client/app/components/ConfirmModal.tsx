@@ -1,30 +1,30 @@
-"use client";
+'use client'
 
-import { Fragment } from "react";
 import {
   Dialog,
   DialogPanel,
   DialogTitle,
   Transition,
   TransitionChild,
-} from "@headlessui/react";
+} from '@headlessui/react'
+import { Fragment } from 'react'
 
 interface ConfirmModalProps {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  confirmText?: string;
-  cancelText?: string;
-  onConfirm: () => void;
-  onCancel: () => void;
+  isOpen: boolean
+  title: string
+  message: string
+  confirmText?: string
+  cancelText?: string
+  onConfirm: () => void
+  onCancel: () => void
 }
 
 export function ConfirmModal({
   isOpen,
   title,
   message,
-  confirmText = "Continue",
-  cancelText = "Cancel",
+  confirmText = 'Continue',
+  cancelText = 'Cancel',
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
@@ -86,5 +86,5 @@ export function ConfirmModal({
         </div>
       </Dialog>
     </Transition>
-  );
+  )
 }

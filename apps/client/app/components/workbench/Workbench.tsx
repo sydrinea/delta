@@ -1,2 +1,2 @@
-export { NfaWorkbench } from "./NfaWorkbench";
-export { TmWorkbench } from "./TmWorkbench";
+export { NfaWorkbench } from './NfaWorkbench'
+export { TmWorkbench } from './TmWorkbench'

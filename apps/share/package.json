@@ -4,6 +4,7 @@
   "private": true,
   "license": "MIT",
   "scripts": {
+    "lint": "eslint",
     "deploy": "wrangler deploy",
     "cf-typegen": "wrangler types"
   },

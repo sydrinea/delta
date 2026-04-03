@@ -1,70 +1,72 @@
-import { createPortal } from "react-dom";
-import { useRef, useState } from "react";
+import { useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
-type AlignPos = "center" | "right" | "left";
+type AlignPos = 'center' | 'right' | 'left'
 
 function calculateAlignment(
   rect: DOMRect,
   tooltipWidth: number,
-): { left: number; align: AlignPos } {
-  const center = rect.left + rect.width / 2;
+): { left: number, align: AlignPos } {
+  const center = rect.left + rect.width / 2
 
   if (center + tooltipWidth / 2 > window.innerWidth - 8) {
-    return { left: rect.right, align: "right" };
+    return { left: rect.right, align: 'right' }
   }
 
   if (center - tooltipWidth / 2 < 8) {
-    return { left: rect.left, align: "left" };
+    return { left: rect.left, align: 'left' }
   }
 
-  return { left: center, align: "center" };
+  return { left: center, align: 'center' }
 }
 
 interface TooltipProps {
-  label: string;
-  children: React.ReactNode;
+  label: string
+  children: React.ReactNode
 }
 
 interface Pos {
-  top: number;
-  left: number;
-  align: AlignPos;
+  top: number
+  left: number
+  align: AlignPos
 }
 
 const STYLE_MAP = {
   center: {
-    container: { transform: "translate(-50%, -100%)" },
-    arrow: { left: "50%", right: "auto", transform: "translateX(-50%)" },
+    container: { transform: 'translate(-50%, -100%)' },
+    arrow: { left: '50%', right: 'auto', transform: 'translateX(-50%)' },
   },
   right: {
-    container: { transform: "translate(-100%, -100%)" },
-    arrow: { left: "auto", right: "12px", transform: "none" },
+    container: { transform: 'translate(-100%, -100%)' },
+    arrow: { left: 'auto', right: '12px', transform: 'none' },
   },
   left: {
-    container: { transform: "translate(0, -100%)" },
-    arrow: { left: "12px", right: "auto", transform: "none" },
+    container: { transform: 'translate(0, -100%)' },
+    arrow: { left: '12px', right: 'auto', transform: 'none' },
   },
-} as const;
+} as const
 
 export function Tooltip({ label, children }: TooltipProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState<Pos | null>(null);
+  const ref = useRef<HTMLDivElement>(null)
+  const [pos, setPos] = useState<Pos | null>(null)
 
   const show = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== "mouse") return;
+    if (e.pointerType !== 'mouse')
+      return
 
-    const rect = ref.current?.getBoundingClientRect();
-    if (!rect) return;
+    const rect = ref.current?.getBoundingClientRect()
+    if (!rect)
+      return
 
-    const tooltipWidth = label.length * 7 + 16; // rough estimate
-    const { left, align } = calculateAlignment(rect, tooltipWidth);
+    const tooltipWidth = label.length * 7 + 16 // rough estimate
+    const { left, align } = calculateAlignment(rect, tooltipWidth)
 
     setPos({
       top: rect.top,
       left,
       align,
-    });
-  };
+    })
+  }
 
   return (
     <div
@@ -74,8 +76,8 @@ export function Tooltip({ label, children }: TooltipProps) {
       onPointerLeave={() => setPos(null)}
     >
       {children}
-      {pos &&
-        createPortal(
+      {pos
+        && createPortal(
           <div
             className="fixed z-50 pointer-events-none"
             style={{
@@ -101,5 +103,5 @@ export function Tooltip({ label, children }: TooltipProps) {
           document.body,
         )}
     </div>
-  );
+  )
 }

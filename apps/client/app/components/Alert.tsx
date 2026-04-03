@@ -1,28 +1,28 @@
-"use client";
+'use client'
 
-import { Fragment } from "react";
 import {
   Dialog,
   DialogPanel,
   DialogTitle,
   Transition,
   TransitionChild,
-} from "@headlessui/react";
+} from '@headlessui/react'
+import { Fragment } from 'react'
 
 interface AlertProps {
-  isOpen: boolean;
-  title: string;
-  message: string;
-  confirmText?: string;
-  onConfirm: () => void;
-  onClose: () => void;
+  isOpen: boolean
+  title: string
+  message: string
+  confirmText?: string
+  onConfirm: () => void
+  onClose: () => void
 }
 
 export function Alert({
   isOpen,
   title,
   message,
-  confirmText = "OK",
+  confirmText = 'OK',
   onConfirm,
   onClose,
 }: AlertProps) {
@@ -76,5 +76,5 @@ export function Alert({
         </div>
       </Dialog>
     </Transition>
-  );
+  )
 }
