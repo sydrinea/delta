@@ -1,26 +1,19 @@
 'use client'
 
 import type { TuringMachine } from '@delta/build'
+import type { TraceBottomPanelContext, TraceInputArgs } from '../visualize/TraceContext'
 import type { EnabledTabs, WorkbenchLogic } from './types'
-import type { TraceBottomPanelContext, TraceInputArgs } from '@/components/visualize/TraceContext'
 import { recipes } from '@delta/examples/recipes'
 import { simulateTM } from '@delta/simulator'
 import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
-import { useAlert } from '@/components/AlertProvider'
-import { DeltaEditor } from '@/components/editor/DeltaEditor'
-import { Trace } from '@/components/visualize/Trace'
-import {
-
-  TraceProvider,
-  useTraceInteractionContext,
-  useTraceSimulationContext,
-} from '@/components/visualize/TraceContext'
-import { TransitionTable } from '@/components/visualize/TransitionTable'
 import { useCompile } from '@/hooks/useCompile'
 import { toDotTM } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
 import { useTmStore } from '@/store/tmStore'
+import { DeltaEditor } from '../editor'
+import { useAlert } from '../providers'
+import { Trace, TraceProvider, TransitionTable, useTraceInteractionContext, useTraceSimulationContext } from '../visualize'
 import { useWorkbenchVariantCore } from './useWorkbenchVariantCore'
 import {
   buildSlidingWindowTokens,
@@ -28,9 +21,9 @@ import {
   makeStoreAdapters,
   TRACE_WINDOW_SIZE,
 } from './utils'
-import { WorkbenchScaffold } from './WorkbenchScaffold'
+import { WorkbenchShell } from './WorkbenchShell'
 
-interface TmWorkbenchProps {
+interface WorkbenchTMProps {
   enabledTabs?: EnabledTabs
 }
 
@@ -140,18 +133,9 @@ function getTmInputTokens(args: TraceInputArgs) {
   })
 }
 
-function TmWorkbenchInner({
-  enabledTabs,
-  resolvedTheme,
-}: {
-  enabledTabs: EnabledTabs
-  resolvedTheme: string | undefined
-}) {
-  const logic = useTmWorkbenchLogic(enabledTabs, resolvedTheme)
-  return <WorkbenchScaffold logic={logic} />
-}
-
-export function TmWorkbench({ enabledTabs = DEFAULT_TABS }: TmWorkbenchProps) {
+export function TMComponent({
+  enabledTabs = DEFAULT_TABS,
+}: WorkbenchTMProps) {
   const machine = useTmStore(s => s.machine)
   const tests = useTmStore(s => s.tests)
   const { resolvedTheme } = useTheme()
@@ -184,10 +168,18 @@ export function TmWorkbench({ enabledTabs = DEFAULT_TABS }: TmWorkbenchProps) {
         />
       )}
     >
-      <TmWorkbenchInner
-        enabledTabs={enabledTabs}
-        resolvedTheme={resolvedTheme}
-      />
+      <TMWorkbenchWithTraceContext enabledTabs={enabledTabs} resolvedTheme={resolvedTheme} />
     </TraceProvider>
   )
+}
+
+function TMWorkbenchWithTraceContext({
+  enabledTabs,
+  resolvedTheme,
+}: {
+  enabledTabs: EnabledTabs
+  resolvedTheme: string | undefined
+}) {
+  const logic = useTmWorkbenchLogic(enabledTabs, resolvedTheme)
+  return <WorkbenchShell logic={logic} />
 }

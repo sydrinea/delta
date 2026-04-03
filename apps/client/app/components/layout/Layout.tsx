@@ -1,8 +1,6 @@
-import { AlertProvider } from '@/components/AlertProvider'
-import { Loader } from '@/components/Loader'
-import Navbar from '@/components/Navbar'
-import { OfflineReadyToast } from './OfflineReadyToast'
-import { ToastProvider } from './ToastProvider'
+import { AlertProvider, ToastProvider } from '../providers'
+import { Loader, OfflineReadyToast } from '../ui'
+import Navbar from './Navbar'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

@@ -11,7 +11,7 @@ import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import { unified } from 'unified'
-import DocsLayout from '@/components/DocsLayout'
+import { Guide } from '@/components'
 import { NAV } from '../nav'
 
 const GITHUB_REPO = 'https://github.com/sydrinea/delta'
@@ -99,7 +99,7 @@ export default async function DocsPage({
   }).toString()}`
 
   return (
-    <DocsLayout
+    <Guide
       activePage={pageId}
       html={html}
       headings={headings}

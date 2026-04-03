@@ -1,10 +1,10 @@
 'use client'
 
-import type { Heading } from '../guide/nav'
+import type { Heading } from '../../guide/nav'
 import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { NAV } from '../guide/nav'
-import { GitHubIcon } from './GitHubIcon'
+import { NAV } from '../../guide/nav'
+import { GitHub } from '../icons'
 
 interface ToCProps {
   headings: Heading[]
@@ -85,7 +85,7 @@ function SidebarContent({ activePage, onNavigate }: SidebarContentProps) {
   )
 }
 
-interface DocsLayoutProps {
+interface GuideLayoutProps {
   activePage: string
   html: string
   headings: Heading[]
@@ -95,7 +95,7 @@ interface DocsLayoutProps {
   nextPage: { label: string, href: string } | null
 }
 
-export default function DocsLayout({
+export default function Guide({
   activePage,
   html,
   headings,
@@ -103,7 +103,7 @@ export default function DocsLayout({
   issueUrl,
   previousPage,
   nextPage,
-}: DocsLayoutProps) {
+}: GuideLayoutProps) {
   const [activeHeading, setActiveHeading] = useState(headings[0]?.id ?? '')
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
@@ -208,7 +208,7 @@ export default function DocsLayout({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-peach/35 border border-ctp-peach/55 text-ctp-text hover:bg-ctp-peach/45 transition-colors"
                   >
-                    <GitHubIcon className="w-3.5 h-3.5" />
+                    <GitHub className="w-3.5 h-3.5" />
                     Edit on GitHub
                   </a>
                   <a
@@ -217,7 +217,7 @@ export default function DocsLayout({
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-red/35 border border-ctp-red/55 text-ctp-text hover:bg-ctp-red/45 transition-colors"
                   >
-                    <GitHubIcon className="w-3.5 h-3.5" />
+                    <GitHub className="w-3.5 h-3.5" />
                     Report issue
                   </a>
                 </div>

@@ -2,12 +2,12 @@
 
 import type { TuringMachine } from '@delta/build'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useScrollableTable } from '@/components/visualize/hooks/useScrollableTable'
+import { useScrollableTable } from './hooks/useScrollableTable'
 import {
   activeTupleFromTapes,
   buildTMTransitionRows,
   formatReadTuple,
-} from '@/components/visualize/metadata'
+} from './metadata'
 
 interface TransitionTableCurrentStep {
   states: Set<string>
@@ -55,7 +55,7 @@ export function TransitionTable({
       return []
     }
 
-    return transitionRows.filter(row => row.fromState === currentState)
+    return transitionRows.filter((row): row is ReturnType<typeof buildTMTransitionRows>[number] => row.fromState === currentState)
   }, [transitionRows, currentState])
 
   const visibleRows = tableMode === 'all' ? transitionRows : stateRelevantRows
@@ -76,7 +76,7 @@ export function TransitionTable({
     }
 
     return row.readSymbols.every(
-      (symbol, index) => symbol === currentReadTuple[index],
+      (symbol: string, index: number) => symbol === currentReadTuple[index],
     )
   }, [currentReadTuple, currentState])
 
@@ -85,7 +85,7 @@ export function TransitionTable({
       return
     }
 
-    const hoveredRow = visibleRows.find(row => row.edgeId === hoveredEdgeId)
+    const hoveredRow = visibleRows.find((row): row is ReturnType<typeof buildTMTransitionRows>[number] => row.edgeId === hoveredEdgeId)
     if (!hoveredRow) {
       return
     }
@@ -94,7 +94,7 @@ export function TransitionTable({
   }, [hoveredEdgeId, scrollRowToCenter, visibleRows])
 
   useEffect(() => {
-    const activeRow = visibleRows.find(row => isCurrentTransition(row))
+    const activeRow = visibleRows.find((row): row is ReturnType<typeof buildTMTransitionRows>[number] => isCurrentTransition(row))
     if (!activeRow) {
       return
     }
@@ -158,7 +158,7 @@ export function TransitionTable({
             </tr>
           </thead>
           <tbody>
-            {visibleRows.map((row) => {
+            {visibleRows.map((row: ReturnType<typeof buildTMTransitionRows>[number]) => {
               const isHovered = row.edgeId === hoveredEdgeId
               const isCurrent = isCurrentTransition(row)
               const rowClassName = isCurrent

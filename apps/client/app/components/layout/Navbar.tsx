@@ -8,7 +8,7 @@ import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
 } from '@/lib/navigation-loader-config'
-import { version } from '../../package.json'
+import { version } from '../../../package.json'
 
 const TABS = [
   { label: 'NFA / DFA', href: '/nfa' },

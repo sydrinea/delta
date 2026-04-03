@@ -1,6 +1,6 @@
 import { siGithub } from 'simple-icons/icons'
 
-export function GitHubIcon({ className }: { className?: string }) {
+export function GitHub({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"

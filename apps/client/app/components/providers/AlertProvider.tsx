@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from 'react'
-import { Alert } from './Alert'
+import { Alert } from '../ui'
 
 const CLOSE_TEXT_CLEAR_DELAY_MS = 300
 

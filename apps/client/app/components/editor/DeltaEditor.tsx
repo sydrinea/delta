@@ -39,11 +39,6 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
 
   const monaco = useMonaco()
   const compile = useCompile(scope)
-  // eslint-disable-next-line node/prefer-global/process -- Next injects DELTA_TYPES via process.env at build/runtime, and this lookup safely guards browser access.
-  const runtimeProcess = (globalThis as Record<string, unknown>).process as
-    | { env?: { DELTA_TYPES?: string } }
-    | undefined
-  const deltaTypesRef = useRef(runtimeProcess?.env?.DELTA_TYPES ?? '')
 
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor
@@ -67,13 +62,15 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
     })
 
     monaco.typescript.typescriptDefaults.addExtraLib(
-      deltaTypesRef.current,
+      // eslint-disable-next-line node/prefer-global/process
+      process.env.DELTA_TYPES!,
       'ts:delta/lib.d.ts',
     )
 
     if (!monaco.editor.getModel(monaco.Uri.parse('ts:delta/lib.d.ts'))) {
       monaco.editor.createModel(
-        deltaTypesRef.current,
+        // eslint-disable-next-line node/prefer-global/process
+        process.env.DELTA_TYPES!,
         'typescript',
         monaco.Uri.parse('ts:delta/lib.d.ts'),
       )

@@ -182,7 +182,7 @@ export function simulate(
 
   const initial: TMConfiguration = {
     state: machine.startState,
-    heads: Array.from({ length: tapeCount }).fill(0),
+    heads: Array.from({ length: tapeCount }).fill(0) as number[],
     tapes,
   }
 

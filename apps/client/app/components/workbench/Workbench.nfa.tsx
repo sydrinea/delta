@@ -1,29 +1,22 @@
 'use client'
 
 import type { NFA } from '@delta/build'
+import type { TraceBottomPanelContext, TraceInputArgs } from '../visualize/TraceContext'
 import type { EnabledTabs, TabId, WorkbenchLogic } from './types'
-import type { TraceBottomPanelContext, TraceInputArgs } from '@/components/visualize/TraceContext'
 import { recipes } from '@delta/examples/recipes'
 import { simulate as simulateNFA } from '@delta/simulator'
 import { useTheme } from 'next-themes'
 import { useMemo, useState } from 'react'
 import { ReactFlowProvider } from 'reactflow'
-import { useAlert } from '@/components/AlertProvider'
-import { DeltaEditor } from '@/components/editor/DeltaEditor'
-import { FlowEditor } from '@/components/editor/FlowEditor'
-import { ConfigurationTable } from '@/components/visualize/ConfigurationTable'
-import { Trace } from '@/components/visualize/Trace'
-import {
-
-  TraceProvider,
-  useTraceSimulationContext,
-} from '@/components/visualize/TraceContext'
 import { useCompile } from '@/hooks/useCompile'
 import { containsCustomLogicOrComments } from '@/lib/detect-custom-logic'
 import { toDot } from '@/lib/dot'
 import { nfaToFlow } from '@/lib/flow/toFlow'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfaStore'
+import { DeltaEditor, FlowEditor } from '../editor'
+import { useAlert } from '../providers'
+import { ConfigurationTable, Trace, TraceProvider, useTraceSimulationContext } from '../visualize'
 import { useWorkbenchVariantCore } from './useWorkbenchVariantCore'
 import {
   buildSlidingWindowTokens,
@@ -31,9 +24,9 @@ import {
   makeStoreAdapters,
   TRACE_WINDOW_SIZE,
 } from './utils'
-import { WorkbenchScaffold } from './WorkbenchScaffold'
+import { WorkbenchShell } from './WorkbenchShell'
 
-interface NfaWorkbenchProps {
+interface WorkbenchNFAProps {
   enabledTabs?: EnabledTabs
 }
 
@@ -180,20 +173,9 @@ function getNfaInputTokens(args: TraceInputArgs) {
   })
 }
 
-function NfaWorkbenchInner({
-  enabledTabs,
-  resolvedTheme,
-}: {
-  enabledTabs: EnabledTabs
-  resolvedTheme: string | undefined
-}) {
-  const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme)
-  return <WorkbenchScaffold logic={logic} />
-}
-
-export function NfaWorkbench({
+export function NFAComponent({
   enabledTabs = DEFAULT_TABS,
-}: NfaWorkbenchProps) {
+}: WorkbenchNFAProps) {
   const machine = useNfaStore(s => s.machine)
   const tests = useNfaStore(s => s.tests)
   const { resolvedTheme } = useTheme()
@@ -222,10 +204,18 @@ export function NfaWorkbench({
         />
       )}
     >
-      <NfaWorkbenchInner
-        enabledTabs={enabledTabs}
-        resolvedTheme={resolvedTheme}
-      />
+      <NFAWorkbenchWithTraceContext enabledTabs={enabledTabs} resolvedTheme={resolvedTheme} />
     </TraceProvider>
   )
+}
+
+function NFAWorkbenchWithTraceContext({
+  enabledTabs,
+  resolvedTheme,
+}: {
+  enabledTabs: EnabledTabs
+  resolvedTheme: string | undefined
+}) {
+  const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme)
+  return <WorkbenchShell logic={logic} />
 }

@@ -12,6 +12,7 @@
       "@delta/transform": ["../../packages/transform/src/index.ts"],
       "@delta/examples": ["../../examples/generated/index.ts"],
       // app-scoped deps
+      "@/components": ["./app/components/index.ts"],
       "@/components/*": ["./app/components/*"],
       "@/icons": ["./app/icons.tsx"],
       "@/store/*": ["./app/store/*"],

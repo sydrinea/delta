@@ -4,7 +4,7 @@ import type { TestCase } from '@delta/examples'
 import { TestCaseArraySchema } from '@delta/examples'
 import { useEffect, useState } from 'react'
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
-import { useAlert } from './AlertProvider'
+import { useAlert } from '../providers'
 import { Tooltip } from './Tooltip'
 
 interface TestResult {

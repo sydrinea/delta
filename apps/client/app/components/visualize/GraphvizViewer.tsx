@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Tooltip } from '../Tooltip'
+import { Tooltip } from '../ui/Tooltip'
 import { toPng, toSvg } from './helpers'
 
 interface GraphvizViewerProps {
@@ -74,7 +74,9 @@ export function GraphvizViewer({
     () => withFullscreenLayout(dot, fullscreenNodesep, fullscreenRanksep),
     [dot, fullscreenNodesep, fullscreenRanksep],
   )
+
   const isMounted = typeof document !== 'undefined'
+
   const updateHoveredEdge = useCallback((target: EventTarget | null) => {
     if (!onEdgeHover)
       return
@@ -87,6 +89,7 @@ export function GraphvizViewer({
     const hoveredEdge = target.closest<SVGGElement>('g.edge')
     onEdgeHover(hoveredEdge?.getAttribute('id') ?? null)
   }, [onEdgeHover])
+
   const clearHoveredEdge = useCallback(() => {
     onEdgeHover?.(null)
   }, [onEdgeHover])
@@ -127,7 +130,7 @@ export function GraphvizViewer({
       cancelled = true
       clearHoveredEdge()
     }
-  }, [clearHoveredEdge, dot, fullscreenDot])
+  }, [clearHoveredEdge, dot, fullscreenDot, isFullscreen])
 
   useEffect(() => {
     if (!isFullscreen)

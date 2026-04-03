@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { flavors } from '@catppuccin/palette'
 import { ThemeProvider } from 'next-themes'
 import { Cormorant, Recursive, Syne } from 'next/font/google'
-import Layout from '@/components/Layout'
+import { Layout } from '@/components'
 import { SerwistProvider } from './serwist'
 import './globals.css'
 import 'reactflow/dist/style.css'
@@ -23,6 +23,7 @@ const cormorant = Cormorant({
 })
 
 export const metadata: Metadata = {
+  //  this is a Next.js pattern
   applicationName: 'Delta — theory of computation tools',
   title: 'Delta — theory of computation tools',
   description: 'Create, test, and visualize DFAs and NFAs, with more to come!',
@@ -49,6 +50,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
+  //  this is a Next.js pattern
   themeColor: flavors.latte.colors.mauve.hex,
   initialScale: 1,
   width: 'device-width',

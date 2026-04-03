@@ -1,8 +1,8 @@
 'use client'
 
-import type { TraceStep } from '@/components/visualize/TraceContext'
+import type { TraceStep } from './TraceContext'
 import { useEffect, useMemo } from 'react'
-import { useScrollableTable } from '@/components/visualize/hooks/useScrollableTable'
+import { useScrollableTable } from './hooks/useScrollableTable'
 
 interface ConfigurationTableProps {
   trace: TraceStep[]

@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { GitHubIcon } from '@/components/GitHubIcon'
+import { GitHub } from '@/components'
 import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
@@ -151,7 +151,7 @@ export default function Home() {
           className="p-2 rounded-lg text-ctp-overlay0 hover:text-ctp-text hover:bg-ctp-surface0 border border-transparent hover:border-ctp-surface1 transition-all duration-200"
           aria-label="View on GitHub"
         >
-          <GitHubIcon className="w-5 h-5" />
+          <GitHub className="w-5 h-5" />
         </a>
       </div>
     </div>

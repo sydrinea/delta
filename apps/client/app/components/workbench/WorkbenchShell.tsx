@@ -10,18 +10,16 @@ import {
 } from '@headlessui/react'
 import { Check, Share2 } from 'lucide-react'
 import { Fragment } from 'react'
-import { ConfirmModal } from '@/components/ConfirmModal'
-import { TestSuite } from '@/components/TestSuite'
-import { Tooltip } from '@/components/Tooltip'
-import { GraphvizViewer } from '@/components/visualize/GraphvizViewer'
+import { ConfirmModal, TestSuite, Tooltip } from '../ui'
+import { GraphvizViewer } from '../visualize'
 
-interface WorkbenchScaffoldProps<M extends { name?: string }> {
+interface WorkbenchShellProps<M extends { name?: string }> {
   logic: WorkbenchLogic<M>
 }
 
-export function WorkbenchScaffold<M extends { name?: string }>({
+export function WorkbenchShell<M extends { name?: string }>({
   logic,
-}: WorkbenchScaffoldProps<M>) {
+}: WorkbenchShellProps<M>) {
   return (
     <>
       <DesktopWorkbench logic={logic} />
@@ -32,7 +30,7 @@ export function WorkbenchScaffold<M extends { name?: string }>({
 
 function MobileWorkbench<M extends { name?: string }>({
   logic,
-}: WorkbenchScaffoldProps<M>) {
+}: WorkbenchShellProps<M>) {
   const { machine, tests, setTests, simulate } = logic
 
   return (
@@ -58,7 +56,7 @@ function MobileWorkbench<M extends { name?: string }>({
 
 function DesktopWorkbench<M extends { name?: string }>({
   logic,
-}: WorkbenchScaffoldProps<M>) {
+}: WorkbenchShellProps<M>) {
   const {
     activeTab,
     requestTabChange,
@@ -145,7 +143,7 @@ function DesktopWorkbench<M extends { name?: string }>({
 
 function WorkbenchHeader<M extends { name?: string }>({
   logic,
-}: WorkbenchScaffoldProps<M>) {
+}: WorkbenchShellProps<M>) {
   const {
     editorValue,
     compile,
