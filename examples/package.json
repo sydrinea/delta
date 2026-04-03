@@ -9,8 +9,8 @@
   "types": "./generated/index.ts",
   "scripts": {
     "lint": "eslint",
-    "generate:recipes": "tsx scripts/recipes.ts",
-    "generate:exports": "tsx scripts/exports.ts",
+    "generate:recipes": "tsx scripts/recipes.ts && eslint --fix",
+    "generate:exports": "tsx scripts/exports.ts && eslint --fix",
     "generate": "pnpm run generate:recipes && pnpm run generate:exports"
   },
   "dependencies": {
