@@ -1,26 +1,19 @@
 <div align="center">
+  <img src="https://delta.sydneyn.dev/android-chrome-512x512.png" width="64" alt="Delta logo" />
+  <h1>Delta</h1>
+  <p>An interactive, code-first environment to design, test, and visualize automata<p>
 
-<img src="https://delta.sydneyn.dev/android-chrome-512x512.png" width="96" alt="Delta logo" />
-
-# Delta
-
-**An interactive, code-first environment to design, test, and visualize automata**
-
-[![Live App](https://img.shields.io/badge/try%20it-delta.sydneyn.dev-blue?style=flat-square)](https://delta.sydneyn.dev)
-&nbsp;
-[![Demo](https://img.shields.io/badge/watch-demo-red?style=flat-square&logo=youtube)](https://www.youtube.com/watch?v=zOM9aVSUVi0)
+[![Live App](https://img.shields.io/badge/try%20it-delta.sydneyn.dev-blueviolet?style=flat-square)](https://delta.sydneyn.dev)
+[![Demo](https://img.shields.io/badge/watch-demo-red?style=flat-square)](https://www.youtube.com/watch?v=zOM9aVSUVi0)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-Delta lets you define DFAs, NFAs, and Turing Machines as TypeScript code using a readable fluent API, then immediately run test suites against them, visualize execution, and share your work with a URL.
-
-## Getting Started
+## Getting started
 
 No setup required: **[delta.sydneyn.dev](https://delta.sydneyn.dev)**
-
-To run it locally:
 
 ```bash
 git clone https://github.com/sydrinea/delta
@@ -29,72 +22,30 @@ pnpm install
 pnpm run dev
 ```
 
-> **Note:** `@delta/build` is not yet published to npm. It's available as a workspace package within this monorepo.
+> `@delta/build` is not yet published to npm. It's available as a workspace package within this monorepo.
 
 ## Features
 
-### Declarative Fluent API
+**Fluent API** — Define DFAs, NFAs, and Turing machines as TypeScript using a chainable builder. Errors surface at build time, not at runtime.
 
-Machines are defined in code using `@delta/build`, a chainable builder library. DFAs, NFAs, and Turing Machines each have their own builder with validation baked in — errors surface at build time, not at runtime.
+**Test suites** — Pair any machine with a test suite. Delta runs them all and reports pass/fail inline.
 
-```ts
-import { nfa } from "@delta/build";
+**NFA → DFA** — Convert any NFA to an equivalent DFA via subset construction, with an option to preserve human-readable state names.
 
-const machine = nfa("ends in ab")
-  .alphabet("a", "b")
-  .states("q0", "q1", "q2")
-  .start("q0")
-  .accept("q2")
-  .transition("q0", "a", "q0")
-  .transition("q0", "b", "q0")
-  .transition("q0", "a", "q1")
-  .transition("q1", "b", "q2")
-  .build();
-```
+**Thompson's construction** — Build NFAs from regular expressions using a stack-based API mirroring union, concatenation, and Kleene star.
 
-### Integrated Test Suites
-
-Pair any machine with a test suite. Delta runs them all and reports pass/fail inline.
-
-### Thompson's Construction
-
-A stack-based API for building NFAs from regular expressions using union, concatenation, and Kleene star — directly mirroring Thompson's construction.
-
-### Subset Construction (NFA → DFA)
-
-Convert any NFA to an equivalent DFA via `convertToDFA` from `@delta/transform`, with an option to preserve human-readable state names.
-
-```ts
-import { convertToDFA } from "@delta/transform";
-
-const deterministic = convertToDFA(myNFA, {
-  name: "my DFA",
-  preserveNames: false,
-});
-```
-
-### Shareable URLs
-
-Every machine and its state can be encoded into a URL, so you can save your work or send it to someone without any accounts or exports.
+**Shareable URLs** — Every machine encodes into a URL. No accounts or exports needed.
 
 ## Documentation
 
-| Guide                                       | Description                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------------ |
-| [Quick Start](docs/quick-start.md)          | Builder lifecycle, shared methods, and the `q()` helper                  |
-| [NFAs](docs/nfa.md)                         | Epsilon transitions, shorthand methods, state scoping, batch transitions |
-| [DFAs](docs/dfa.md)                         | Determinism constraints, total transition function, `.increment()`       |
-| [Turing Machines](docs/tm.md)               | Tape alphabet, single-tape and multi-tape builders, `.seek()`            |
-| [Thompson's Construction](docs/thompson.md) | Stack model, primitives, operators, machine composition                  |
-
-Also be sure to check out the examples [for NFAs](/examples/src/nfa) and [for Turing Machines](/examples/src/tm).
+Guides for NFAs, DFAs, Turing machines, and Thompson's construction are at [preview.delta.sydneyn.dev/guide](https://preview.delta.sydneyn.dev/guide).
 
 ## Roadmap
 
 - [ ] PDAs
-- [ ] Regular Grammars
-- [ ] Context-Free Grammars
+- [ ] Regular grammars
+- [ ] Context-free grammars
 
-## License
+---
 
-[MIT](LICENSE)
+[MIT license](LICENSE)
