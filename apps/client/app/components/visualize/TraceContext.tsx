@@ -133,6 +133,7 @@ export function TraceProvider<M extends VisualMachine>({
 
     const stillExists = tests.some(test => test.id === selectedTest)
     if (!stillExists)
+      // eslint-disable-next-line react/set-state-in-effect
       setSelectedTest('')
   }, [tests, selectedTest])
 

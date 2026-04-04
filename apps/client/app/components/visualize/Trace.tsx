@@ -1,7 +1,10 @@
 'use client'
 
 import type { TraceInputToken, VisualMachine } from './TraceContext'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 import { useMemo, useRef } from 'react'
+import { Button } from '../ui/button'
+import { ButtonGroup, ButtonGroupSeparator } from '../ui/button-group'
 import {
   Combobox,
   ComboboxContent,
@@ -10,6 +13,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from '../ui/combobox'
+import { WithTooltip } from '../ui/tooltip'
 import {
   useTraceInputContext,
   useTraceInteractionContext,
@@ -49,6 +53,8 @@ export function Trace<M extends VisualMachine>() {
     onBlur,
     onTouchStart,
     onTouchEnd,
+    stepBack,
+    stepForward,
   } = useTraceInteractionContext()
 
   const handleTestSelect = (nextInput: string | null) => {
@@ -102,7 +108,8 @@ export function Trace<M extends VisualMachine>() {
       onBlur={onBlur}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      className="flex flex-col gap-4 md:p-4 focus:outline-none min-w-0 w-full max-w-full"
+      // Added pb-24 so the user can scroll past the bottom content, ensuring the floating button doesn't cover anything
+      className="flex flex-col gap-4 md:p-4 focus:outline-none min-w-0 w-full max-w-full relative pb-24 min-h-full"
     >
       {/* Input combobox */}
       <div className="flex flex-col gap-2">
@@ -204,16 +211,43 @@ export function Trace<M extends VisualMachine>() {
         setHoveredEdgeId,
       })}
 
-      {!focused && !isEmpty && (
-        <p className="text-ctp-overlay0 text-xs text-center mt-auto">
-          click to focus · ← → to step
-        </p>
-      )}
+      {/* Interactive Button Group (Floating/Sticky) */}
+      {!isEmpty && (
+        <div className="sticky bottom-6 mt-auto flex flex-col items-center gap-3 z-50 pointer-events-none">
+          {!focused && (
+            <p className="text-ctp-overlay0 text-xs text-center transition-opacity bg-ctp-base/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm pointer-events-auto ring-1 ring-ctp-surface1/50">
+              click to focus
+            </p>
+          )}
 
-      {focused && !isEmpty && (
-        <p className="text-ctp-overlay0 text-xs text-center mt-auto">
-          ← → to step
-        </p>
+          <div className="pointer-events-auto drop-shadow-xl hover:drop-shadow-2xl transition-all">
+            <ButtonGroup>
+              <WithTooltip shortcut={['arrowleft']}>
+                <Button
+                  data-slot="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  tabIndex={-1}
+                  onClick={stepBack}
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                </Button>
+              </WithTooltip>
+              <ButtonGroupSeparator />
+              <WithTooltip shortcut={['arrowright']}>
+                <Button
+                  data-slot="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  tabIndex={-1}
+                  onClick={stepForward}
+                >
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
+              </WithTooltip>
+            </ButtonGroup>
+          </div>
+        </div>
       )}
     </div>
   )

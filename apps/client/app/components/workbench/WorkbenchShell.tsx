@@ -1,9 +1,8 @@
 'use client'
 
 import type { TabId, WorkbenchLogic } from './types'
-import { Check, CodeXml, Share2, TestTube, Workflow } from 'lucide-react'
-import { useCallback, useEffect, useRef } from 'react'
-import * as React from 'react'
+import { Check, Share2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import { ConfirmModal, TestSuite } from '../ui'
 import { Button } from '../ui/button'
 import {
@@ -22,97 +21,10 @@ import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { WithTooltip } from '../ui/tooltip'
 import { GraphvizViewer } from '../visualize'
 
-const MOBILE_TABS: { id: TabId, label: string, Icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 'code', label: 'Code', Icon: ({ className }) => (
-    <CodeXml className={className} />
-  ) },
-  { id: 'canvas', label: 'Canvas', Icon: ({ className }) => (
-    <Workflow className={className} />
-  ) },
-  { id: 'debug', label: 'Debug', Icon: ({ className }) => (
-    <TestTube className={className} />
-  ) },
-  { id: 'tests', label: 'Tests', Icon: ({ className }) => (
-    <TestTube className={className} />
-  ) },
-]
-
 const TAB_LABELS: Partial<Record<TabId, string>> = {
   code: 'Code',
   debug: 'Debug',
-}
-
-const MOBILE_TAB_IDS = MOBILE_TABS.map(t => t.id)
-
-function getMobileTabIndex(tab: TabId): number {
-  const index = MOBILE_TAB_IDS.indexOf(tab)
-  return index >= 0 ? index : 0
-}
-
-interface UseScrollTabSyncOptions {
-  containerRef: React.RefObject<HTMLDivElement | null>
-  activeIndex: number
-  onChangeIndex: (index: number) => void
-  tabCount?: number
-}
-
-function useScrollTabSync({
-  containerRef,
-  activeIndex,
-  onChangeIndex,
-}: UseScrollTabSyncOptions) {
-  const scrollSettleTimeoutRef = useRef<number | null>(null)
-  const lastAppliedIndexRef = useRef(activeIndex)
-
-  // Sync activeIndex -> scroll position
-  useEffect(() => {
-    if (!containerRef.current)
-      return
-    const targetScroll = activeIndex * window.innerWidth
-    const current = containerRef.current.scrollLeft
-    if (Math.abs(current - targetScroll) > 16) {
-      containerRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' })
-    }
-    lastAppliedIndexRef.current = activeIndex
-  }, [activeIndex, containerRef])
-
-  // Sync scroll position -> activeIndex (debounced)
-  const handleScroll = useCallback(() => {
-    if (scrollSettleTimeoutRef.current !== null) {
-      clearTimeout(scrollSettleTimeoutRef.current)
-    }
-
-    scrollSettleTimeoutRef.current = window.setTimeout(() => {
-      if (!containerRef.current)
-        return
-      const newIndex = Math.round(
-        containerRef.current.scrollLeft / window.innerWidth,
-      )
-      if (newIndex !== lastAppliedIndexRef.current) {
-        lastAppliedIndexRef.current = newIndex
-        onChangeIndex(newIndex)
-      }
-    }, 150)
-  }, [containerRef, onChangeIndex])
-
-  // Handle device rotation/resize
-  useEffect(() => {
-    const handleResize = () => {
-      if (!containerRef.current)
-        return
-      const targetScroll = lastAppliedIndexRef.current * window.innerWidth
-      containerRef.current.scrollTo({ left: targetScroll, behavior: 'auto' })
-    }
-    window.addEventListener('resize', handleResize)
-    return () => {
-      window.removeEventListener('resize', handleResize)
-      if (scrollSettleTimeoutRef.current !== null) {
-        clearTimeout(scrollSettleTimeoutRef.current)
-      }
-    }
-  }, [containerRef])
-
-  return { handleScroll }
+  canvas: 'Canvas',
 }
 
 interface WorkbenchShellProps<M extends { name?: string }> {
@@ -142,117 +54,95 @@ function MobileWorkbench<M extends { name?: string }>({
     requestTabChange,
     activeTab,
     confirmModal,
+    visibleTabs,
   } = logic
-  const mobileActiveIndex = getMobileTabIndex(activeTab)
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const mobileVisibleTabs = visibleTabs.filter(t => t.id !== 'canvas' && t.id !== 'code')
 
-  const handleIndexChange = useCallback((index: number) => {
-    if (index < 0 || index >= MOBILE_TAB_IDS.length) {
-      return
-    }
-
-    const tabId = MOBILE_TAB_IDS[index]
-    if (tabId)
-      requestTabChange(tabId)
-  }, [requestTabChange])
-
-  const { handleScroll } = useScrollTabSync({
-    containerRef: scrollContainerRef,
-    activeIndex: mobileActiveIndex,
-    onChangeIndex: handleIndexChange,
-    tabCount: MOBILE_TABS.length,
+  const [mobileTab, setMobileTab] = useState<string>(() => {
+    return activeTab === 'code' || activeTab === 'canvas' ? 'debug' : activeTab
   })
+
+  useEffect(() => {
+    (async () => {
+      if (activeTab !== 'code' && activeTab !== 'canvas') {
+        setMobileTab(activeTab)
+      }
+    })()
+  }, [activeTab])
+
+  const handleTabChange = (value: string) => {
+    setMobileTab(value)
+    if (value !== 'tests') {
+      requestTabChange(value as TabId)
+    }
+  }
 
   return (
     <div className="flex flex-col md:hidden w-full h-full overflow-hidden">
-      {/* Mobile header */}
       <MobileHeader logic={logic} />
 
-      {/* Sliding panel track */}
-      <div
-        className="flex-1 overflow-x-auto overflow-y-hidden md:hidden min-h-0"
-        ref={scrollContainerRef}
-        onScroll={handleScroll}
-        style={{
-          scrollBehavior: 'smooth',
-          scrollSnapType: 'x mandatory',
-          WebkitOverflowScrolling: 'touch',
-        }}
+      <Tabs
+        value={mobileTab}
+        onValueChange={handleTabChange}
+        className="flex flex-col flex-1 min-h-0"
       >
-        {/* Track: all panels side-by-side */}
-        <div
-          className="flex h-full"
-          style={{
-            width: `${MOBILE_TABS.length * 100}%`,
-          }}
-        >
-          {/* Panel: Code */}
-          <div
-            className="h-full overflow-hidden shrink-0"
-            style={{ width: '100vw', scrollSnapAlign: 'center' }}
-          >
-            {logic.visibleTabs.find(t => t.id === 'code')?.content}
-          </div>
+        <div className="shrink-0 px-4 pt-3 pb-2">
+          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap gap-4">
+            {mobileVisibleTabs.map(tab => (
+              <TabsTrigger
+                key={tab.id}
+                value={tab.id}
+                className="capitalize shrink-0"
+                aria-controls={`tab-panel-${tab.id}`}
+              >
+                {TAB_LABELS[tab.id] ?? tab.id}
+              </TabsTrigger>
+            ))}
+            <TabsTrigger
+              value="tests"
+              className="capitalize shrink-0"
+              aria-controls="tab-panel-tests"
+            >
+              Tests
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
-          {/* Panel: Debug / Trace */}
-          <div
-            className="h-full overflow-hidden shrink-0 p-4"
-            style={{ width: '100vw', scrollSnapAlign: 'center' }}
-          >
-            {/* When debug tab is active, show the debug content.
-                We always render it so the TraceProvider context stays alive,
-                but only the active panel is "in view". */}
-            {logic.visibleTabs.find(t => t.id === 'debug')?.content}
-          </div>
-
-          {/* Panel: Tests */}
-          <div
-            className="h-full overflow-y-auto shrink-0"
-            style={{ width: '100vw', scrollSnapAlign: 'center' }}
-          >
-            <div className="p-4">
-              <TestSuite
-                tests={tests}
-                setTests={setTests}
-                evaluateInput={
-                  machine ? (input: string) => simulate(machine, input) : undefined
-                }
-                machineName={machine?.name ?? 'delta'}
-                resetKeys={[machine, selectedRecipeKey]}
-              />
+        <div className="flex-1 overflow-hidden relative">
+          {mobileVisibleTabs.map(tab => (
+            <div
+              key={tab.id}
+              className={`absolute inset-0 w-full h-full transition-opacity duration-200 ${
+                mobileTab === tab.id
+                  ? 'opacity-100 pointer-events-auto z-10'
+                  : 'opacity-0 pointer-events-none z-0'
+              } ${tab.id === 'debug' ? 'p-4' : ''}`}
+            >
+              {tab.content}
             </div>
+          ))}
+
+          {/* Dedicated Tests Panel */}
+          <div
+            className={`absolute inset-0 w-full h-full overflow-y-auto p-4 transition-opacity duration-200 ${
+              mobileTab === 'tests'
+                ? 'opacity-100 pointer-events-auto z-10'
+                : 'opacity-0 pointer-events-none z-0'
+            }`}
+          >
+            <TestSuite
+              tests={tests}
+              setTests={setTests}
+              evaluateInput={
+                machine ? (input: string) => simulate(machine, input) : undefined
+              }
+              machineName={machine?.name ?? 'delta'}
+              resetKeys={[machine, selectedRecipeKey]}
+            />
           </div>
         </div>
-      </div>
-
-      {/* iOS-style bottom tab bar */}
-      <nav
-        className="shrink-0 flex items-stretch border-t border-ctp-surface0 bg-ctp-base/90 backdrop-blur-md"
-        role="tablist"
-      >
-        {MOBILE_TABS.map((tab, index) => {
-          const isActive = index === mobileActiveIndex
-          return (
-            <Button
-              key={tab.id}
-              onClick={() => handleIndexChange(index)}
-              variant="ghost"
-              className={`h-auto flex-1 flex-col items-center justify-center gap-0.5 py-2 ${
-                isActive ? 'text-ctp-mauve' : 'text-ctp-overlay1'
-              }`}
-              role="tab"
-              aria-selected={isActive}
-              aria-controls={`tab-panel-${tab.id}`}
-            >
-              <tab.Icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium tracking-wide">
-                {tab.label}
-              </span>
-            </Button>
-          )
-        })}
-      </nav>
+      </Tabs>
 
       {confirmModal && <ConfirmModal {...confirmModal} />}
     </div>
@@ -276,9 +166,8 @@ function MobileHeader<M extends { name?: string }>({
   } = logic
 
   return (
-    <div className="shrink-0 flex items-center gap-2 px-4 py-2 bg-ctp-base/75 backdrop-blur-md">
-      {/* Left side: Machine name + Share button */}
-      <div className="flex items-center gap-2 min-w-0 flex-1">
+    <div className="shrink-0 flex items-center justify-between gap-2 px-4 py-2 bg-ctp-base/75 backdrop-blur-md">
+      <div className="flex items-center gap-2 min-w-0 shrink-0 max-w-[50%]">
         <h1 className="text-ctp-text text-xs font-bold uppercase tracking-widest truncate min-w-0">
           {machine?.name ?? 'untitled'}
         </h1>
@@ -286,15 +175,13 @@ function MobileHeader<M extends { name?: string }>({
           onClick={handleShare}
           variant="embossed"
           size="icon-sm"
-          className="text-ctp-overlay0 hover:text-ctp-text"
+          className="text-ctp-overlay0 hover:text-ctp-text shrink-0"
         >
           {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
         </Button>
       </div>
 
-      {/* Right side: Compile status, button, and recipe dropdown */}
-      <div className="flex items-center gap-2 shrink-0">
-        {/* Compile status pill */}
+      <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
         <span
           className={`text-xs font-bold shrink-0 ${
             editorErrors && editorErrors.length > 0 ? 'text-ctp-red' : 'text-ctp-green'
@@ -303,7 +190,6 @@ function MobileHeader<M extends { name?: string }>({
           {editorErrors && editorErrors.length > 0 ? '✗' : '✓'}
         </span>
 
-        {/* Compile button */}
         <WithTooltip shortcut={['cmd', 's']}>
           <Button
             onClick={() => compile(editorValue)}
@@ -315,13 +201,13 @@ function MobileHeader<M extends { name?: string }>({
           </Button>
         </WithTooltip>
 
-        {/* Recipe dropdown */}
         {recipeEntries.length > 0 && (
           <RecipeDropdown
             recipeEntries={recipeEntries}
             selectedRecipeKey={selectedRecipeKey}
             applyRecipe={applyRecipe}
             selectedRecipeLabel={selectedRecipeLabel}
+            size="sm"
           />
         )}
       </div>
@@ -358,7 +244,6 @@ function DesktopWorkbench<M extends { name?: string }>({
       >
         <ResizablePanel id="workbench-desktop-left-panel" defaultSize={50} minSize={30}>
           <div className="flex flex-col h-full overflow-hidden">
-            {/* Fixed header: tabs + recipe dropdown */}
             <div className="shrink-0 flex items-center gap-4 px-4 pt-3 pb-2">
               <Tabs
                 value={activeTab}
@@ -384,10 +269,10 @@ function DesktopWorkbench<M extends { name?: string }>({
                 applyRecipe={applyRecipe}
                 selectedRecipeLabel={selectedRecipeLabel}
                 className="ml-auto"
+                size="lg" // Retain original size on desktop
               />
             </div>
 
-            {/* Editor fills remaining height */}
             <div className="flex-1 overflow-hidden min-h-0">{activeTabContent}</div>
 
             {confirmModal && <ConfirmModal {...confirmModal} />}
@@ -507,6 +392,7 @@ function WorkbenchHeader<M extends { name?: string }>({
             selectedRecipeKey={selectedRecipeKey}
             applyRecipe={applyRecipe}
             selectedRecipeLabel={selectedRecipeLabel}
+            size="sm"
           />
         </div>
       </div>
@@ -520,12 +406,14 @@ export function RecipeDropdown({
   applyRecipe,
   selectedRecipeLabel,
   className = '',
+  size = 'lg',
 }: {
   recipeEntries: [string, { label: string }][]
   selectedRecipeKey: string
   applyRecipe: (key: string) => void
   selectedRecipeLabel: string
   className?: string
+  size: 'default' | 'sm' | 'lg'
 }) {
   if (recipeEntries.length === 0)
     return null
@@ -537,7 +425,7 @@ export function RecipeDropdown({
         onValueChange={applyRecipe}
       >
         <SelectTrigger
-          size="lg"
+          size={size}
           className="ml-auto w-auto max-w-full min-w-0 **:data-[slot=select-value]:max-w-full **:data-[slot=select-value]:overflow-hidden **:data-[slot=select-value]:text-ellipsis **:data-[slot=select-value]:whitespace-nowrap"
         >
           <SelectValue placeholder={selectedRecipeLabel} />
