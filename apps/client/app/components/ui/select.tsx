@@ -9,10 +9,26 @@ import {
   navigationMenuSharedTriggerClasses,
 } from './navigation-menu'
 
+interface ControlledSelectProps extends Omit<React.ComponentProps<typeof SelectPrimitive.Root>, 'defaultValue'> {
+  value: string
+  onValueChange: (value: string) => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}
+
 function Select({
+  value,
+  onValueChange,
   ...props
-}: React.ComponentProps<typeof SelectPrimitive.Root>) {
-  return <SelectPrimitive.Root data-slot="select" {...props} />
+}: ControlledSelectProps) {
+  return (
+    <SelectPrimitive.Root
+      data-slot="select"
+      value={value}
+      onValueChange={onValueChange}
+      {...props}
+    />
+  )
 }
 
 function SelectGroup({

@@ -3,6 +3,7 @@
 import type { TabId, WorkbenchLogic } from './types'
 import { Check, CodeXml, Share2, TestTube, Workflow } from 'lucide-react'
 import { useCallback, useEffect, useRef } from 'react'
+import * as React from 'react'
 import { ConfirmModal, TestSuite } from '../ui'
 import { Button } from '../ui/button'
 import {
@@ -513,7 +514,7 @@ function WorkbenchHeader<M extends { name?: string }>({
   )
 }
 
-function RecipeDropdown({
+export function RecipeDropdown({
   recipeEntries,
   selectedRecipeKey,
   applyRecipe,
@@ -531,7 +532,10 @@ function RecipeDropdown({
 
   return (
     <div className={`min-w-0 ${className}`}>
-      <Select value={selectedRecipeKey || undefined} onValueChange={applyRecipe}>
+      <Select
+        value={selectedRecipeKey}
+        onValueChange={applyRecipe}
+      >
         <SelectTrigger
           size="lg"
           className="ml-auto w-auto max-w-full min-w-0 **:data-[slot=select-value]:max-w-full **:data-[slot=select-value]:overflow-hidden **:data-[slot=select-value]:text-ellipsis **:data-[slot=select-value]:whitespace-nowrap"

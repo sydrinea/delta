@@ -5,7 +5,7 @@ import type * as MonacoEditor from 'monaco-editor'
 import Editor, { useMonaco } from '@monaco-editor/react'
 import { AlertTriangle } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useCompile } from '@/hooks/useCompile'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfaStore'
@@ -40,16 +40,14 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
   const monaco = useMonaco()
   const compile = useCompile(scope)
 
-  const hasCompiledRef = useRef(false)
+  const [isEditorReady, setIsEditorReady] = useState(false)
 
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor
-    editor.setValue(editorValue)
 
-    if (!hasCompiledRef.current) {
-      compile(editorValue)
-      hasCompiledRef.current = true
-    }
+    setIsEditorReady(true)
+
+    compile(editor.getValue())
 
     defineThemes(monaco)
 
@@ -116,7 +114,7 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
         compile(editorValue)
       }
     }
-  }, [compile, editorValue])
+  }, [compile, editorValue, isEditorReady])
 
   useEffect(() => {
     if (!editorRef.current)
