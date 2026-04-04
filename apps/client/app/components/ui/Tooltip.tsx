@@ -1,126 +1,150 @@
 'use client'
 
-import { useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
+import * as TooltipPrimitive from '@radix-ui/react-tooltip'
+import * as React from 'react'
+import { cn } from '@/lib/utils'
 
-type AlignPos = 'center' | 'right' | 'left'
+const TooltipProvider = TooltipPrimitive.Provider
+const Tooltip = TooltipPrimitive.Root
+const TooltipTrigger = TooltipPrimitive.Trigger
 
-function calculateAlignment(
-  rect: DOMRect,
-  tooltipWidth: number,
-): { left: number, align: AlignPos } {
-  const center = rect.left + rect.width / 2
+const RE = /^f\d+$/i
 
-  if (center + tooltipWidth / 2 > window.innerWidth - 8) {
-    return { left: rect.right, align: 'right' }
-  }
+function TooltipContent({ ref, className, sideOffset = 6, ...props }: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content> & { ref?: React.RefObject<React.ElementRef<typeof TooltipPrimitive.Content> | null> }) {
+  return (
+    <TooltipPrimitive.Portal>
+      <TooltipPrimitive.Content
+        ref={ref}
+        sideOffset={sideOffset}
+        className={cn(
+          'z-overlay overflow-hidden',
+          'rounded-md border border-ctp-subtext0/25 bg-ctp-mantle',
+          'px-2.5 py-1.5 text-xs text-ctp-text shadow-md',
+          'animate-in fade-in-0 zoom-in-95',
+          'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
+          'data-[side=bottom]:slide-in-from-top-2',
+          'data-[side=left]:slide-in-from-right-2',
+          'data-[side=right]:slide-in-from-left-2',
+          'data-[side=top]:slide-in-from-bottom-2',
+          className,
+        )}
+        {...props}
+      />
+    </TooltipPrimitive.Portal>
+  )
+}
+TooltipContent.displayName = TooltipPrimitive.Content.displayName
 
-  if (center - tooltipWidth / 2 < 8) {
-    return { left: rect.left, align: 'left' }
-  }
-
-  return { left: center, align: 'center' }
+const KEY_SYMBOLS: Record<string, string> = {
+  alt: '⌥',
+  arrowdown: '↓',
+  arrowleft: '←',
+  arrowright: '→',
+  arrowup: '↑',
+  backspace: '⌫',
+  cmd: '⌘',
+  command: '⌘',
+  control: '⌃',
+  ctrl: '⌃',
+  del: '⌦',
+  delete: '⌦',
+  enter: '↩',
+  esc: '⎋',
+  escape: '⎋',
+  option: '⌥',
+  return: '↩',
+  shift: '⇧',
+  space: '␣',
+  tab: '⇥',
 }
 
-interface TooltipProps {
-  label: string
+function toKeyLabel(token: string) {
+  const trimmed = token.trim()
+
+  if (!trimmed)
+    return ''
+
+  const lower = trimmed.toLowerCase()
+  const symbol = KEY_SYMBOLS[lower]
+
+  if (symbol)
+    return symbol
+
+  if (trimmed.length === 1)
+    return trimmed.toUpperCase()
+
+  if (RE.test(trimmed))
+    return trimmed.toUpperCase()
+
+  return trimmed
+}
+
+function Kbd({
+  keys,
+  className,
+}: {
+  keys: string[]
+  className?: string
+}) {
+  const labels = keys.map(toKeyLabel).filter(Boolean)
+
+  if (!labels.length)
+    return null
+
+  return (
+    <span className={cn('inline-flex items-center gap-1', className)}>
+      {labels.map(label => (
+        <React.Fragment key={label}>
+          <kbd
+            className={cn(
+              'inline-flex items-center justify-center',
+              'rounded border border-ctp-surface2 border-b-2',
+              'bg-ctp-surface0 px-1.5 py-px',
+              'font-mono text-[10px] leading-4 text-ctp-subtext1',
+              'shadow-sm',
+            )}
+          >
+            {label}
+          </kbd>
+        </React.Fragment>
+      ))}
+    </span>
+  )
+}
+
+interface WithTooltipProps {
+  label?: string
+  shortcut?: string[]
+  side?: React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Content>['side']
   children: React.ReactNode
 }
 
-interface Pos {
-  top: number
-  left: number
-  align: AlignPos
+function WithTooltip({
+  label,
+  shortcut,
+  side = 'top',
+  children,
+}: WithTooltipProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {children as React.ReactElement}
+      </TooltipTrigger>
+      <TooltipContent side={side}>
+        <span className="flex items-center gap-1.5">
+          {label}
+          {!!shortcut?.length && <Kbd keys={shortcut} />}
+        </span>
+      </TooltipContent>
+    </Tooltip>
+  )
 }
 
-const STYLE_MAP = {
-  center: {
-    container: { transform: 'translate(-50%, -100%)' },
-    arrow: { left: '50%', right: 'auto', transform: 'translateX(-50%)' },
-  },
-  right: {
-    container: { transform: 'translate(-100%, -100%)' },
-    arrow: { left: 'auto', right: '12px', transform: 'none' },
-  },
-  left: {
-    container: { transform: 'translate(0, -100%)' },
-    arrow: { left: '12px', right: 'auto', transform: 'none' },
-  },
-} as const
-
-export function Tooltip({ label, children }: TooltipProps) {
-  const ref = useRef<HTMLDivElement>(null)
-  const lastTouchAtRef = useRef(0)
-  const [pos, setPos] = useState<Pos | null>(null)
-
-  const show = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Ignore synthetic mouseenter events that can fire after touch on mobile.
-    if (Date.now() - lastTouchAtRef.current < 1000)
-      return
-
-    // Tooltips should only appear on hover-capable pointing devices.
-    if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches)
-      return
-
-    if (e.pointerType !== 'mouse')
-      return
-
-    const rect = ref.current?.getBoundingClientRect()
-    if (!rect)
-      return
-
-    const tooltipWidth = label.length * 7 + 16 // rough estimate
-    const { left, align } = calculateAlignment(rect, tooltipWidth)
-
-    setPos({
-      top: rect.top,
-      left,
-      align,
-    })
-  }
-
-  return (
-    <div
-      ref={ref}
-      className="relative"
-      onPointerDownCapture={(event) => {
-        if (event.pointerType !== 'mouse') {
-          lastTouchAtRef.current = Date.now()
-        }
-
-        setPos(null)
-      }}
-      onClickCapture={() => setPos(null)}
-      onPointerEnter={show}
-      onPointerLeave={() => setPos(null)}
-    >
-      {children}
-      {pos
-        && createPortal(
-          <div
-            className="fixed z-50 pointer-events-none"
-            style={{
-              top: pos.top - 8,
-              left: pos.left,
-              ...STYLE_MAP[pos.align].container,
-            }}
-          >
-            <div className="relative px-2 py-1 text-xs rounded bg-ctp-surface0 border-t-2 border-ctp-mauve/65 text-ctp-text whitespace-nowrap">
-              {label}
-              <svg
-                className="absolute top-full text-ctp-surface0"
-                style={STYLE_MAP[pos.align].arrow}
-                width="8"
-                height="4"
-                viewBox="0 0 8 4"
-                fill="currentColor"
-              >
-                <path d="M0 0L4 4L8 0" />
-              </svg>
-            </div>
-          </div>,
-          document.body,
-        )}
-    </div>
-  )
+export {
+  Kbd,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  WithTooltip,
 }

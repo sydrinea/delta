@@ -3,18 +3,32 @@
 import { Heart } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
 } from '@/lib/navigation-loader-config'
 import { version } from '../../../package.json'
-
-const TABS = [
-  { label: 'NFA / DFA', href: '/nfa' },
-  { label: 'PDA', href: '/pda' },
-  { label: 'TM', href: '/tm' },
-] as const
+import { Badge } from '../ui/badge'
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '../ui/navigation-menu'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from '../ui/sidebar'
+import { NAVBAR_GROUPS, NAVBAR_MOBILE_ITEMS } from './navbar-config'
 
 function MadeBy() {
   return (
@@ -34,9 +48,12 @@ function MadeBy() {
   )
 }
 
-export default function Navbar() {
+function NavbarContent() {
   const pathname = usePathname()
-  const [open, setOpen] = useState(false)
+  const { isMobile, setOpenMobile } = useSidebar()
+
+  const isActiveHref = (href: string) =>
+    pathname === href || (href !== '/' && pathname.startsWith(`${href}/`))
 
   const handleNavigationStart = (href: string) => {
     if (pathname === href)
@@ -54,81 +71,79 @@ export default function Navbar() {
     )
   }
 
+  const handleMobileNavigate = (href: string) => {
+    handleNavigationStart(href)
+    if (isMobile)
+      setOpenMobile(false)
+  }
+
   return (
     <>
-      <header className="sticky top-0 z-30 h-14 w-full shrink-0 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md">
+      <header className="sticky top-0 z-sticky h-14 w-full shrink-0 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md">
         <div className="hidden md:flex h-full items-center justify-between px-6">
           <div className="flex items-center gap-6">
-            <Link href="/">
-              <h1 className="text-ctp-text text-sm font-bold tracking-widest uppercase">
+            <Link href="/" onClick={() => handleNavigationStart('/')}>
+              <Badge variant="ghost" className="font-bold tracking-widest uppercase px-3">
                 delta
-              </h1>
+              </Badge>
             </Link>
 
-            <nav className="flex items-center gap-1">
-              {TABS.map((tab) => {
-                const isActive = pathname === tab.href
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    onClick={() => handleNavigationStart(tab.href)}
-                    className={`relative px-3 py-1.5 text-xs rounded-lg transition-all duration-200 ${
-                      isActive
-                        ? 'text-ctp-text'
-                        : 'text-ctp-subtext0 hover:text-ctp-text'
-                    }`}
-                  >
-                    {isActive && (
-                      <span className="absolute inset-0 bg-ctp-surface0 rounded-lg animate-in fade-in slide-in-from-bottom-1 duration-200" />
-                    )}
-                    <span className="relative">{tab.label}</span>
-                  </Link>
-                )
-              })}
-            </nav>
+            <NavigationMenu viewport={false}>
+              <NavigationMenuList className="gap-1">
+                {NAVBAR_GROUPS.map(group => (
+                  <NavigationMenuItem key={group.heading}>
+                    <NavigationMenuTrigger
+                      className={group.items.some(item => isActiveHref(item.href))
+                        ? 'text-ctp-text bg-ctp-surface0/50'
+                        : 'text-ctp-subtext0 hover:text-ctp-text'}
+                    >
+                      {group.heading}
+                    </NavigationMenuTrigger>
+                    <NavigationMenuContent>
+                      <ul className="min-w-44 space-y-1 p-1">
+                        {group.items.map(item => (
+                          <li key={item.href}>
+                            <NavigationMenuLink asChild>
+                              <Link
+                                href={item.href}
+                                onClick={() => handleNavigationStart(item.href)}
+                                className={isActiveHref(item.href)
+                                  ? 'bg-ctp-surface0/60 text-ctp-text'
+                                  : 'text-ctp-subtext0 hover:text-ctp-text'}
+                              >
+                                {item.label}
+                              </Link>
+                            </NavigationMenuLink>
+                          </li>
+                        ))}
+                      </ul>
+                    </NavigationMenuContent>
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
 
           <div className="flex items-center gap-1.5">
             <MadeBy />
             <span className="text-ctp-overlay1 text-xs">·</span>
-            <span className="text-ctp-overlay0 text-xs">
+            <Badge variant="info">
               v
               {version}
-            </span>
+            </Badge>
           </div>
         </div>
 
         <div className="grid h-full grid-cols-3 items-center px-6 md:hidden">
           <div className="flex justify-start">
-            <button
-              onClick={() => setOpen(o => !o)}
-              className="text-ctp-text w-5 h-5 relative cursor-pointer"
-              aria-label={open ? 'close menu' : 'open menu'}
-            >
-              <span
-                className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? 'top-2 rotate-45' : 'top-0.5'
-                }`}
-              />
-              <span
-                className={`absolute left-0 top-2 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? 'opacity-0 scale-x-0' : 'opacity-100 scale-x-100'
-                }`}
-              />
-              <span
-                className={`absolute left-0 h-0.5 w-5 bg-current transition-all duration-300 ${
-                  open ? 'top-2 -rotate-45' : 'top-3.5'
-                }`}
-              />
-            </button>
+            <SidebarTrigger variant="ghost" size="icon-sm" className="text-ctp-text" />
           </div>
 
           <div className="flex justify-center">
-            <Link href="/">
-              <h1 className="text-ctp-text text-sm font-bold tracking-widest uppercase">
+            <Link href="/" onClick={() => handleNavigationStart('/')}>
+              <Badge variant="ghost" className="font-bold tracking-widest uppercase px-3">
                 delta
-              </h1>
+              </Badge>
             </Link>
           </div>
 
@@ -136,60 +151,52 @@ export default function Navbar() {
         </div>
       </header>
 
-      <div
-        className={`fixed inset-0 z-20 md:hidden transition-all duration-75 ${
-          open
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        {/* glassy blur backdrop */}
-        <div
-          className="absolute inset-0 bg-ctp-base/70 backdrop-blur-md"
-          onClick={() => setOpen(false)}
-        />
-
-        {/* menu panel */}
-        <div
-          className={`absolute inset-x-0 top-0 flex flex-col p-8 transition-all duration-300 ${
-            open ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'
-          }`}
-        >
-          <nav className="flex flex-col gap-2 mt-10">
-            {TABS.map((tab) => {
-              const isActive = pathname === tab.href
-              return (
-                <Link
-                  key={tab.href}
-                  href={tab.href}
-                  onClick={() => {
-                    handleNavigationStart(tab.href)
-                    setOpen(false)
-                  }}
-                  className={`px-4 py-3 rounded-lg text-sm transition-colors ${
-                    isActive
-                      ? 'bg-ctp-surface0/80 text-ctp-text'
-                      : 'text-ctp-subtext0 hover:text-ctp-text hover:bg-ctp-surface0/60'
-                  }`}
-                >
-                  {tab.label}
-                </Link>
-              )
-            })}
-          </nav>
-
-          <div className="mt-12 flex flex-col gap-1">
-            <MadeBy />
-            <span
-              className="text-ctp-overlay0 text-sm"
-              style={{ fontSize: '0.65rem' }}
-            >
+      <Sidebar side="left" variant="sidebar" collapsible="offcanvas" className="md:hidden">
+        <SidebarHeader className="border-b border-ctp-subtext0/25 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold tracking-wide text-ctp-subtext0 uppercase">
+              Menu
+            </span>
+            <Badge variant="info">
               v
               {version}
-            </span>
+            </Badge>
           </div>
-        </div>
-      </div>
+        </SidebarHeader>
+
+        <SidebarContent className="px-2 py-3">
+          <SidebarMenu>
+            {NAVBAR_MOBILE_ITEMS.map((item) => {
+              const isActive = isActiveHref(item.href)
+              return (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isActive}
+                    className="h-auto rounded-lg px-3 py-2.5 text-sm text-ctp-subtext0 hover:bg-ctp-surface0/60 hover:text-ctp-text data-[active=true]:bg-ctp-surface0 data-[active=true]:text-ctp-text"
+                  >
+                    <Link href={item.href} onClick={() => handleMobileNavigate(item.href)}>
+                      {item.label}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )
+            })}
+          </SidebarMenu>
+
+          <div className="mt-6 px-3">
+            <MadeBy />
+          </div>
+        </SidebarContent>
+      </Sidebar>
     </>
+  )
+}
+
+export default function Navbar() {
+  return (
+    <SidebarProvider defaultOpen={false} className="contents">
+      <NavbarContent />
+    </SidebarProvider>
   )
 }

@@ -1,12 +1,12 @@
 import type { TestCase } from '@delta/examples'
 import type { ReactNode } from 'react'
 
-export type TabId = 'editor' | 'canvas' | 'visualizer'
+export type TabId = 'code' | 'canvas' | 'debug' | 'tests'
 
 export interface EnabledTabs {
-  editor?: boolean
+  code?: boolean
   canvas?: boolean
-  visualizer?: boolean
+  debug?: boolean
 }
 
 export interface VisibleTab {
@@ -20,6 +20,30 @@ export interface ConfirmModalConfig {
   message: string
   confirmText: string
   cancelText: string
+  confirmVariant?:
+    | 'primary'
+    | 'outline'
+    | 'secondary'
+    | 'danger'
+    | 'ghost'
+    | 'destructive'
+    | 'warning'
+    | 'success'
+    | 'info'
+    | 'accent'
+    | 'link'
+  cancelVariant?:
+    | 'primary'
+    | 'outline'
+    | 'secondary'
+    | 'danger'
+    | 'ghost'
+    | 'destructive'
+    | 'warning'
+    | 'success'
+    | 'info'
+    | 'accent'
+    | 'link'
   onConfirm: () => void
   onCancel: () => void
 }

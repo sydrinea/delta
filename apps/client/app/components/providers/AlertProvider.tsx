@@ -83,7 +83,6 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-// eslint-disable-next-line react-refresh/only-export-components -- This module intentionally exports both provider and hook so consumers share one alert context source.
 export function useAlert() {
   const context = use(AlertContext)
   if (!context) {

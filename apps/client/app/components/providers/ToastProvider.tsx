@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable react-refresh/only-export-components -- This file exports both a provider and a consumer hook to keep toast context API colocated. */
-
 import {
   createContext,
   use,
@@ -96,7 +94,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
 
       {/* portal anchor — bottom center */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex flex-col gap-2 items-center pointer-events-none">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-toast flex flex-col gap-2 items-center pointer-events-none">
         {queue.map(toast => (
           <ToastItem key={toast.id} toast={toast} onDone={remove} />
         ))}

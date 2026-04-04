@@ -175,7 +175,7 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
 
       {editorErrors
         && editorErrors.filter(err => err.line === 0).length > 0 && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-ctp-base/95 backdrop-blur-md border border-ctp-red/30 shadow-sm rounded-lg z-10 flex items-start gap-3 px-4 py-3 transition-all">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-2xl bg-ctp-base/95 backdrop-blur-md border border-ctp-red/30 shadow-sm rounded-lg z-raised flex items-start gap-3 px-4 py-3 transition-all">
           <AlertTriangle className="w-5 h-5 text-ctp-red mt-0.5 shrink-0" />
 
           <div className="flex flex-col">

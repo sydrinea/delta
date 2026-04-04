@@ -5,6 +5,22 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NAV } from '../../guide/nav'
 import { GitHub } from '../icons'
+import { Button } from '../ui/button'
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarProvider,
+  SidebarTrigger,
+  useSidebar,
+} from '../ui/sidebar'
 
 interface ToCProps {
   headings: Heading[]
@@ -50,36 +66,37 @@ interface SidebarContentProps {
   onNavigate: (id: string) => void
 }
 
-function SidebarContent({ activePage, onNavigate }: SidebarContentProps) {
+function GuideSidebarNav({ activePage, onNavigate }: SidebarContentProps) {
+  const getGuideHref = (id: string) => (id === 'quick-start' ? '/guide' : `/guide/${id}`)
+
   return (
-    <div className="py-6 px-4 space-y-6">
+    <div className="py-3 px-2 space-y-3">
       {NAV.map(group => (
-        <div key={group.section}>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-ctp-overlay0 mb-1.5 px-1">
+        <SidebarGroup key={group.section} className="px-2 py-1">
+          <SidebarGroupLabel className="h-auto px-1 pb-1.5 text-[10px] font-bold uppercase tracking-widest text-ctp-overlay0">
             {group.section}
-          </p>
-          <ul className="space-y-0.5">
-            {group.pages.map((page) => {
-              const isActive = activePage === page.id
-              return (
-                <li key={page.id}>
-                  <Link
-                    href={`/guide/${page.id === 'quick-start' ? '' : page.id}`}
-                    onClick={() => onNavigate('')}
-                    className={[
-                      'block w-full text-left px-2 py-1.5 rounded-lg text-xs transition-colors duration-150 cursor-pointer',
-                      isActive
-                        ? 'bg-ctp-surface0 text-ctp-text font-semibold'
-                        : 'text-ctp-subtext0 hover:bg-ctp-surface0/60 hover:text-ctp-text',
-                    ].join(' ')}
-                  >
-                    {page.label}
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {group.pages.map((page) => {
+                const isActive = activePage === page.id
+                return (
+                  <SidebarMenuItem key={page.id}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      className="h-auto rounded-lg px-2 py-1.5 text-xs text-ctp-subtext0 hover:bg-ctp-surface0/60 hover:text-ctp-text data-[active=true]:bg-ctp-surface0 data-[active=true]:text-ctp-text data-[active=true]:font-semibold"
+                    >
+                      <Link href={getGuideHref(page.id)} onClick={() => onNavigate('')}>
+                        {page.label}
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       ))}
     </div>
   )
@@ -95,7 +112,7 @@ interface GuideLayoutProps {
   nextPage: { label: string, href: string } | null
 }
 
-export default function Guide({
+function GuideShell({
   activePage,
   html,
   headings,
@@ -105,21 +122,9 @@ export default function Guide({
   nextPage,
 }: GuideLayoutProps) {
   const [activeHeading, setActiveHeading] = useState(headings[0]?.id ?? '')
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { isMobile, setOpenMobile } = useSidebar()
 
   const contentRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (sidebarOpen) {
-      document.body.style.overflow = 'hidden'
-    }
-    else {
-      document.body.style.overflow = ''
-    }
-    return () => {
-      document.body.style.overflow = ''
-    }
-  }, [sidebarOpen])
 
   useEffect(() => {
     const root = contentRef.current
@@ -156,41 +161,39 @@ export default function Guide({
 
   const navigate = useCallback((id: string) => {
     setActiveHeading(id)
-    setSidebarOpen(false)
-  }, [])
+    if (isMobile)
+      setOpenMobile(false)
+  }, [isMobile, setOpenMobile])
 
   return (
     <>
-      <div className="min-h-screen bg-ctp-base">
-        <div className="sticky top-14 z-10 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md lg:hidden">
-          <button
-            onClick={() => setSidebarOpen(o => !o)}
-            className="flex w-full items-center gap-2 px-4 py-3 text-sm font-medium text-ctp-subtext0 hover:bg-ctp-surface0/40 hover:text-ctp-text transition-colors cursor-pointer"
-          >
-            <span className="font-mono text-ctp-mauve font-bold">
-              {sidebarOpen ? 'v' : '>'}
+      <Sidebar
+        side="left"
+        variant="sidebar"
+        collapsible="offcanvas"
+        className="md:top-14 md:h-[calc(100svh-3.5rem)]"
+      >
+        <SidebarHeader className="border-b border-ctp-surface0 px-4 py-3">
+          <p className="text-xs font-semibold tracking-wide text-ctp-subtext0 uppercase">
+            Guide
+          </p>
+        </SidebarHeader>
+        <SidebarContent className="pb-6">
+          <GuideSidebarNav activePage={activePage} onNavigate={navigate} />
+        </SidebarContent>
+      </Sidebar>
+
+      <SidebarInset className="min-h-screen bg-ctp-base">
+        <div className="sticky top-14 z-raised border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md md:hidden">
+          <div className="flex items-center px-4 py-2">
+            <SidebarTrigger variant="ghost" size="icon-sm" className="text-ctp-text" />
+            <span className="ml-2 text-xs font-semibold tracking-wide text-ctp-subtext0 uppercase">
+              Guide
             </span>
-            {' '}
-            Menu
-          </button>
+          </div>
         </div>
 
-        <aside
-          className={[
-            'fixed inset-0 top-header-adjust z-10 bg-ctp-base overflow-y-auto lg:hidden',
-            sidebarOpen ? 'block' : 'hidden',
-          ].join(' ')}
-        >
-          <div className="py-2 pb-24">
-            <SidebarContent activePage={activePage} onNavigate={navigate} />
-          </div>
-        </aside>
-
-        <div className="mx-auto flex max-w-6xl items-start">
-          <aside className="hidden lg:block w-56 shrink-0 self-start sticky top-14 h-[calc(100vh-3.5rem)] overflow-y-auto border-r border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md">
-            <SidebarContent activePage={activePage} onNavigate={navigate} />
-          </aside>
-
+        <div className="mx-auto flex w-full max-w-6xl items-start">
           <main className="flex-1 min-w-0 px-6 py-10 lg:px-12">
             <div ref={contentRef} className="mx-auto max-w-2xl">
               {/* eslint-disable react-dom/no-dangerously-set-innerhtml -- Content is generated from project markdown via a controlled unified/rehype pipeline on the server. */}
@@ -202,24 +205,26 @@ export default function Guide({
 
               <footer className="mt-12 border-t border-ctp-surface0 pt-6 pb-10 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">
-                  <a
-                    href={editUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-peach/35 border border-ctp-peach/55 text-ctp-text hover:bg-ctp-peach/45 transition-colors"
-                  >
-                    <GitHub className="w-3.5 h-3.5" />
-                    Edit on GitHub
-                  </a>
-                  <a
-                    href={issueUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-lg bg-ctp-red/35 border border-ctp-red/55 text-ctp-text hover:bg-ctp-red/45 transition-colors"
-                  >
-                    <GitHub className="w-3.5 h-3.5" />
-                    Report issue
-                  </a>
+                  <Button asChild variant="secondary" size="xs">
+                    <a
+                      href={editUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <GitHub className="w-3.5 h-3.5" />
+                      Edit on GitHub
+                    </a>
+                  </Button>
+                  <Button asChild variant="destructive" size="xs">
+                    <a
+                      href={issueUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <GitHub className="w-3.5 h-3.5" />
+                      Report issue
+                    </a>
+                  </Button>
                 </div>
 
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -273,7 +278,22 @@ export default function Guide({
             />
           </aside>
         </div>
-      </div>
+      </SidebarInset>
     </>
+  )
+}
+
+export default function Guide(props: GuideLayoutProps) {
+  return (
+    <SidebarProvider
+      style={
+        {
+          '--sidebar-width': '14rem',
+          '--sidebar-width-mobile': '18rem',
+        } as React.CSSProperties
+      }
+    >
+      <GuideShell {...props} />
+    </SidebarProvider>
   )
 }

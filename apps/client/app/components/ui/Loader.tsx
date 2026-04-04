@@ -108,7 +108,7 @@ export function Loader() {
   }
 
   return (
-    <div className="fixed inset-0 z-60 flex items-center justify-center bg-ctp-base">
+    <div className="fixed inset-0 z-toast flex items-center justify-center bg-ctp-base">
       <div
         className="flex items-center gap-2"
         role="status"

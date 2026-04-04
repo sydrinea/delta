@@ -29,6 +29,8 @@ import ReactFlow, {
 import { toDot } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfaStore'
+import { Button } from '../ui/button'
+import { Input } from '../ui/input'
 import { getFlowElementsFromDot } from './layoutNFA'
 
 function AutomataEdge({
@@ -107,7 +109,7 @@ function AutomataEdge({
                   onBlur={handleBlur}
                   className="flex flex-col gap-1 bg-ctp-base border border-ctp-surface1 rounded p-1"
                 >
-                  <input
+                  <Input
                     autoFocus
                     value={label}
                     onChange={e => handleLabelChange(e.target.value)}
@@ -117,7 +119,7 @@ function AutomataEdge({
                         updateEdges()
                       }
                     }}
-                    className="w-16 text-xs text-center bg-transparent text-ctp-text focus:outline-none"
+                    className="h-6 w-16 border-0 bg-transparent px-1 text-center text-xs text-ctp-text focus-visible:ring-0"
                   />
                 </div>
               )
@@ -155,7 +157,7 @@ function StateNode({ data, selected }: NodeProps) {
         position={Position.Left}
         className="bg-ctp-mauve/45! border-0! w-1! h-1!"
       />
-      <span className="relative z-10">{data.label}</span>
+      <span className="relative z-raised">{data.label}</span>
       <Handle
         id="source-right"
         type="source"
@@ -435,31 +437,35 @@ export function FlowEditor() {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center gap-2 px-4 py-2 border-b border-ctp-surface0 shrink-0">
-        <button
+        <Button
           onClick={addState}
-          className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          variant="secondary"
+          size="xs"
         >
           + state
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={toggleAccept}
-          className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          variant="secondary"
+          size="xs"
         >
           toggle accept
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={setStart}
-          className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-surface0 transition-colors"
+          variant="secondary"
+          size="xs"
         >
           set start
-        </button>
+        </Button>
         <div className="flex items-center gap-2 ml-auto">
-          <button
+          <Button
             onClick={clearGraph}
-            className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-red hover:bg-ctp-surface0 transition-colors"
+            variant="destructive"
+            size="xs"
           >
             clear
-          </button>
+          </Button>
         </div>
       </div>
 

@@ -13,7 +13,9 @@ import {
 } from 'lucide-react'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Tooltip } from '../ui/Tooltip'
+import { Button } from '../ui/button'
+import { ButtonGroup } from '../ui/button-group'
+import { WithTooltip } from '../ui/tooltip'
 import { toPng, toSvg } from './helpers'
 
 interface GraphvizViewerProps {
@@ -211,28 +213,24 @@ export function GraphvizViewer({
     {
       id: 'download',
       label: 'Download PNG',
-      color: 'hover:text-ctp-mauve',
       icon: Download,
       handler: handleDownloadPng,
     },
     {
       id: 'png',
       label: 'Copy Image',
-      color: 'hover:text-ctp-green',
       icon: Copy,
       handler: handleCopyPng,
     },
     {
       id: 'svg',
       label: 'Copy SVG',
-      color: 'hover:text-ctp-yellow',
       icon: Code,
       handler: handleCopySvg,
     },
     {
       id: 'dot',
       label: 'Copy DOT',
-      color: 'hover:text-ctp-blue',
       icon: Network,
       handler: handleCopyDot,
     },
@@ -252,38 +250,43 @@ export function GraphvizViewer({
       />
 
       {showExportActions && (
-        <div className="absolute bottom-3 left-3 flex flex-row items-center p-1 rounded-full bg-ctp-crust/80 backdrop-blur-sm border border-ctp-surface1 shadow-sm">
+        <ButtonGroup className="absolute bottom-3 left-3">
           {exportActions.map(
-            ({ id, label, color, icon: Icon, handler }, index) => (
+            ({ id, label, icon: Icon, handler }) => (
               <Fragment key={id}>
-                <Tooltip label={label}>
-                  <button
+                <WithTooltip label={label}>
+                  <Button
                     onClick={handler}
-                    className={`shrink-0 hover:cursor-pointer p-1.5 rounded-full text-ctp-overlay0 ${color} hover:bg-ctp-surface0 transition-colors flex items-center justify-center w-7 h-7`}
+                    variant="ghost"
+                    size="icon"
+                    className="text-ctp-overlay0 hover:text-ctp-text"
                   >
-                    {actionState === id ? <Check /> : <Icon />}
-                  </button>
-                </Tooltip>
+                    {actionState === id
+                      ? <Check className="w-4 h-4" />
+                      : <Icon className="w-4 h-4" />}
+                  </Button>
+                </WithTooltip>
 
-                {index < exportActions.length - 1 && (
-                  <div className="w-px h-4 bg-ctp-surface1 shrink-0 mx-1" />
-                )}
               </Fragment>
             ),
           )}
-        </div>
+        </ButtonGroup>
       )}
 
-      <div className="absolute bottom-3 right-3 flex flex-row items-center p-1 rounded-full bg-ctp-crust/80 backdrop-blur-sm border border-ctp-surface1 shadow-sm">
-        <Tooltip label={fullscreenMode ? 'Exit Fullscreen' : 'Fullscreen'}>
-          <button
+      <ButtonGroup className="absolute bottom-3 right-3">
+        <WithTooltip label={fullscreenMode ? 'Exit Fullscreen' : 'Fullscreen'}>
+          <Button
             onClick={() => setIsFullscreen(value => !value)}
-            className="shrink-0 hover:cursor-pointer p-1.5 rounded-full text-ctp-overlay0 hover:text-ctp-mauve hover:bg-ctp-surface0 transition-colors flex items-center justify-center w-7 h-7"
+            variant="ghost"
+            size="icon"
+            className="text-ctp-overlay0 hover:text-ctp-text"
           >
-            {isFullscreen ? <Minimize2 /> : <Maximize />}
-          </button>
-        </Tooltip>
-      </div>
+            {isFullscreen
+              ? <Minimize2 className="w-4 h-4" />
+              : <Maximize className="w-4 h-4" />}
+          </Button>
+        </WithTooltip>
+      </ButtonGroup>
     </>
   )
 
@@ -295,7 +298,7 @@ export function GraphvizViewer({
         && createPortal(
           <Transition as={Fragment} show={isFullscreen}>
             <div
-              className="fixed inset-0 z-50 p-3 sm:p-4 md:p-6"
+              className="fixed inset-0 z-modal p-3 sm:p-4 md:p-6"
               onClick={() => setIsFullscreen(false)}
             >
               <TransitionChild

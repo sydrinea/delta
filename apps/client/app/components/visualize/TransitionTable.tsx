@@ -2,6 +2,7 @@
 
 import type { TuringMachine } from '@delta/build'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { useScrollableTable } from './hooks/useScrollableTable'
 import {
   activeTupleFromTapes,
@@ -118,20 +119,19 @@ export function TransitionTable({
               {accepted ? '✓ accepted' : '✗ rejected'}
             </span>
           )}
-          <div className="inline-flex rounded-lg border border-ctp-surface1 overflow-hidden text-xs">
-            <button
-              className={`cursor-pointer px-2 py-1 border-l border-ctp-surface1 ${tableMode === 'state' ? 'bg-ctp-surface0 text-ctp-text' : 'text-ctp-subtext0 hover:text-ctp-text'}`}
-              onClick={() => setTableMode('state')}
-            >
-              state
-            </button>
-            <button
-              className={`cursor-pointer px-2 py-1 ${tableMode === 'all' ? 'bg-ctp-surface0 text-ctp-text' : 'text-ctp-subtext0 hover:text-ctp-text'}`}
-              onClick={() => setTableMode('all')}
-            >
-              all
-            </button>
-          </div>
+          <Tabs
+            value={tableMode}
+            onValueChange={value => setTableMode(value as TMTableMode)}
+          >
+            <TabsList className="gap-4">
+              <TabsTrigger value="state">
+                state
+              </TabsTrigger>
+              <TabsTrigger value="all">
+                all
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
       </div>
 

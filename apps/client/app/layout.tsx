@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { flavors } from '@catppuccin/palette'
 import { ThemeProvider } from 'next-themes'
 import { Cormorant, Recursive, Syne } from 'next/font/google'
+import { cn } from '@/app/lib/utils'
 import { Layout } from '@/components'
 import { SerwistProvider } from './serwist'
 import './globals.css'
@@ -66,7 +67,7 @@ export default function RootLayout({
     <html
       suppressHydrationWarning
       lang="en"
-      className={`overscroll-none bg-ctp-base ${recursiveMono.variable} ${syne.variable} ${cormorant.variable} antialiased font-sans`}
+      className={cn('overscroll-none', 'bg-ctp-base', 'antialiased', recursiveMono.variable, syne.variable, cormorant.variable, 'font-mono')}
       dir="ltr"
     >
       <body>

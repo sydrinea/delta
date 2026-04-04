@@ -69,7 +69,7 @@ export function ConfigurationTable({
         className="overflow-auto max-h-96 w-full relative"
       >
         <table className="w-full min-w-max text-xs text-left border-collapse">
-          <thead className="sticky top-0 bg-ctp-crust/80 backdrop-blur-sm text-ctp-subtext0 z-10">
+          <thead className="sticky top-0 bg-ctp-crust/80 backdrop-blur-sm text-ctp-subtext0 z-raised">
             <tr>
               <th className="px-3 py-2 border-b border-ctp-surface1 w-12">
                 Step

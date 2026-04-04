@@ -2,10 +2,15 @@
 
 import type { TestCase } from '@delta/examples'
 import { TestCaseArraySchema } from '@delta/examples'
+import { Trash2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { cn } from '@/app/lib/utils'
 import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
 import { useAlert } from '../providers'
-import { Tooltip } from './Tooltip'
+import { Badge } from './badge'
+import { Button, buttonVariants } from './button'
+import { Input } from './input'
+import { WithTooltip } from './tooltip'
 
 interface TestResult {
   id: string
@@ -14,7 +19,8 @@ interface TestResult {
 }
 
 const TESTS_PER_PAGE = 6
-const ROW_HEIGHT = 36
+const ROW_HEIGHT = 42
+const ROW_GAP = 6
 
 interface TestSuiteProps {
   tests: TestCase[]
@@ -155,8 +161,13 @@ export function TestSuite({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Tooltip label="Import tests from JSON">
-            <label className="text-xs px-3 py-1 rounded-lg bg-ctp-blue/20 border border-ctp-blue text-ctp-blue hover:bg-ctp-blue/30 transition-colors cursor-pointer flex items-center justify-center">
+          <WithTooltip label="Import tests from JSON">
+            <label
+              className={cn(
+                buttonVariants({ variant: 'info', size: 'xs' }),
+                'cursor-pointer',
+              )}
+            >
               import
               <input
                 type="file"
@@ -165,27 +176,29 @@ export function TestSuite({
                 onChange={handleTestImport}
               />
             </label>
-          </Tooltip>
+          </WithTooltip>
 
-          <Tooltip label="Export tests to JSON">
-            <button
+          <WithTooltip label="Export tests to JSON">
+            <Button
               onClick={handleTestExport}
               disabled={tests.length === 0}
-              className="text-xs px-3 py-1 rounded-lg bg-ctp-mauve/20 border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve/30 disabled:opacity-40 transition-colors cursor-pointer disabled:cursor-not-allowed"
+              variant="accent"
+              size="xs"
             >
               export
-            </button>
-          </Tooltip>
+            </Button>
+          </WithTooltip>
 
-          <Tooltip label="shift+cmd+t">
-            <button
+          <WithTooltip shortcut={['shift', 'cmd', 't']}>
+            <Button
               onClick={runTests}
               disabled={!evaluateInput || tests.length === 0}
-              className="text-xs px-3 py-1 rounded-lg bg-ctp-green/20 border border-ctp-green text-ctp-green hover:bg-ctp-green/30 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed transition-colors"
+              variant="success"
+              size="xs"
             >
               run tests
-            </button>
-          </Tooltip>
+            </Button>
+          </WithTooltip>
         </div>
       </div>
 
@@ -224,35 +237,29 @@ function Test({ result, test, onRemove }: TestProps) {
   return (
     <div
       style={{ height: ROW_HEIGHT }}
-      className={`flex items-center gap-2 px-3 rounded-lg border text-sm transition-colors ${
+      className={`flex items-center gap-2.5 px-3.5 rounded-lg border text-sm transition-colors ${
         result
           ? result.passed
             ? 'bg-ctp-green/10 border-ctp-green/30'
             : 'bg-ctp-red/10 border-ctp-red/30'
-          : 'bg-ctp-mantle border-ctp-surface1'
+          : 'bg-ctp-mantle border-ctp-subtext0/25'
       }`}
     >
-      <span className="flex-1 text-ctp-text truncate">
+      <span className="flex-1 truncate">
         {test.input || <span className="text-ctp-overlay0">ε</span>}
       </span>
-      <span
-        className={`text-xs ${test.expected ? 'text-ctp-green' : 'text-ctp-red'}`}
-      >
+      <Badge variant={test.expected ? 'success' : 'destructive'}>
         {test.expected ? 'accept' : 'reject'}
-      </span>
-      {result && (
-        <span
-          className={`text-xs font-bold ${result.passed ? 'text-ctp-green' : 'text-ctp-red'}`}
-        >
-          {result.passed ? '✓' : '✗'}
-        </span>
-      )}
-      <button
+      </Badge>
+      <Button
         onClick={() => onRemove(test.id)}
-        className="text-ctp-overlay0 hover:text-ctp-red transition-colors text-xs ml-1"
+        variant="ghost"
+        size="icon-touch"
+        className="ml-1 text-ctp-overlay0 hover:text-ctp-red"
+        aria-label="Delete test"
       >
-        ×
-      </button>
+        <Trash2 className="text-ctp-red h-4" />
+      </Button>
     </div>
   )
 }
@@ -272,31 +279,30 @@ function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
   }
 
   return (
-    <div className="flex items-center gap-2 border-t border-ctp-surface0 pt-3">
-      <input
+    <div className="flex items-center gap-2 border-t border-ctp-subtext0/25 pt-3">
+      <Input
         type="text"
         value={input}
         onChange={e => setInput(e.target.value)}
         onKeyDown={e => e.key === 'Enter' && handleSubmit()}
         placeholder={inputPlaceholder}
-        className="flex-1 bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
+        className="flex-1"
       />
-      <button
+      <Button
         onClick={() => setExpected(e => !e)}
-        className={`text-xs px-3 py-1.5 rounded-lg border font-bold transition-colors ${
-          expected
-            ? 'bg-ctp-green/20 border-ctp-green text-ctp-green'
-            : 'bg-ctp-red/20 border-ctp-red text-ctp-red'
-        }`}
+        variant={expected ? 'success' : 'destructive'}
+        size="sm"
       >
         {expected ? 'accept' : 'reject'}
-      </button>
-      <button
+      </Button>
+      <Button
         onClick={handleSubmit}
-        className="text-xs px-3 py-1.5 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust transition-colors"
+        variant="ghost"
+        size="sm"
+        className="text-ctp-subtext0"
       >
         +
-      </button>
+      </Button>
     </div>
   )
 }
@@ -325,9 +331,9 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
   return (
     <>
       <div
-        className="flex flex-col gap-1"
+        className="flex flex-col gap-1.5"
         style={{
-          height: TESTS_PER_PAGE * ROW_HEIGHT + (TESTS_PER_PAGE - 1) * 4,
+          height: TESTS_PER_PAGE * ROW_HEIGHT + (TESTS_PER_PAGE - 1) * ROW_GAP,
         }}
       >
         {visibleTests.map(test => (
@@ -343,7 +349,7 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
           <div
             key={`empty-${slot}`}
             style={{ height: ROW_HEIGHT }}
-            className="rounded-lg border border-dashed border-ctp-surface0"
+            className="rounded-lg border border-dashed border-ctp-subtext0/25 bg-ctp-base/30"
           />
         ))}
       </div>
@@ -351,26 +357,30 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
       <div className="flex items-center justify-center gap-2 h-4">
         {totalPages > 1 && (
           <>
-            <button
+            <Button
               onClick={() => setPage(Math.max(safePage - 1, 0))}
               disabled={safePage === 0}
-              className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
+              variant="ghost"
+              size="icon-xs"
+              className="text-ctp-subtext0 hover:text-ctp-text"
             >
               ←
-            </button>
+            </Button>
             <span className="text-ctp-overlay0 text-xs">
               {safePage + 1}
               {' '}
               /
               {totalPages}
             </span>
-            <button
+            <Button
               onClick={() => setPage(Math.min(safePage + 1, maxPage))}
               disabled={safePage === maxPage}
-              className="text-ctp-subtext0 hover:text-ctp-text disabled:opacity-30 text-xs transition-colors"
+              variant="ghost"
+              size="icon-xs"
+              className="text-ctp-subtext0 hover:text-ctp-text"
             >
               →
-            </button>
+            </Button>
           </>
         )}
       </div>

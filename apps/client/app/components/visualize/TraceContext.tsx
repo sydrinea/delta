@@ -1,13 +1,11 @@
 'use client'
 
-/* eslint-disable react-refresh/only-export-components -- Provider and related context hooks are intentionally colocated to keep generic types consistent. */
-
 import type { TestCase } from '@delta/examples'
 import type { ReactNode } from 'react'
 import {
   createContext,
-
   use,
+  useEffect,
   useMemo,
   useState,
 } from 'react'
@@ -90,6 +88,9 @@ interface TraceInteractionContextValue {
   onBlur: () => void
   onTouchStart: (e: React.TouchEvent) => void
   onTouchEnd: (e: React.TouchEvent) => void
+  // Step navigation — exposed so mobile UI can provide explicit buttons
+  stepBack: () => void
+  stepForward: () => void
 }
 
 type TraceContextValue<M extends VisualMachine> = TraceInputContextValue
@@ -125,6 +126,16 @@ export function TraceProvider<M extends VisualMachine>({
   const [selectedTest, setSelectedTest] = useState('')
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
 
+  // If a recipe/test set change removes the selected test, reset to placeholder.
+  useEffect(() => {
+    if (!selectedTest)
+      return
+
+    const stillExists = tests.some(test => test.id === selectedTest)
+    if (!stillExists)
+      setSelectedTest('')
+  }, [tests, selectedTest])
+
   const simulation = useMemo(() => {
     if (!machine)
       return null
@@ -134,13 +145,22 @@ export function TraceProvider<M extends VisualMachine>({
   const trace = useMemo(() => simulation?.trace ?? [], [simulation])
   const maxStep = Math.max(0, trace.length - 1)
 
-  const { step, focused, onFocus, onBlur, onTouchStart, onTouchEnd }
-    = useStepNavigation({
-      maxStep,
-      resetDeps: [input, machine],
-      focusRequiredForKeys: true,
-      enableSwipe: true,
-    })
+  const {
+    step,
+    focused,
+    onFocus,
+    onBlur,
+    onTouchStart,
+    onTouchEnd,
+    // These are the new additions you need to expose from useStepNavigation:
+    stepBack,
+    stepForward,
+  } = useStepNavigation({
+    maxStep,
+    resetDeps: [input, machine],
+    focusRequiredForKeys: true,
+    enableSwipe: true,
+  })
 
   const safeStep = Math.min(step, maxStep)
   const current = trace[safeStep] ?? null
@@ -207,8 +227,10 @@ export function TraceProvider<M extends VisualMachine>({
       onBlur,
       onTouchStart,
       onTouchEnd,
+      stepBack,
+      stepForward,
     }),
-    [hoveredEdgeId, focused, onFocus, onBlur, onTouchStart, onTouchEnd],
+    [hoveredEdgeId, focused, onFocus, onBlur, onTouchStart, onTouchEnd, stepBack, stepForward],
   )
 
   return (

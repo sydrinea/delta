@@ -1,18 +1,118 @@
 'use client'
 
-import type { WorkbenchLogic } from './types'
+import type { TabId, WorkbenchLogic } from './types'
+import { Check, CodeXml, Share2, TestTube, Workflow } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { ConfirmModal, TestSuite } from '../ui'
+import { Button } from '../ui/button'
 import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-  Transition,
-} from '@headlessui/react'
-import { Check, Share2 } from 'lucide-react'
-import { Fragment } from 'react'
-import { ConfirmModal, TestSuite, Tooltip } from '../ui'
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from '../ui/resizable'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select'
+import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
+import { WithTooltip } from '../ui/tooltip'
 import { GraphvizViewer } from '../visualize'
-import { TabSwitcher } from './TabSwitcher'
+
+const MOBILE_TABS: { id: TabId, label: string, Icon: React.ComponentType<{ className?: string }> }[] = [
+  { id: 'code', label: 'Code', Icon: ({ className }) => (
+    <CodeXml className={className} />
+  ) },
+  { id: 'canvas', label: 'Canvas', Icon: ({ className }) => (
+    <Workflow className={className} />
+  ) },
+  { id: 'debug', label: 'Debug', Icon: ({ className }) => (
+    <TestTube className={className} />
+  ) },
+  { id: 'tests', label: 'Tests', Icon: ({ className }) => (
+    <TestTube className={className} />
+  ) },
+]
+
+const TAB_LABELS: Partial<Record<TabId, string>> = {
+  code: 'Code',
+  debug: 'Debug',
+}
+
+const MOBILE_TAB_IDS = MOBILE_TABS.map(t => t.id)
+
+function getMobileTabIndex(tab: TabId): number {
+  const index = MOBILE_TAB_IDS.indexOf(tab)
+  return index >= 0 ? index : 0
+}
+
+interface UseScrollTabSyncOptions {
+  containerRef: React.RefObject<HTMLDivElement | null>
+  activeIndex: number
+  onChangeIndex: (index: number) => void
+  tabCount?: number
+}
+
+function useScrollTabSync({
+  containerRef,
+  activeIndex,
+  onChangeIndex,
+}: UseScrollTabSyncOptions) {
+  const scrollSettleTimeoutRef = useRef<number | null>(null)
+  const lastAppliedIndexRef = useRef(activeIndex)
+
+  // Sync activeIndex -> scroll position
+  useEffect(() => {
+    if (!containerRef.current)
+      return
+    const targetScroll = activeIndex * window.innerWidth
+    const current = containerRef.current.scrollLeft
+    if (Math.abs(current - targetScroll) > 16) {
+      containerRef.current.scrollTo({ left: targetScroll, behavior: 'smooth' })
+    }
+    lastAppliedIndexRef.current = activeIndex
+  }, [activeIndex, containerRef])
+
+  // Sync scroll position -> activeIndex (debounced)
+  const handleScroll = useCallback(() => {
+    if (scrollSettleTimeoutRef.current !== null) {
+      clearTimeout(scrollSettleTimeoutRef.current)
+    }
+
+    scrollSettleTimeoutRef.current = window.setTimeout(() => {
+      if (!containerRef.current)
+        return
+      const newIndex = Math.round(
+        containerRef.current.scrollLeft / window.innerWidth,
+      )
+      if (newIndex !== lastAppliedIndexRef.current) {
+        lastAppliedIndexRef.current = newIndex
+        onChangeIndex(newIndex)
+      }
+    }, 150)
+  }, [containerRef, onChangeIndex])
+
+  // Handle device rotation/resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (!containerRef.current)
+        return
+      const targetScroll = lastAppliedIndexRef.current * window.innerWidth
+      containerRef.current.scrollTo({ left: targetScroll, behavior: 'auto' })
+    }
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      if (scrollSettleTimeoutRef.current !== null) {
+        clearTimeout(scrollSettleTimeoutRef.current)
+      }
+    }
+  }, [containerRef])
+
+  return { handleScroll }
+}
 
 interface WorkbenchShellProps<M extends { name?: string }> {
   logic: WorkbenchLogic<M>
@@ -22,37 +122,213 @@ export function WorkbenchShell<M extends { name?: string }>({
   logic,
 }: WorkbenchShellProps<M>) {
   return (
-    <>
+    <div className="h-full flex flex-col">
       <DesktopWorkbench logic={logic} />
       <MobileWorkbench logic={logic} />
-    </>
+    </div>
   )
 }
 
 function MobileWorkbench<M extends { name?: string }>({
   logic,
 }: WorkbenchShellProps<M>) {
-  const { machine, tests, setTests, simulate } = logic
+  const {
+    machine,
+    tests,
+    setTests,
+    simulate,
+    selectedRecipeKey,
+    requestTabChange,
+    activeTab,
+    confirmModal,
+  } = logic
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const [mobileActiveIndex, setMobileActiveIndex] = useState(() =>
+    getMobileTabIndex(activeTab),
+  )
+
+  const handleIndexChange = useCallback((index: number) => {
+    if (index < 0 || index >= MOBILE_TAB_IDS.length) {
+      return
+    }
+
+    setMobileActiveIndex(index)
+
+    const tabId = MOBILE_TAB_IDS[index]
+    if (tabId)
+      requestTabChange(tabId)
+  }, [requestTabChange])
+
+  const { handleScroll } = useScrollTabSync({
+    containerRef: scrollContainerRef,
+    activeIndex: mobileActiveIndex,
+    onChangeIndex: handleIndexChange,
+    tabCount: MOBILE_TABS.length,
+  })
 
   return (
-    <div className="flex flex-col md:hidden w-full h-full overflow-hidden min-w-0 p-4 gap-4">
-      <WorkbenchHeader logic={logic} />
+    <div className="flex flex-col md:hidden w-full h-full overflow-hidden">
+      {/* Mobile header */}
+      <MobileHeader logic={logic} />
 
-      <TabSwitcher logic={logic} />
+      {/* Sliding panel track */}
+      <div
+        className="flex-1 overflow-x-auto overflow-y-hidden md:hidden min-h-0"
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+        style={{
+          scrollBehavior: 'smooth',
+          scrollSnapType: 'x mandatory',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        {/* Track: all panels side-by-side */}
+        <div
+          className="flex h-full"
+          style={{
+            width: `${MOBILE_TABS.length * 100}%`,
+          }}
+        >
+          {/* Panel: Code */}
+          <div
+            className="h-full overflow-hidden shrink-0"
+            style={{ width: '100vw', scrollSnapAlign: 'center' }}
+          >
+            {logic.visibleTabs.find(t => t.id === 'code')?.content}
+          </div>
 
-      <div className="flex-1 min-w-0 overflow-hidden">
-        {machine && <div className="h-full overflow-y-auto">{logic.activeTabContent}</div>}
+          {/* Panel: Debug / Trace */}
+          <div
+            className="h-full overflow-hidden shrink-0 p-4"
+            style={{ width: '100vw', scrollSnapAlign: 'center' }}
+          >
+            {/* When debug tab is active, show the debug content.
+                We always render it so the TraceProvider context stays alive,
+                but only the active panel is "in view". */}
+            {logic.visibleTabs.find(t => t.id === 'debug')?.content}
+          </div>
+
+          {/* Panel: Tests */}
+          <div
+            className="h-full overflow-y-auto shrink-0"
+            style={{ width: '100vw', scrollSnapAlign: 'center' }}
+          >
+            <div className="p-4">
+              <TestSuite
+                tests={tests}
+                setTests={setTests}
+                evaluateInput={
+                  machine ? (input: string) => simulate(machine, input) : undefined
+                }
+                machineName={machine?.name ?? 'delta'}
+                resetKeys={[machine, selectedRecipeKey]}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <TestSuite
-        tests={tests}
-        setTests={setTests}
-        evaluateInput={
-          machine ? (input: string) => simulate(machine, input) : undefined
-        }
-        machineName={machine?.name ?? 'delta'}
-        resetKeys={[machine, logic.selectedRecipeKey]}
-      />
+      {/* iOS-style bottom tab bar */}
+      <nav
+        className="shrink-0 flex items-stretch border-t border-ctp-surface0 bg-ctp-base/90 backdrop-blur-md"
+        role="tablist"
+      >
+        {MOBILE_TABS.map((tab, index) => {
+          const isActive = index === mobileActiveIndex
+          return (
+            <Button
+              key={tab.id}
+              onClick={() => handleIndexChange(index)}
+              variant="ghost"
+              className={`h-auto flex-1 flex-col items-center justify-center gap-0.5 py-2 ${
+                isActive ? 'text-ctp-mauve' : 'text-ctp-overlay1'
+              }`}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`tab-panel-${tab.id}`}
+            >
+              <tab.Icon className="w-5 h-5" />
+              <span className="text-[10px] font-medium tracking-wide">
+                {tab.label}
+              </span>
+            </Button>
+          )
+        })}
+      </nav>
+
+      {confirmModal && <ConfirmModal {...confirmModal} />}
+    </div>
+  )
+}
+
+function MobileHeader<M extends { name?: string }>({
+  logic,
+}: WorkbenchShellProps<M>) {
+  const {
+    machine,
+    editorValue,
+    compile,
+    editorErrors,
+    handleShare,
+    copied,
+    recipeEntries,
+    selectedRecipeKey,
+    applyRecipe,
+    selectedRecipeLabel,
+  } = logic
+
+  return (
+    <div className="shrink-0 flex items-center gap-2 px-4 py-2 bg-ctp-base/75 backdrop-blur-md">
+      {/* Left side: Machine name + Share button */}
+      <div className="flex items-center gap-2 min-w-0 flex-1">
+        <h1 className="text-ctp-text text-xs font-bold uppercase tracking-widest truncate min-w-0">
+          {machine?.name ?? 'untitled'}
+        </h1>
+        <Button
+          onClick={handleShare}
+          variant="ghost"
+          size="icon-touch"
+          className="text-ctp-overlay0 hover:text-ctp-text"
+        >
+          {copied ? <Check /> : <Share2 />}
+        </Button>
+      </div>
+
+      {/* Right side: Compile status, button, and recipe dropdown */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Compile status pill */}
+        <span
+          className={`text-xs font-bold shrink-0 ${
+            editorErrors && editorErrors.length > 0 ? 'text-ctp-red' : 'text-ctp-green'
+          }`}
+        >
+          {editorErrors && editorErrors.length > 0 ? '✗' : '✓'}
+        </span>
+
+        {/* Compile button */}
+        <WithTooltip shortcut={['cmd', 's']}>
+          <Button
+            onClick={() => compile(editorValue)}
+            variant="secondary"
+            size="xs"
+            className="shrink-0"
+          >
+            compile
+          </Button>
+        </WithTooltip>
+
+        {/* Recipe dropdown */}
+        {recipeEntries.length > 0 && (
+          <RecipeDropdown
+            recipeEntries={recipeEntries}
+            selectedRecipeKey={selectedRecipeKey}
+            applyRecipe={applyRecipe}
+            selectedRecipeLabel={selectedRecipeLabel}
+          />
+        )}
+      </div>
     </div>
   )
 }
@@ -80,66 +356,85 @@ function DesktopWorkbench<M extends { name?: string }>({
 
   return (
     <div className="hidden md:flex flex-row flex-1 overflow-hidden">
-      <div className="flex flex-col border-r border-ctp-surface0 w-1/2 overflow-hidden">
-        <div className="flex items-center gap-4 px-4 pt-3 pb-0 border-b border-ctp-surface0 shrink-0 relative z-50">
-          <div className="flex items-center gap-4 shrink-0">
-            {visibleTabs.map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => requestTabChange(tab.id)}
-                className={`tracking-wide pb-2 text-xs transition-colors border-b-2 cursor-pointer ${
-                  activeTab === tab.id
-                    ? 'text-ctp-text border-ctp-mauve'
-                    : 'text-ctp-subtext0 border-transparent hover:text-ctp-text'
-                }`}
+      <ResizablePanelGroup
+        orientation="horizontal"
+        className="h-full"
+        persistence={{
+          id: 'workbench-desktop-layout',
+          panelIds: ['workbench-desktop-left-panel', 'workbench-desktop-right-panel'],
+        }}
+      >
+        <ResizablePanel id="workbench-desktop-left-panel" defaultSize={50} minSize={30}>
+          <div className="flex flex-col overflow-hidden h-full">
+            <div className="flex items-center gap-4 px-4 pt-3 pb-2 shrink-0 relative z-raised overflow-hidden">
+              <Tabs
+                value={activeTab}
+                onValueChange={value => requestTabChange(value as TabId)}
               >
-                {tab.id}
-              </button>
-            ))}
-          </div>
+                <TabsList className="gap-4">
+                  {visibleTabs.map((tab) => {
+                    return (
+                      <TabsTrigger
+                        key={tab.id}
+                        value={tab.id}
+                        className="capitalize"
+                        aria-controls={`tab-panel-${tab.id}`}
+                      >
+                        {TAB_LABELS[tab.id] ?? tab.id}
+                      </TabsTrigger>
+                    )
+                  })}
+                </TabsList>
+              </Tabs>
 
-          <RecipeDropdown
-            recipeEntries={recipeEntries}
-            selectedRecipeKey={selectedRecipeKey}
-            applyRecipe={applyRecipe}
-            selectedRecipeLabel={selectedRecipeLabel}
-            className="ml-auto pb-2 shrink"
-          />
-        </div>
-
-        <div className="flex-1 overflow-hidden">{activeTabContent}</div>
-
-        {confirmModal && <ConfirmModal {...confirmModal} />}
-      </div>
-
-      <div className="flex flex-col w-1/2 overflow-y-auto overflow-x-hidden min-w-0">
-        <div className="flex flex-col gap-4 p-6 min-w-0">
-          <WorkbenchHeader logic={logic} />
-
-          <div className="flex flex-col gap-4">
-            {machine && machineDot && (
-              <GraphvizViewer
-                dot={machineDot}
-                machineName={machine.name ?? 'machine'}
-                showExportActions
-                onEdgeHover={graphvizOnEdgeHover}
+              <RecipeDropdown
+                recipeEntries={recipeEntries}
+                selectedRecipeKey={selectedRecipeKey}
+                applyRecipe={applyRecipe}
+                selectedRecipeLabel={selectedRecipeLabel}
+                className="ml-auto"
               />
-            )}
+            </div>
 
-            <TestSuite
-              tests={tests}
-              setTests={setTests}
-              evaluateInput={
-                machine
-                  ? (input: string) => simulate(machine, input)
-                  : undefined
-              }
-              machineName={machine?.name ?? 'delta'}
-              resetKeys={[machine, selectedRecipeKey]}
-            />
+            <div className="flex-1 overflow-hidden">{activeTabContent}</div>
+
+            {confirmModal && <ConfirmModal {...confirmModal} />}
           </div>
-        </div>
-      </div>
+        </ResizablePanel>
+
+        <ResizableHandle withHandle />
+
+        <ResizablePanel id="workbench-desktop-right-panel" defaultSize={50} minSize={30}>
+          <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden min-w-0">
+            <div className="flex flex-col gap-4 p-6 min-w-0">
+              <WorkbenchHeader logic={logic} />
+
+              <div className="flex flex-col gap-4">
+                {machine && machineDot && (
+                  <GraphvizViewer
+                    dot={machineDot}
+                    machineName={machine.name ?? 'machine'}
+                    showExportActions
+                    onEdgeHover={graphvizOnEdgeHover}
+                  />
+                )}
+
+                <TestSuite
+                  tests={tests}
+                  setTests={setTests}
+                  evaluateInput={
+                    machine
+                      ? (input: string) => simulate(machine, input)
+                      : undefined
+                  }
+                  machineName={machine?.name ?? 'delta'}
+                  resetKeys={[machine, selectedRecipeKey]}
+                />
+              </div>
+            </div>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   )
 }
@@ -163,14 +458,16 @@ function WorkbenchHeader<M extends { name?: string }>({
   return (
     <div className="flex flex-col-reverse lg:flex-row justify-between gap-3 relative">
       <div className="flex items-center gap-y-3">
-        <Tooltip label="cmd+s">
-          <button
+        <WithTooltip shortcut={['cmd', 's']}>
+          <Button
             onClick={() => compile(editorValue)}
-            className="hover:cursor-pointer text-xs px-3 py-1 rounded-lg bg-ctp-mantle border border-ctp-surface1 text-ctp-text hover:bg-ctp-crust disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+            variant="secondary"
+            size="xs"
+            className="shrink-0"
           >
             compile
-          </button>
-        </Tooltip>
+          </Button>
+        </WithTooltip>
         <p
           className={`font-bold text-xs px-3 py-1 rounded-lg ${editorErrors && editorErrors.length > 0 ? 'text-ctp-red' : 'text-ctp-green'} transition-colors whitespace-nowrap`}
         >
@@ -185,10 +482,12 @@ function WorkbenchHeader<M extends { name?: string }>({
           <h1 className="text-ctp-text text-sm lg:text-end font-bold uppercase tracking-widest max-w-40 md:max-w-56 xl:max-w-80 text-nowrap overflow-x-auto">
             {machine?.name ?? 'untitled'}
           </h1>
-          <Tooltip label="Share Machine">
-            <button
+          <WithTooltip label="Share Machine">
+            <Button
               onClick={handleShare}
-              className="text-ctp-overlay0 hover:text-ctp-text transition-colors flex items-center shrink-0"
+              variant="ghost"
+              size="icon-touch"
+              className="text-ctp-overlay0 hover:text-ctp-text"
             >
               {copied
                 ? (
@@ -197,8 +496,8 @@ function WorkbenchHeader<M extends { name?: string }>({
                 : (
                     <Share2 className="w-4 h-4" />
                   )}
-            </button>
-          </Tooltip>
+            </Button>
+          </WithTooltip>
         </div>
 
         <div className="md:hidden shrink-0">
@@ -231,53 +530,22 @@ function RecipeDropdown({
     return null
 
   return (
-    <Listbox
-      as="div"
-      value={selectedRecipeKey}
-      onChange={applyRecipe}
-      className={`min-w-0 ${className}`}
-    >
-      <div className="relative w-full md:w-auto min-w-32">
-        <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1 text-xs text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve overflow-hidden">
-          <span
-            className={`block overflow-x-auto whitespace-nowrap [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${
-              selectedRecipeKey ? '' : 'text-ctp-subtext1'
-            }`}
-          >
-            {selectedRecipeLabel}
-          </span>
-        </ListboxButton>
-        <svg
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none bg-ctp-mantle"
-          viewBox="0 0 12 12"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
+    <div className={`min-w-0 ${className}`}>
+      <Select value={selectedRecipeKey || undefined} onValueChange={applyRecipe}>
+        <SelectTrigger
+          size="lg"
+          className="ml-auto w-auto max-w-full min-w-0 **:data-[slot=select-value]:max-w-full **:data-[slot=select-value]:overflow-hidden **:data-[slot=select-value]:text-ellipsis **:data-[slot=select-value]:whitespace-nowrap"
         >
-          <path d="M2 4L6 8L10 4" />
-        </svg>
-        <Transition
-          as={Fragment}
-          enter="transition ease-out duration-100"
-          enterFrom="opacity-0 scale-95"
-          enterTo="opacity-100 scale-100"
-          leave="transition ease-in duration-75"
-          leaveFrom="opacity-100 scale-100"
-          leaveTo="opacity-0 scale-95"
-        >
-          <ListboxOptions className="absolute right-0 z-30 mt-1 max-h-60 min-w-56 overflow-auto rounded-lg border border-ctp-surface1 bg-ctp-mantle py-1 text-sm shadow-lg focus:outline-none">
-            {recipeEntries.map(([key, recipe]) => (
-              <ListboxOption
-                key={key}
-                value={key}
-                className="cursor-pointer select-none px-3 py-1.5 text-xs text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text"
-              >
-                {recipe.label}
-              </ListboxOption>
-            ))}
-          </ListboxOptions>
-        </Transition>
-      </div>
-    </Listbox>
+          <SelectValue placeholder={selectedRecipeLabel} />
+        </SelectTrigger>
+        <SelectContent align="end" position="popper">
+          {recipeEntries.map(([key, recipe]) => (
+            <SelectItem key={key} value={key}>
+              {recipe.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   )
 }

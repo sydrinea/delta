@@ -8,6 +8,7 @@ import {
   TransitionChild,
 } from '@headlessui/react'
 import { Fragment } from 'react'
+import { Button } from './button'
 
 interface AlertProps {
   isOpen: boolean
@@ -28,7 +29,7 @@ export function Alert({
 }: AlertProps) {
   return (
     <Transition show={isOpen} as={Fragment} appear>
-      <Dialog className="relative z-50" onClose={onClose}>
+      <Dialog className="relative z-modal" onClose={onClose}>
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
@@ -52,7 +53,7 @@ export function Alert({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <DialogPanel className="relative w-full max-w-md transform overflow-hidden bg-ctp-base border border-ctp-surface0 p-6 text-left align-middle rounded-2xl shadow-xl transition-all flex flex-col gap-4">
+              <DialogPanel className="relative w-full max-w-md transform overflow-hidden bg-ctp-base border border-ctp-subtext0/25 p-6 text-left align-middle rounded-2xl shadow-xl transition-all flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
                   <DialogTitle className="text-lg font-bold text-ctp-text">
                     {title}
@@ -63,12 +64,13 @@ export function Alert({
                 </div>
 
                 <div className="flex flex-row justify-end gap-3 mt-4">
-                  <button
+                  <Button
                     onClick={onConfirm}
-                    className="text-sm px-4 py-1.5 rounded-lg bg-ctp-mauve/20 border border-ctp-mauve text-ctp-mauve hover:bg-ctp-mauve/30 cursor-pointer transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ctp-mauve focus-visible:ring-offset-2 focus-visible:ring-offset-ctp-base"
+                    variant="primary"
+                    size="sm"
                   >
                     {confirmText}
-                  </button>
+                  </Button>
                 </div>
               </DialogPanel>
             </TransitionChild>

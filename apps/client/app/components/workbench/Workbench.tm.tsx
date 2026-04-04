@@ -28,9 +28,9 @@ interface WorkbenchTMProps {
 }
 
 const DEFAULT_TABS: EnabledTabs = {
-  editor: true,
+  code: true,
   canvas: false,
-  visualizer: true,
+  debug: true,
 }
 
 const LEADING_BRACKET_REGEX = /^\[/
@@ -55,13 +55,13 @@ function useTmWorkbenchLogic(
   const tabs = useMemo(
     () =>
       buildTabs({
-        editorContent: <DeltaEditor scope="tm" />,
+        codeContent: <DeltaEditor scope="tm" />,
         canvasContent: (
           <div className="h-full flex items-center justify-center text-sm text-ctp-subtext0">
             Canvas is only available for NFA machines.
           </div>
         ),
-        visualizerContent: <Trace />,
+        debugContent: <Trace />,
       }),
     [],
   )
@@ -181,5 +181,9 @@ function TMWorkbenchWithTraceContext({
   resolvedTheme: string | undefined
 }) {
   const logic = useTmWorkbenchLogic(enabledTabs, resolvedTheme)
-  return <WorkbenchShell logic={logic} />
+  return (
+    <div className="h-full flex flex-col">
+      <WorkbenchShell logic={logic} />
+    </div>
+  )
 }

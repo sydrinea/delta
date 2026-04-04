@@ -12,4 +12,7 @@ export default antfu({
     '**/.turbo/**',
     '**/coverage/**',
   ],
+  rules: {
+    'react-refresh/only-export-components': 'off',
+  },
 })

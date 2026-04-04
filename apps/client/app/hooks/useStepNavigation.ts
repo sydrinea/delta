@@ -75,6 +75,8 @@ export function useStepNavigation({
   return {
     step: boundedStep,
     setStep,
+    stepBack: () => setStep(s => Math.max(0, s - 1)),
+    stepForward: () => setStep(s => Math.min(maxStep, s + 1)),
     focused,
     onFocus: () => setFocused(true),
     onBlur: () => setFocused(false),

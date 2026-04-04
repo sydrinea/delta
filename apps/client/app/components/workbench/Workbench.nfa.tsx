@@ -31,12 +31,17 @@ interface WorkbenchNFAProps {
 }
 
 const DEFAULT_TABS: EnabledTabs = {
-  editor: true,
+  code: true,
   canvas: true,
-  visualizer: true,
+  debug: true,
 }
 
-const LEADING_LOWERCASE_REGEX = /^[a-z]/
+const TAB_LABELS: Record<TabId, string> = {
+  code: 'Editor',
+  canvas: 'Canvas',
+  debug: 'Debug',
+  tests: 'Tests',
+}
 
 function useNfaWorkbenchLogic(
   enabledTabs: EnabledTabs,
@@ -59,13 +64,13 @@ function useNfaWorkbenchLogic(
   const tabs = useMemo(
     () =>
       buildTabs({
-        editorContent: <DeltaEditor scope="nfa" />,
+        codeContent: <DeltaEditor scope="nfa" />,
         canvasContent: (
           <ReactFlowProvider>
             <FlowEditor />
           </ReactFlowProvider>
         ),
-        visualizerContent: <Trace />,
+        debugContent: <Trace />,
       }),
     [],
   )
@@ -85,7 +90,7 @@ function useNfaWorkbenchLogic(
     resolvedTheme,
     onRecipeLoaded: ({ activeTab, setActiveTab }) => {
       if (activeTab === 'canvas') {
-        setActiveTab('editor')
+        setActiveTab('code')
       }
     },
   })
@@ -139,7 +144,9 @@ function useNfaWorkbenchLogic(
       message:
         'Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?',
       confirmText: 'Convert to Canvas',
-      cancelText: `Stay in ${core.base.activeTab.replace(LEADING_LOWERCASE_REGEX, s => s.toUpperCase())}`,
+      cancelText: `Stay in ${TAB_LABELS[core.base.activeTab]}`,
+      confirmVariant: 'destructive',
+      cancelVariant: 'secondary',
       onConfirm: confirmTabChange,
       onCancel: cancelTabChange,
     },
@@ -217,5 +224,9 @@ function NFAWorkbenchWithTraceContext({
   resolvedTheme: string | undefined
 }) {
   const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme)
-  return <WorkbenchShell logic={logic} />
+  return (
+    <div className="h-full flex flex-col">
+      <WorkbenchShell logic={logic} />
+    </div>
+  )
 }

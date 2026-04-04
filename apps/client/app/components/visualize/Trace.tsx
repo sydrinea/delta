@@ -1,27 +1,31 @@
 'use client'
 
 import type { TraceInputToken, VisualMachine } from './TraceContext'
+import { useMemo, useRef } from 'react'
 import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-  Transition,
-} from '@headlessui/react'
-import { Fragment, useMemo, useRef } from 'react'
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '../ui/combobox'
 import {
-
   useTraceInputContext,
   useTraceInteractionContext,
   useTraceSimulationContext,
-
 } from './TraceContext'
 
 export function Trace<M extends VisualMachine>() {
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { tests, input, setInput, selectedTest, setSelectedTest }
+  const { tests, input, setInput, setSelectedTest }
     = useTraceInputContext()
+
+  const testInputs = useMemo(
+    () => [...new Set(tests.map(t => t.input))],
+    [tests],
+  )
 
   const {
     machine,
@@ -47,14 +51,12 @@ export function Trace<M extends VisualMachine>() {
     onTouchEnd,
   } = useTraceInteractionContext()
 
-  const handleTestSelect = (testId: string) => {
-    setSelectedTest(testId)
-    const selected = tests.find(t => t.id === testId)
-    if (selected)
-      setInput(selected.input)
+  const handleTestSelect = (nextInput: string | null) => {
+    const nextValue = nextInput ?? ''
+    setInput(nextValue)
+    const match = tests.find(t => t.input === nextValue)
+    setSelectedTest(match?.id ?? '')
   }
-
-  const selectedTestCase = tests.find(t => t.id === selectedTest)
 
   const tokenRows = useMemo(() => {
     const tokens
@@ -102,62 +104,26 @@ export function Trace<M extends VisualMachine>() {
       onTouchEnd={onTouchEnd}
       className="flex flex-col gap-4 md:p-4 focus:outline-none min-w-0 w-full max-w-full"
     >
-      {/* input + test picker */}
-      <div className="flex flex-col md:flex-row gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          placeholder="input string"
-          className="flex-1 w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg px-3 py-1.5 text-sm text-ctp-text placeholder-ctp-overlay0 focus:outline-none focus:ring-2 focus:ring-ctp-mauve"
-        />
-        <Listbox value={selectedTest} onChange={handleTestSelect}>
-          <div className="relative w-full md:w-auto">
-            <ListboxButton className="w-full bg-ctp-mantle border border-ctp-surface1 rounded-lg pl-3 pr-8 py-1.5 text-sm text-left text-ctp-text cursor-pointer focus:outline-none focus:ring-2 focus:ring-ctp-mauve">
-              <span className={selectedTestCase ? '' : 'text-ctp-subtext1'}>
-                {selectedTestCase
-                  ? `${selectedTestCase.input === '' ? 'ε' : selectedTestCase.input} - ${selectedTestCase.expected ? 'accept' : 'reject'}`
-                  : 'pick test'}
-              </span>
-            </ListboxButton>
-
-            <svg
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-ctp-overlay0 pointer-events-none"
-              viewBox="0 0 12 12"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M2 4L6 8L10 4" />
-            </svg>
-
-            <Transition
-              as={Fragment}
-              enter="transition ease-out duration-100"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="transition ease-in duration-75"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <ListboxOptions className="absolute z-30 mt-1 max-h-60 w-full overflow-auto rounded-lg border border-ctp-surface1 bg-ctp-mantle py-1 text-sm shadow-lg focus:outline-none">
-                {tests.map(t => (
-                  <ListboxOption
-                    key={t.id}
-                    value={t.id}
-                    className="cursor-pointer select-none px-3 py-1.5 text-ctp-subtext0 hover:bg-ctp-surface0 hover:text-ctp-text"
-                  >
-                    {t.input === '' ? 'ε' : t.input}
-                    {' '}
-                    -
-                    {' '}
-                    {t.expected ? 'accept' : 'reject'}
-                  </ListboxOption>
-                ))}
-              </ListboxOptions>
-            </Transition>
-          </div>
-        </Listbox>
+      {/* Input combobox */}
+      <div className="flex flex-col gap-2">
+        <Combobox items={testInputs} value={input || null} onValueChange={handleTestSelect}>
+          <ComboboxInput
+            className="w-full"
+            value={input}
+            onChange={handleInputChange}
+            placeholder="input string"
+          />
+          <ComboboxContent>
+            <ComboboxEmpty>No matching tests.</ComboboxEmpty>
+            <ComboboxList>
+              {testInput => (
+                <ComboboxItem key={testInput || 'epsilon'} value={testInput}>
+                  {testInput === '' ? 'ε' : testInput}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </div>
 
       {!isEmpty && current && (

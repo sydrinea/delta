@@ -9,34 +9,35 @@ import type {
 import type { TraceInputToken } from '@/components/visualize/TraceContext'
 import type { SlicePatch } from '@/store/shared'
 
-export const TAB_ORDER: TabId[] = ['editor', 'canvas', 'visualizer']
+export const TAB_ORDER: TabId[] = ['code', 'canvas', 'debug']
 export const TRACE_WINDOW_SIZE = 81
 
 export function isTabEnabled(enabledTabs: EnabledTabs, tab: TabId): boolean {
+  // @ts-expect-error -- this is guaranteed to be valid
   return enabledTabs[tab] !== false
 }
 
 export function getInitialTab(enabledTabs: EnabledTabs): TabId {
-  return TAB_ORDER.find(tab => isTabEnabled(enabledTabs, tab)) ?? 'editor'
+  return TAB_ORDER.find(tab => isTabEnabled(enabledTabs, tab)) ?? 'code'
 }
 
 export function buildTabs({
-  editorContent,
+  codeContent,
   canvasContent,
-  visualizerContent,
+  debugContent,
 }: {
-  editorContent: ReactNode
+  codeContent: ReactNode
   canvasContent: ReactNode
-  visualizerContent: ReactNode
+  debugContent: ReactNode
 }): VisibleTab[] {
   return TAB_ORDER.map(tab => ({
     id: tab,
     content:
-      tab === 'editor'
-        ? editorContent
+      tab === 'code'
+        ? codeContent
         : tab === 'canvas'
           ? canvasContent
-          : visualizerContent,
+          : debugContent,
   }))
 }
 

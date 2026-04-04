@@ -1,6 +1,7 @@
 export { Alert } from './Alert'
+export { Badge, badgeVariants } from './badge'
 export { ConfirmModal } from './ConfirmModal'
 export { Loader } from './Loader'
 export { OfflineReadyToast } from './OfflineReadyToast'
+export { Tabs, TabsContent, TabsList, TabsTrigger } from './tabs'
 export { TestSuite } from './TestSuite'
-export { Tooltip } from './Tooltip'
