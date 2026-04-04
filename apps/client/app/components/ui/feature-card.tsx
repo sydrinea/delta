@@ -54,7 +54,7 @@ export function FeatureCard({
   const content = (
     <>
       <div className="flex items-start justify-between mb-2">
-        <h2 className="text-sm font-semibold font-mono text-ctp-text">{title}</h2>
+        <h2 className={cn('text-sm font-semibold font-mono', styles.text)}>{title}</h2>
         <span className={cn('text-xs font-mono transition-colors duration-200', styles.text)}>
           {label}
         </span>
