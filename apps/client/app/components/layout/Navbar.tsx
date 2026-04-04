@@ -94,8 +94,8 @@ function NavbarContent() {
                   <NavigationMenuItem key={group.heading}>
                     <NavigationMenuTrigger
                       className={group.items.some(item => isActiveHref(item.href))
-                        ? 'text-ctp-text bg-ctp-surface0/50'
-                        : 'text-ctp-subtext0 hover:text-ctp-text'}
+                        ? 'border-ctp-mauve/70 text-ctp-text data-[state=open]:border-ctp-mauve/70'
+                        : 'border-ctp-base text-ctp-subtext0 hover:text-ctp-text'}
                     >
                       {group.heading}
                     </NavigationMenuTrigger>
@@ -195,7 +195,7 @@ function NavbarContent() {
 
 export default function Navbar() {
   return (
-    <SidebarProvider defaultOpen={false} className="contents">
+    <SidebarProvider defaultOpen={false} className="contents" noWrapper={true}>
       <NavbarContent />
     </SidebarProvider>
   )

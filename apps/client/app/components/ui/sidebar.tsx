@@ -1,3 +1,6 @@
+/* eslint-disable react/no-context-provider */
+/* eslint-disable react/no-use-context */
+/* eslint-disable react/use-state */
 'use client'
 
 import type { VariantProps } from 'class-variance-authority'
@@ -60,9 +63,11 @@ function SidebarProvider({
   className,
   style,
   children,
+  noWrapper = false,
   ...props
 }: React.ComponentProps<'div'> & {
   defaultOpen?: boolean
+  noWrapper?: boolean
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }) {
@@ -127,21 +132,20 @@ function SidebarProvider({
     [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   )
 
+  if (noWrapper) {
+    return (
+      <SidebarContext.Provider value={contextValue}>
+        {children}
+      </SidebarContext.Provider>
+    )
+  }
+
   return (
     <SidebarContext.Provider value={contextValue}>
       <div
         data-slot="sidebar-wrapper"
-        style={
-          {
-            '--sidebar-width': SIDEBAR_WIDTH,
-            '--sidebar-width-icon': SIDEBAR_WIDTH_ICON,
-            ...style,
-          } as React.CSSProperties
-        }
-        className={cn(
-          'group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar',
-          className,
-        )}
+        style={{ '--sidebar-width': SIDEBAR_WIDTH, '--sidebar-width-icon': SIDEBAR_WIDTH_ICON, ...style } as React.CSSProperties}
+        className={cn('group/sidebar-wrapper flex min-h-svh w-full has-data-[variant=inset]:bg-sidebar', className)}
         {...props}
       >
         {children}

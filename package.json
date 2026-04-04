@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
+    "start": "cd apps/client && pnpm start && cd../..",
     "test": "turbo test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"

@@ -4,14 +4,24 @@ import path from 'node:path'
 import process from 'node:process'
 import Slugger from 'github-slugger'
 import { notFound } from 'next/navigation'
+import { Fragment, jsx, jsxs } from 'react/jsx-runtime'
 import rehypePrettyCode from 'rehype-pretty-code'
+import rehypeReact from 'rehype-react'
 import rehypeSlug from 'rehype-slug'
-import rehypeStringify from 'rehype-stringify'
 import remarkGfm from 'remark-gfm'
 import remarkParse from 'remark-parse'
 import remarkRehype from 'remark-rehype'
 import { unified } from 'unified'
-import { Guide } from '@/components'
+import {
+  Code,
+  Guide,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components'
 import { NAV } from '../nav'
 
 const GITHUB_REPO = 'https://github.com/sydrinea/delta'
@@ -28,7 +38,7 @@ function extractHeadings(markdown: string): Heading[] {
   })
 }
 
-async function parseMarkdown(md: string): Promise<string> {
+async function parseMarkdown(md: string): Promise<React.ReactNode> {
   const file = await unified()
     .use(remarkParse)
     .use(remarkGfm)
@@ -41,9 +51,22 @@ async function parseMarkdown(md: string): Promise<string> {
       },
       keepBackground: false,
     })
-    .use(rehypeStringify)
+    .use(rehypeReact, {
+      Fragment,
+      jsx,
+      jsxs,
+      components: {
+        pre: Code,
+        table: Table,
+        thead: TableHeader,
+        tbody: TableBody,
+        tr: TableRow,
+        th: TableHead,
+        td: TableCell,
+      },
+    })
     .process(md)
-  return String(file)
+  return file.result as React.ReactNode
 }
 
 export async function generateStaticParams() {
@@ -71,7 +94,7 @@ export default async function DocsPage({
     notFound()
   }
 
-  const html = await parseMarkdown(markdown)
+  const content = await parseMarkdown(markdown)
   const headings = extractHeadings(markdown)
 
   const orderedPages = NAV.flatMap(group => group.pages)
@@ -101,7 +124,7 @@ export default async function DocsPage({
   return (
     <Guide
       activePage={pageId}
-      html={html}
+      content={content}
       headings={headings}
       editUrl={editUrl}
       issueUrl={issueUrl}

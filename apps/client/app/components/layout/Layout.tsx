@@ -1,3 +1,5 @@
+'use client'
+
 import { AlertProvider, ToastProvider } from '../providers'
 import { Loader, OfflineReadyToast } from '../ui'
 import { TooltipProvider } from '../ui/tooltip'
@@ -8,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <TooltipProvider delayDuration={50}>
       <ToastProvider>
         <AlertProvider>
-          <main className="relative h-dvh flex flex-col font-mono">
+          <main className="relative flex flex-col font-mono">
             <Loader />
             <Navbar />
             {children}

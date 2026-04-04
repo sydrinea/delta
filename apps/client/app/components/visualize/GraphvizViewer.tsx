@@ -253,21 +253,16 @@ export function GraphvizViewer({
         <ButtonGroup className="absolute bottom-3 left-3">
           {exportActions.map(
             ({ id, label, icon: Icon, handler }) => (
-              <Fragment key={id}>
-                <WithTooltip label={label}>
-                  <Button
-                    onClick={handler}
-                    variant="ghost"
-                    size="icon"
-                    className="text-ctp-overlay0 hover:text-ctp-text"
-                  >
-                    {actionState === id
-                      ? <Check className="w-4 h-4" />
-                      : <Icon className="w-4 h-4" />}
-                  </Button>
-                </WithTooltip>
-
-              </Fragment>
+              <WithTooltip label={label} key={id}>
+                <Button
+                  onClick={handler}
+                  size="icon"
+                >
+                  {actionState === id
+                    ? <Check className="w-4 h-4" />
+                    : <Icon className="w-4 h-4" />}
+                </Button>
+              </WithTooltip>
             ),
           )}
         </ButtonGroup>
@@ -277,9 +272,7 @@ export function GraphvizViewer({
         <WithTooltip label={fullscreenMode ? 'Exit Fullscreen' : 'Fullscreen'}>
           <Button
             onClick={() => setIsFullscreen(value => !value)}
-            variant="ghost"
             size="icon"
-            className="text-ctp-overlay0 hover:text-ctp-text"
           >
             {isFullscreen
               ? <Minimize2 className="w-4 h-4" />

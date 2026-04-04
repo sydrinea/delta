@@ -10,6 +10,15 @@ import { useAlert } from '../providers'
 import { Badge } from './badge'
 import { Button, buttonVariants } from './button'
 import { Input } from './input'
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from './pagination'
 import { WithTooltip } from './tooltip'
 
 interface TestResult {
@@ -295,14 +304,15 @@ function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
       >
         {expected ? 'accept' : 'reject'}
       </Button>
-      <Button
-        onClick={handleSubmit}
-        variant="ghost"
-        size="sm"
-        className="text-ctp-subtext0"
-      >
-        +
-      </Button>
+      <WithTooltip shortcut={['enter']}>
+        <Button
+          onClick={handleSubmit}
+          variant="ghost"
+          size="sm"
+        >
+          +
+        </Button>
+      </WithTooltip>
     </div>
   )
 }
@@ -312,6 +322,10 @@ interface TestCaseListProps {
   results: Record<string, TestResult>
   onRemove: (id: string) => void
 }
+
+type PaginationToken
+  = { type: 'page', page: number, key: string }
+    | { type: 'ellipsis', key: string }
 
 function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
   const [page, setPage] = useState(0)
@@ -327,6 +341,43 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
     { length: emptyRows },
     (_, offset) => safePage * TESTS_PER_PAGE + visibleTests.length + offset,
   )
+  const pageTokens: PaginationToken[] = (() => {
+    if (totalPages <= 3) {
+      return Array.from({ length: totalPages }, (_, index) => ({
+        type: 'page',
+        page: index,
+        key: `page-${index}`,
+      }))
+    }
+
+    if (safePage <= 1) {
+      return [
+        { type: 'page', page: 0, key: 'page-0' },
+        { type: 'page', page: 1, key: 'page-1' },
+        { type: 'page', page: 2, key: 'page-2' },
+        { type: 'ellipsis', key: 'ellipsis-trailing' },
+        { type: 'page', page: maxPage, key: `page-${maxPage}` },
+      ]
+    }
+
+    if (safePage >= maxPage - 1) {
+      return [
+        { type: 'page', page: 0, key: 'page-0' },
+        { type: 'ellipsis', key: 'ellipsis-leading' },
+        { type: 'page', page: maxPage - 2, key: `page-${maxPage - 2}` },
+        { type: 'page', page: maxPage - 1, key: `page-${maxPage - 1}` },
+        { type: 'page', page: maxPage, key: `page-${maxPage}` },
+      ]
+    }
+
+    return [
+      { type: 'page', page: 0, key: 'page-0' },
+      { type: 'ellipsis', key: 'ellipsis-leading' },
+      { type: 'page', page: safePage, key: `page-${safePage}` },
+      { type: 'ellipsis', key: 'ellipsis-trailing' },
+      { type: 'page', page: maxPage, key: `page-${maxPage}` },
+    ]
+  })()
 
   return (
     <>
@@ -354,34 +405,77 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
         ))}
       </div>
 
-      <div className="flex items-center justify-center gap-2 h-4">
+      <div className="flex items-center justify-center">
         {totalPages > 1 && (
-          <>
-            <Button
-              onClick={() => setPage(Math.max(safePage - 1, 0))}
-              disabled={safePage === 0}
-              variant="ghost"
-              size="icon-xs"
-              className="text-ctp-subtext0 hover:text-ctp-text"
-            >
-              ←
-            </Button>
-            <span className="text-ctp-overlay0 text-xs">
-              {safePage + 1}
-              {' '}
-              /
-              {totalPages}
-            </span>
-            <Button
-              onClick={() => setPage(Math.min(safePage + 1, maxPage))}
-              disabled={safePage === maxPage}
-              variant="ghost"
-              size="icon-xs"
-              className="text-ctp-subtext0 hover:text-ctp-text"
-            >
-              →
-            </Button>
-          </>
+          <Pagination className="mx-0 w-auto">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  text=""
+                  aria-disabled={safePage === 0}
+                  tabIndex={safePage === 0 ? -1 : 0}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    if (safePage === 0)
+                      return
+                    setPage(Math.max(safePage - 1, 0))
+                  }}
+                  className={cn(
+                    'text-ctp-subtext0 hover:text-ctp-text',
+                    safePage === 0 && 'pointer-events-none opacity-50',
+                  )}
+                />
+              </PaginationItem>
+
+              {pageTokens.map(token => (
+                token.type === 'ellipsis'
+                  ? (
+                      <PaginationItem key={token.key}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    )
+                  : (
+                      <PaginationItem key={token.key}>
+                        <PaginationLink
+                          href="#"
+                          isActive={token.page === safePage}
+                          aria-label={`Go to page ${token.page + 1}`}
+                          onClick={(event) => {
+                            event.preventDefault()
+                            setPage(token.page)
+                          }}
+                          className={cn(
+                            'font-semibold text-ctp-subtext0 hover:text-ctp-text',
+                            token.page === safePage && 'text-ctp-text',
+                          )}
+                        >
+                          {token.page + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  text=""
+                  aria-disabled={safePage === maxPage}
+                  tabIndex={safePage === maxPage ? -1 : 0}
+                  onClick={(event) => {
+                    event.preventDefault()
+                    if (safePage === maxPage)
+                      return
+                    setPage(Math.min(safePage + 1, maxPage))
+                  }}
+                  className={cn(
+                    'text-ctp-subtext0 hover:text-ctp-text',
+                    safePage === maxPage && 'pointer-events-none opacity-50',
+                  )}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </div>
     </>

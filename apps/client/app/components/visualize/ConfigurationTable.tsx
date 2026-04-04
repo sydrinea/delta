@@ -2,6 +2,7 @@
 
 import type { TraceStep } from './TraceContext'
 import { useEffect, useMemo } from 'react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { useScrollableTable } from './hooks/useScrollableTable'
 
 interface ConfigurationTableProps {
@@ -68,35 +69,35 @@ export function ConfigurationTable({
         ref={scrollContainerRef}
         className="overflow-auto max-h-96 w-full relative"
       >
-        <table className="w-full min-w-max text-xs text-left border-collapse">
-          <thead className="sticky top-0 bg-ctp-crust/80 backdrop-blur-sm text-ctp-subtext0 z-raised">
-            <tr>
-              <th className="px-3 py-2 border-b border-ctp-surface1 w-12">
+        <Table className="w-full min-w-max">
+          <TableHeader className="sticky top-0 z-raised">
+            <TableRow>
+              <TableHead className="w-12">
                 Step
-              </th>
-              <th className="px-3 py-2 border-b border-ctp-surface1">
+              </TableHead>
+              <TableHead>
                 Configuration
-              </th>
-            </tr>
-          </thead>
-          <tbody>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {configurations.map((config) => {
               const isCurrent = config.index === step
               const rowClassName = isCurrent ? 'bg-ctp-green/20' : ''
               const prefix = config.index > 0 ? '⊢ ' : '  '
 
               return (
-                <tr
+                <TableRow
                   key={config.index}
                   ref={(element) => {
                     rowRef.current[config.index.toString()] = element
                   }}
                   className={rowClassName}
                 >
-                  <td className="px-3 py-1.5 border-b border-ctp-surface0 text-ctp-mauve font-semibold w-12">
+                  <TableCell className="w-12 text-ctp-mauve font-semibold">
                     {config.index}
-                  </td>
-                  <td className="px-3 py-1.5 border-b border-ctp-surface0 text-ctp-text whitespace-nowrap font-mono">
+                  </TableCell>
+                  <TableCell className="whitespace-nowrap font-mono">
                     <span className="text-ctp-subtext1 mr-2 inline-block w-4 text-center">
                       {prefix}
                     </span>
@@ -110,12 +111,12 @@ export function ConfigurationTable({
                       {config.remainingInput}
                     </span>
                     )
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   )

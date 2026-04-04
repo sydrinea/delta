@@ -104,7 +104,7 @@ function GuideSidebarNav({ activePage, onNavigate }: SidebarContentProps) {
 
 interface GuideLayoutProps {
   activePage: string
-  html: string
+  content: React.ReactNode
   headings: Heading[]
   editUrl: string
   issueUrl: string
@@ -114,7 +114,7 @@ interface GuideLayoutProps {
 
 function GuideShell({
   activePage,
-  html,
+  content,
   headings,
   editUrl,
   issueUrl,
@@ -157,7 +157,7 @@ function GuideShell({
 
     root.addEventListener('click', handleHeadingClick)
     return () => root.removeEventListener('click', handleHeadingClick)
-  }, [html, headings])
+  }, [content, headings])
 
   const navigate = useCallback((id: string) => {
     setActiveHeading(id)
@@ -196,12 +196,11 @@ function GuideShell({
         <div className="mx-auto flex w-full max-w-6xl items-start">
           <main className="flex-1 min-w-0 px-6 py-10 lg:px-12">
             <div ref={contentRef} className="mx-auto max-w-2xl">
-              {/* eslint-disable react-dom/no-dangerously-set-innerhtml -- Content is generated from project markdown via a controlled unified/rehype pipeline on the server. */}
               <article
                 className="prose doc-prose"
-                dangerouslySetInnerHTML={{ __html: html }}
-              />
-              {/* eslint-enable react-dom/no-dangerously-set-innerhtml */}
+              >
+                {content}
+              </article>
 
               <footer className="mt-12 border-t border-ctp-surface0 pt-6 pb-10 space-y-4">
                 <div className="flex flex-wrap items-center gap-2">

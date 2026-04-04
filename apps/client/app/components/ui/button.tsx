@@ -19,7 +19,7 @@ const buttonVariants = cva(
         danger:
           'border-ctp-yellow/70 bg-ctp-yellow/12 text-ctp-yellow hover:bg-ctp-yellow/18 aria-expanded:bg-ctp-yellow/18 focus-visible:border-ctp-yellow/80 focus-visible:ring-ctp-yellow/25',
         ghost:
-          'border-ctp-subtext0/25 bg-ctp-surface0/45 text-ctp-subtext1 hover:bg-ctp-surface1/55 hover:text-ctp-text aria-expanded:bg-ctp-surface1/55 aria-expanded:text-ctp-text',
+          'border-ctp-subtext0/25 bg-ctp-surface0/45 text-ctp-overlay0 hover:bg-ctp-surface1/55 hover:text-ctp-text aria-expanded:bg-ctp-surface1/55 aria-expanded:text-ctp-text',
         destructive:
           'border-ctp-red/70 bg-ctp-red/12 text-ctp-red hover:bg-ctp-red/18 aria-expanded:bg-ctp-red/18 focus-visible:border-ctp-red/80 focus-visible:ring-ctp-red/25',
         warning:
@@ -30,6 +30,8 @@ const buttonVariants = cva(
           'border-ctp-blue/70 bg-ctp-blue/12 text-ctp-blue hover:bg-ctp-blue/18 aria-expanded:bg-ctp-blue/18 focus-visible:border-ctp-blue/80 focus-visible:ring-ctp-blue/25',
         accent:
           'border-ctp-mauve/70 bg-ctp-mauve/12 text-ctp-mauve hover:bg-ctp-mauve/18 aria-expanded:bg-ctp-mauve/18 focus-visible:border-ctp-mauve/80 focus-visible:ring-ctp-mauve/25',
+        embossed:
+          'rounded-lg text-ctp-overlay0 hover:text-ctp-text hover:bg-ctp-surface0 border border-transparent hover:border-ctp-surface1 transition-all duration-200',
         link: 'text-primary hover:text-primary/85 underline-offset-4 hover:underline',
       },
       size: {

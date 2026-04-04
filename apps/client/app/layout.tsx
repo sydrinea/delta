@@ -4,7 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import { Cormorant, Recursive, Syne } from 'next/font/google'
 import { cn } from '@/app/lib/utils'
 import { Layout } from '@/components'
-import { SerwistProvider } from './serwist'
+// import { SerwistProvider } from './serwist'
 import './globals.css'
 import 'reactflow/dist/style.css'
 
@@ -13,9 +13,10 @@ const syne = Syne({
   subsets: ['latin'],
 })
 
-const recursiveMono = Recursive({
-  variable: '--font-recursive-mono',
+const recursive = Recursive({
+  variable: '--font-recursive',
   subsets: ['latin'],
+  axes: ['MONO'],
 })
 
 const cormorant = Cormorant({
@@ -67,25 +68,25 @@ export default function RootLayout({
     <html
       suppressHydrationWarning
       lang="en"
-      className={cn('overscroll-none', 'bg-ctp-base', 'antialiased', recursiveMono.variable, syne.variable, cormorant.variable, 'font-mono')}
+      className={cn('overscroll-none', 'bg-ctp-base', 'antialiased', recursive.variable, syne.variable, cormorant.variable, 'font-mono')}
       dir="ltr"
     >
       <body>
-        <SerwistProvider swUrl="/serwist/sw.js">
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem={true}
-            value={{
-              light: 'latte',
-              dark: 'mocha',
-            }}
-          >
-            <div id="dark-mode-root">
-              <Layout>{children}</Layout>
-            </div>
-          </ThemeProvider>
-        </SerwistProvider>
+        {/* <SerwistProvider swUrl="/serwist/sw.js"> */}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem={true}
+          value={{
+            light: 'latte',
+            dark: 'mocha',
+          }}
+        >
+          <div id="dark-mode-root">
+            <Layout>{children}</Layout>
+          </div>
+        </ThemeProvider>
+        {/* </SerwistProvider> */}
       </body>
     </html>
   )

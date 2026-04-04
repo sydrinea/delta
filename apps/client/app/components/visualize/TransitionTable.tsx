@@ -2,6 +2,14 @@
 
 import type { TuringMachine } from '@delta/build'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '../ui/table'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { useScrollableTable } from './hooks/useScrollableTable'
 import {
@@ -139,25 +147,24 @@ export function TransitionTable({
         ref={scrollContainerRef}
         className="overflow-auto max-h-96 w-full relative"
       >
-        <table className="w-full min-w-max text-xs text-left border-collapse">
-          <thead className="sticky top-0 bg-ctp-crust/80 backdrop-blur-sm text-ctp-subtext0">
-            <tr>
-              <th className="px-2 py-2 border-b border-ctp-surface1">ID</th>
-              <th className="px-2 py-2 border-b border-ctp-surface1">From</th>
-              <th className="px-2 py-2 border-b border-ctp-surface1">To</th>
+        <Table className="w-full min-w-max">
+          <TableHeader className="sticky top-0 z-raised">
+            <TableRow>
+              <TableHead>ID</TableHead>
+              <TableHead>From</TableHead>
+              <TableHead>To</TableHead>
               {Array.from({ length: machine.tapeCount }, (_, index) => (
-                <th
+                <TableHead
                   key={`tape-col-${index}`}
-                  className="px-2 py-2 border-b border-ctp-surface1"
                 >
                   Tape
                   {' '}
                   {index + 1}
-                </th>
+                </TableHead>
               ))}
-            </tr>
-          </thead>
-          <tbody>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {visibleRows.map((row: ReturnType<typeof buildTMTransitionRows>[number]) => {
               const isHovered = row.edgeId === hoveredEdgeId
               const isCurrent = isCurrentTransition(row)
@@ -168,57 +175,57 @@ export function TransitionTable({
                   : ''
 
               return (
-                <tr
+                <TableRow
                   key={row.id}
                   ref={(element) => {
                     rowRef.current[row.id] = element
                   }}
                   className={rowClassName}
                 >
-                  <td className="px-2 py-1.5 border-b border-ctp-surface0 text-ctp-mauve font-semibold">
+                  <TableCell className="text-ctp-mauve font-semibold">
                     {row.id}
-                  </td>
-                  <td className="px-2 py-1.5 border-b border-ctp-surface0 text-ctp-text">
+                  </TableCell>
+                  <TableCell>
                     {row.fromState}
-                  </td>
-                  <td className="px-2 py-1.5 border-b border-ctp-surface0 text-ctp-text">
+                  </TableCell>
+                  <TableCell>
                     {row.toState}
-                  </td>
+                  </TableCell>
                   {Array.from({ length: machine.tapeCount }, (_, index) => {
                     const read = row.readSymbols[index] ?? '_'
                     const write = row.writeSymbols[index] ?? read
                     const direction = row.directions[index] ?? 'S'
 
                     return (
-                      <td
+                      <TableCell
                         key={`${row.id}-tape-${index}`}
-                        className="px-2 py-1.5 border-b border-ctp-surface0 text-ctp-subtext1"
+                        className="text-ctp-subtext1"
                       >
                         <span className="text-ctp-text">{read}</span>
                         <span className="px-1">-&gt;</span>
                         <span className="text-ctp-text">{write}</span>
                         <span className="pl-1 text-ctp-mauve">{direction}</span>
-                      </td>
+                      </TableCell>
                     )
                   })}
-                </tr>
+                </TableRow>
               )
             })}
 
             {visibleRows.length === 0 && (
-              <tr>
-                <td
+              <TableRow>
+                <TableCell
                   colSpan={3 + machine.tapeCount}
-                  className="px-2 py-4 text-center text-ctp-subtext0"
+                  className="py-4 text-center text-ctp-subtext0"
                 >
                   {tableMode === 'state'
                     ? 'No transitions from the current state.'
                     : 'No transitions available.'}
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <div className="px-3 py-2 border-t border-ctp-surface0 text-[11px] text-ctp-subtext1">

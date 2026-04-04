@@ -40,14 +40,16 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
   const monaco = useMonaco()
   const compile = useCompile(scope)
 
+  const hasCompiledRef = useRef(false)
+
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor
+    editor.setValue(editorValue)
 
-    if (editor.getValue() !== editorValue) {
-      editor.setValue(editorValue)
+    if (!hasCompiledRef.current) {
+      compile(editorValue)
+      hasCompiledRef.current = true
     }
-
-    compile(editorValue)
 
     defineThemes(monaco)
 
@@ -155,7 +157,9 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
   }
 
   return (
-    <div className="relative w-full h-full">
+    <div
+      className="relative w-full h-full"
+    >
       <Editor
         theme={`catppuccin-${themeNames[resolvedTheme ?? 'light']}`}
         path={editorPath}
@@ -169,7 +173,9 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
           minimap: { enabled: false },
           padding: { top: 12, bottom: 12 },
           fixedOverflowWidgets: true,
-          fontSize: 15,
+          fontFamily: 'var(--font-mono), monospace',
+          fontSize: 16,
+          fontVariations: `'MONO' 0.5`,
         }}
       />
 

@@ -10,7 +10,7 @@
 @theme {
   --font-sans: var(--font-syne);
   --font-serif: var(--font-cormorant);
-  --font-mono: var(--font-recursive-mono);
+  --font-mono: var(--font-recursive);
 
   /* Slightly increase small typography scale globally; buttons use text-xs. */
   --text-xs: 0.8125rem;
@@ -40,27 +40,6 @@
 }
 
 @layer components {
-  /* -- Documentation prose -- */
-  .doc-prose {
-    @apply max-w-full;
-  }
-  .doc-prose :is(h1, h2, h3) {
-    @apply scroll-mt-24 cursor-pointer;
-  }
-  .doc-prose pre {
-    @apply bg-ctp-mantle border border-ctp-surface0 rounded-lg font-mono tracking-wide;
-  }
-  .doc-prose code {
-    @apply font-mono;
-  }
-  .doc-prose table {
-    @apply border-collapse overflow-x-auto block min-w-full;
-  }
-  th,
-  td {
-    @apply border-b border-ctp-surface0;
-  }
-
   /* -- Workbench loader dots -- */
   .workbench-loader-dot {
     @apply inline-block rounded-full opacity-20;

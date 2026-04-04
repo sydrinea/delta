@@ -3,7 +3,8 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { GitHub } from '@/components'
+import { Centered, GitHub } from '@/components'
+import { Button } from '@/components/ui/button'
 import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
@@ -96,64 +97,71 @@ export default function Home() {
   }
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-3xl mx-auto">
-      <div className="mb-12 text-center">
-        <Image
-          src={deltaLogo}
-          alt="Delta logo"
-          className="mx-auto mb-10"
-          width={72}
-          height={72}
-        />
-        <h1 className="text-ctp-text text-3xl font-bold mb-4 leading-tight">
-          design, test, and visualize automata
-        </h1>
-        <p className="text-ctp-subtext0 max-w-md mx-auto leading-relaxed font-sans">
-          A code-first environment for finite automata and Turing machines.
-          Write machines as TypeScript, run test suites, and step through
-          execution visually.
-        </p>
-      </div>
+    <Centered>
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-16 max-w-3xl mx-auto">
+        <div className="mb-12 text-center">
+          <Image
+            src={deltaLogo}
+            alt="Delta logo"
+            className="mx-auto mb-10"
+            width={72}
+            height={72}
+          />
+          <h1 className="text-ctp-text text-3xl font-bold mb-4 leading-tight">
+            design, test, and visualize automata
+          </h1>
+          <p className="text-ctp-subtext0 max-w-md mx-auto leading-relaxed font-sans">
+            A code-first environment for finite automata and Turing machines.
+            Write machines as TypeScript, run test suites, and step through
+            execution visually.
+          </p>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mb-10">
-        {blocks.map(block => (
-          <Link
-            key={block.title}
-            href={block.href}
-            onClick={() => block.external || handleNavigationStart(block.href)}
-            className={`
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full mb-10">
+          {blocks.map(block => (
+            <Link
+              key={block.title}
+              href={block.href}
+              onClick={() => block.external || handleNavigationStart(block.href)}
+              className={`
               group relative rounded-xl border p-5
               transition-all duration-300 overflow-hidden
               shadow-lg
               ${block.bg} ${block.bgHover} ${block.border} ${block.shadow} ${block.labelColor}
             `}
-          >
-            <div className="flex items-start justify-between mb-2">
-              <h2 className="text-sm font-semibold font-mono">{block.title}</h2>
-              <span
-                className={`${block.labelColor} text-xs font-mono transition-colors duration-200`}
-              >
-                {block.label}
-              </span>
-            </div>
-            <p className="font-sans text-ctp-subtext1 leading-relaxed">
-              {block.description}
-            </p>
-          </Link>
-        ))}
-      </div>
+            >
+              <div className="flex items-start justify-between mb-2">
+                <h2 className="text-sm font-semibold font-mono">{block.title}</h2>
+                <span
+                  className={`${block.labelColor} text-xs font-mono transition-colors duration-200`}
+                >
+                  {block.label}
+                </span>
+              </div>
+              <p className="font-sans text-ctp-subtext1 leading-relaxed">
+                {block.description}
+              </p>
+            </Link>
+          ))}
+        </div>
 
-      <div className="flex items-center gap-3">
-        <a
-          href="https://github.com/sydrinea/delta"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="p-2 rounded-lg text-ctp-overlay0 hover:text-ctp-text hover:bg-ctp-surface0 border border-transparent hover:border-ctp-surface1 transition-all duration-200"
-          aria-label="View on GitHub"
-        >
-          <GitHub className="w-5 h-5" />
-        </a>
+        <div className="flex items-center gap-3">
+          <Button
+            asChild
+            variant="embossed"
+            size="icon-sm"
+            aria-label="View on GitHub"
+          >
+            <a
+              href="https://github.com/sydrinea/delta"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <GitHub className="w-5 h-5" />
+            </a>
+          </Button>
+        </div>
       </div>
-    </div>
+    </Centered>
   )
 }

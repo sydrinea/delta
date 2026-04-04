@@ -2,7 +2,7 @@
 
 import type { TabId, WorkbenchLogic } from './types'
 import { Check, CodeXml, Share2, TestTube, Workflow } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { ConfirmModal, TestSuite } from '../ui'
 import { Button } from '../ui/button'
 import {
@@ -122,7 +122,7 @@ export function WorkbenchShell<M extends { name?: string }>({
   logic,
 }: WorkbenchShellProps<M>) {
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-[calc(100dvh-3.5rem)] flex flex-col">
       <DesktopWorkbench logic={logic} />
       <MobileWorkbench logic={logic} />
     </div>
@@ -142,19 +142,14 @@ function MobileWorkbench<M extends { name?: string }>({
     activeTab,
     confirmModal,
   } = logic
+  const mobileActiveIndex = getMobileTabIndex(activeTab)
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
-
-  const [mobileActiveIndex, setMobileActiveIndex] = useState(() =>
-    getMobileTabIndex(activeTab),
-  )
 
   const handleIndexChange = useCallback((index: number) => {
     if (index < 0 || index >= MOBILE_TAB_IDS.length) {
       return
     }
-
-    setMobileActiveIndex(index)
 
     const tabId = MOBILE_TAB_IDS[index]
     if (tabId)
@@ -288,11 +283,11 @@ function MobileHeader<M extends { name?: string }>({
         </h1>
         <Button
           onClick={handleShare}
-          variant="ghost"
-          size="icon-touch"
+          variant="embossed"
+          size="icon-sm"
           className="text-ctp-overlay0 hover:text-ctp-text"
         >
-          {copied ? <Check /> : <Share2 />}
+          {copied ? <Check className="w-4 h-4" /> : <Share2 className="w-4 h-4" />}
         </Button>
       </div>
 
@@ -359,31 +354,26 @@ function DesktopWorkbench<M extends { name?: string }>({
       <ResizablePanelGroup
         orientation="horizontal"
         className="h-full"
-        persistence={{
-          id: 'workbench-desktop-layout',
-          panelIds: ['workbench-desktop-left-panel', 'workbench-desktop-right-panel'],
-        }}
       >
         <ResizablePanel id="workbench-desktop-left-panel" defaultSize={50} minSize={30}>
-          <div className="flex flex-col overflow-hidden h-full">
-            <div className="flex items-center gap-4 px-4 pt-3 pb-2 shrink-0 relative z-raised overflow-hidden">
+          <div className="flex flex-col h-full overflow-hidden">
+            {/* Fixed header: tabs + recipe dropdown */}
+            <div className="shrink-0 flex items-center gap-4 px-4 pt-3 pb-2">
               <Tabs
                 value={activeTab}
                 onValueChange={value => requestTabChange(value as TabId)}
               >
                 <TabsList className="gap-4">
-                  {visibleTabs.map((tab) => {
-                    return (
-                      <TabsTrigger
-                        key={tab.id}
-                        value={tab.id}
-                        className="capitalize"
-                        aria-controls={`tab-panel-${tab.id}`}
-                      >
-                        {TAB_LABELS[tab.id] ?? tab.id}
-                      </TabsTrigger>
-                    )
-                  })}
+                  {visibleTabs.map(tab => (
+                    <TabsTrigger
+                      key={tab.id}
+                      value={tab.id}
+                      className="capitalize"
+                      aria-controls={`tab-panel-${tab.id}`}
+                    >
+                      {TAB_LABELS[tab.id] ?? tab.id}
+                    </TabsTrigger>
+                  ))}
                 </TabsList>
               </Tabs>
 
@@ -396,7 +386,8 @@ function DesktopWorkbench<M extends { name?: string }>({
               />
             </div>
 
-            <div className="flex-1 overflow-hidden">{activeTabContent}</div>
+            {/* Editor fills remaining height */}
+            <div className="flex-1 overflow-hidden min-h-0">{activeTabContent}</div>
 
             {confirmModal && <ConfirmModal {...confirmModal} />}
           </div>
@@ -405,34 +396,44 @@ function DesktopWorkbench<M extends { name?: string }>({
         <ResizableHandle withHandle />
 
         <ResizablePanel id="workbench-desktop-right-panel" defaultSize={50} minSize={30}>
-          <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden min-w-0">
-            <div className="flex flex-col gap-4 p-6 min-w-0">
-              <WorkbenchHeader logic={logic} />
-
-              <div className="flex flex-col gap-4">
-                {machine && machineDot && (
-                  <GraphvizViewer
-                    dot={machineDot}
-                    machineName={machine.name ?? 'machine'}
-                    showExportActions
-                    onEdgeHover={graphvizOnEdgeHover}
-                  />
-                )}
-
-                <TestSuite
-                  tests={tests}
-                  setTests={setTests}
-                  evaluateInput={
-                    machine
-                      ? (input: string) => simulate(machine, input)
-                      : undefined
-                  }
-                  machineName={machine?.name ?? 'delta'}
-                  resetKeys={[machine, selectedRecipeKey]}
-                />
+          <ResizablePanelGroup
+            orientation="vertical"
+            className="h-full flex-col"
+          >
+            <ResizablePanel id="workbench-desktop-graph-panel" defaultSize={40} minSize={30}>
+              <div className="h-full overflow-y-auto overflow-x-hidden min-w-0">
+                <div className="flex flex-col gap-4 p-6 min-w-0">
+                  <WorkbenchHeader logic={logic} />
+                  {machine && machineDot && (
+                    <GraphvizViewer
+                      dot={machineDot}
+                      machineName={machine.name ?? 'machine'}
+                      showExportActions
+                      onEdgeHover={graphvizOnEdgeHover}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+            </ResizablePanel>
+
+            <ResizableHandle withHandle />
+
+            <ResizablePanel id="workbench-desktop-tests-panel" defaultSize={60} minSize={20}>
+              <div className="h-full overflow-y-auto overflow-x-hidden min-w-0">
+                <div className="p-6">
+                  <TestSuite
+                    tests={tests}
+                    setTests={setTests}
+                    evaluateInput={
+                      machine ? (input: string) => simulate(machine, input) : undefined
+                    }
+                    machineName={machine?.name ?? 'delta'}
+                    resetKeys={[machine, selectedRecipeKey]}
+                  />
+                </div>
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </ResizablePanel>
       </ResizablePanelGroup>
     </div>
@@ -485,9 +486,8 @@ function WorkbenchHeader<M extends { name?: string }>({
           <WithTooltip label="Share Machine">
             <Button
               onClick={handleShare}
-              variant="ghost"
-              size="icon-touch"
-              className="text-ctp-overlay0 hover:text-ctp-text"
+              variant="embossed"
+              size="icon-sm"
             >
               {copied
                 ? (

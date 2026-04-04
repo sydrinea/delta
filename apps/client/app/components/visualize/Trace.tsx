@@ -108,7 +108,7 @@ export function Trace<M extends VisualMachine>() {
       <div className="flex flex-col gap-2">
         <Combobox items={testInputs} value={input || null} onValueChange={handleTestSelect}>
           <ComboboxInput
-            className="w-full"
+            className="w-full **:data-[slot=input-group-control]:text-sm"
             value={input}
             onChange={handleInputChange}
             placeholder="input string"

@@ -17,7 +17,7 @@ function TooltipContent({ ref, className, sideOffset = 6, ...props }: React.Comp
         ref={ref}
         sideOffset={sideOffset}
         className={cn(
-          'z-overlay overflow-hidden',
+          'z-toast overflow-hidden',
           'rounded-md border border-ctp-subtext0/25 bg-ctp-mantle',
           'px-2.5 py-1.5 text-xs text-ctp-text shadow-md',
           'animate-in fade-in-0 zoom-in-95',
