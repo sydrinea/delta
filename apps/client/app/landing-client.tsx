@@ -169,7 +169,6 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section id="features" className="py-20">
         <div className={CONTAINER}>
           <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-lavender font-sans">
-            <span className="w-6 h-px bg-ctp-lavender" />
             What you get
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
@@ -191,7 +190,6 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="bg-ctp-mantle border-y border-ctp-surface0 py-20">
         <div className={CONTAINER}>
           <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-yellow font-sans">
-            <span className="w-6 h-px bg-ctp-yellow" />
             Machine types
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
@@ -230,7 +228,6 @@ export default function LandingClient({ children }: LandingClientProps) {
         <div className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
             <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-peach font-sans">
-              <span className="w-6 h-px bg-ctp-peach" />
               Built for rigor
             </div>
             <h2 className="font-sans text-4xl leading-12 font-bold tracking-tight text-ctp-text mb-6">
@@ -251,20 +248,17 @@ export default function LandingClient({ children }: LandingClientProps) {
               </li>
             </ul>
           </div>
-
-          <WindowMock title="tests.ts">
-            <TestSuitePreview
-              className="p-4"
-              rows={[
-                { input: 'a', expected: false, passed: true },
-                { input: 'aa', expected: true, passed: true },
-                { input: 'aaa', expected: true, passed: true },
-                { input: 'aaaa', expected: false, passed: true },
-                { input: 'aaaaaa', expected: true, passed: true },
-                { input: 'aaaaaaa', expected: false, passed: false },
-              ]}
-            />
-          </WindowMock>
+          <TestSuitePreview
+            className="p-4"
+            rows={[
+              { input: 'a', expected: false, passed: true },
+              { input: 'aa', expected: true, passed: true },
+              { input: 'aaa', expected: true, passed: true },
+              { input: 'aaaa', expected: false, passed: true },
+              { input: 'aaaaaa', expected: true, passed: true },
+              { input: 'aaaaaaa', expected: false, passed: false },
+            ]}
+          />
         </div>
       </section>
 
