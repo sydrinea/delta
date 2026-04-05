@@ -10,7 +10,15 @@ const ROUTE_LOADING_CONFIG: Record<string, RouteLoaderConfig> = {
 }
 
 function getRouteConfig(route: string): RouteLoaderConfig {
-  return ROUTE_LOADING_CONFIG[route] ?? {}
+  const sortedPrefixes = Object.keys(ROUTE_LOADING_CONFIG).sort((a, b) => b.length - a.length)
+
+  for (const prefix of sortedPrefixes) {
+    if (route.startsWith(prefix)) {
+      return ROUTE_LOADING_CONFIG[prefix]
+    }
+  }
+
+  return {}
 }
 
 export function shouldEnableLoader(route: string): boolean {

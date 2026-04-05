@@ -9,6 +9,7 @@ import { useTheme } from 'next-themes'
 import { useMemo, useState } from 'react'
 import { ReactFlowProvider } from 'reactflow'
 import { useCompile } from '@/hooks/useCompile'
+import { useUrlSync } from '@/hooks/useUrlSync'
 import { containsCustomLogicOrComments } from '@/lib/detect-custom-logic'
 import { toDot } from '@/lib/dot'
 import { nfaToFlow } from '@/lib/flow/toFlow'
@@ -28,6 +29,9 @@ import { WorkbenchShell } from './WorkbenchShell'
 
 interface WorkbenchNFAProps {
   enabledTabs?: EnabledTabs
+  initialTab?: TabId
+  initialRecipe?: string
+  initialInput?: string
 }
 
 const DEFAULT_TABS: EnabledTabs = {
@@ -46,6 +50,8 @@ const TAB_LABELS: Record<TabId, string> = {
 function useNfaWorkbenchLogic(
   enabledTabs: EnabledTabs,
   resolvedTheme: string | undefined,
+  initialTab?: TabId,
+  initialRecipe?: string,
 ): WorkbenchLogic<NFA> {
   const [showWarning, setShowWarning] = useState(false)
   const [pendingTab, setPendingTab] = useState<TabId | null>(null)
@@ -88,6 +94,8 @@ function useNfaWorkbenchLogic(
     dotFromMachine: toDot,
     activeDot,
     resolvedTheme,
+    initialTab,
+    initialRecipe,
     onRecipeLoaded: ({ activeTab, setActiveTab }) => {
       if (activeTab === 'canvas') {
         setActiveTab('code')
@@ -182,6 +190,9 @@ function getNfaInputTokens(args: TraceInputArgs) {
 
 export function NFAComponent({
   enabledTabs = DEFAULT_TABS,
+  initialTab,
+  initialRecipe,
+  initialInput,
 }: WorkbenchNFAProps) {
   const machine = useNfaStore(s => s.machine)
   const tests = useNfaStore(s => s.tests)
@@ -195,6 +206,7 @@ export function NFAComponent({
       simulate={(currentMachine, input) => simulateNFA(currentMachine, input)}
       getDot={(currentMachine, states) => toDot(currentMachine, theme, states)}
       getInputTokens={getNfaInputTokens}
+      initialInput={initialInput}
       bottomPanel={({
         trace,
         step,
@@ -211,7 +223,12 @@ export function NFAComponent({
         />
       )}
     >
-      <NFAWorkbenchWithTraceContext enabledTabs={enabledTabs} resolvedTheme={resolvedTheme} />
+      <NFAWorkbenchWithTraceContext
+        enabledTabs={enabledTabs}
+        resolvedTheme={resolvedTheme}
+        initialTab={initialTab}
+        initialRecipe={initialRecipe}
+      />
     </TraceProvider>
   )
 }
@@ -219,11 +236,16 @@ export function NFAComponent({
 function NFAWorkbenchWithTraceContext({
   enabledTabs,
   resolvedTheme,
+  initialTab,
+  initialRecipe,
 }: {
   enabledTabs: EnabledTabs
   resolvedTheme: string | undefined
+  initialTab?: TabId
+  initialRecipe?: string
 }) {
-  const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme)
+  const logic = useNfaWorkbenchLogic(enabledTabs, resolvedTheme, initialTab, initialRecipe)
+  useUrlSync({ machineType: 'nfa', activeTab: logic.activeTab, selectedRecipeKey: logic.selectedRecipeKey })
   return (
     <div className="h-full flex flex-col">
       <WorkbenchShell logic={logic} />

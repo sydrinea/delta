@@ -111,6 +111,7 @@ interface TraceProviderProps<M extends VisualMachine> {
   getDot: (machine: M, states: Set<string>) => string
   getInputTokens: (args: TraceInputArgs) => TraceInputToken[]
   bottomPanel?: (context: TraceBottomPanelContext<M>) => ReactNode
+  initialInput?: string
 }
 
 export function TraceProvider<M extends VisualMachine>({
@@ -121,8 +122,9 @@ export function TraceProvider<M extends VisualMachine>({
   getDot,
   getInputTokens,
   bottomPanel,
+  initialInput,
 }: TraceProviderProps<M>) {
-  const [input, setInput] = useState('')
+  const [input, setInput] = useState(initialInput ?? '')
   const [selectedTest, setSelectedTest] = useState('')
   const [hoveredEdgeId, setHoveredEdgeId] = useState<string | null>(null)
 

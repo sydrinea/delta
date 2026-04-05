@@ -290,14 +290,15 @@ function DesktopWorkbench<M extends { name?: string }>({
               <div className="h-full overflow-y-auto overflow-x-hidden min-w-0">
                 <div className="flex flex-col gap-4 p-6 min-w-0">
                   <WorkbenchHeader logic={logic} />
-                  {machine && machineDot && (
-                    <GraphvizViewer
-                      dot={machineDot}
-                      machineName={machine.name ?? 'machine'}
-                      showExportActions
-                      onEdgeHover={graphvizOnEdgeHover}
-                    />
-                  )}
+                  {machine && machineDot
+                    && (
+                      <GraphvizViewer
+                        dot={machineDot}
+                        machineName={machine.name ?? 'machine'}
+                        showExportActions
+                        onEdgeHover={graphvizOnEdgeHover}
+                      />
+                    )}
                 </div>
               </div>
             </ResizablePanel>

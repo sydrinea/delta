@@ -21,7 +21,7 @@ export const NAVBAR_GROUPS: NavbarGroup[] = [
     items: [
       { label: 'NFA & DFA', href: '/nfa' },
       { label: 'PDA', href: '/pda' },
-      { label: 'TM', href: '/tm' },
+      { label: 'Turing Machine', href: '/tm' },
     ],
   },
   {

@@ -10,7 +10,7 @@ import type {
 } from './types'
 import type { Theme } from '@/lib/theme'
 import type { MachineType } from '@/lib/worker/protocol'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMachineShare } from '@/hooks/useMachineShare'
 import { themeNames } from '@/lib/theme'
 import { getInitialTab, isTabEnabled } from './utils'
@@ -40,6 +40,8 @@ interface UseWorkbenchVariantCoreOptions<M extends { name?: string }> {
   dotFromMachine: (machine: M, themeName: Theme) => string
   activeDot: string | null
   resolvedTheme: string | undefined
+  initialTab?: TabId
+  initialRecipe?: string
   onRecipeLoaded?: (args: {
     activeTab: TabId
     setActiveTab: (tab: TabId) => void
@@ -59,11 +61,15 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
   dotFromMachine,
   activeDot,
   resolvedTheme,
+  initialTab,
+  initialRecipe,
   onRecipeLoaded,
 }: UseWorkbenchVariantCoreOptions<M>) {
-  const [activeTab, setActiveTab] = useState<TabId>(() =>
-    getInitialTab(enabledTabs),
-  )
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    if (initialTab && isTabEnabled(enabledTabs, initialTab))
+      return initialTab
+    return getInitialTab(enabledTabs)
+  })
   const [selectedRecipeKey, setSelectedRecipeKey] = useState('')
 
   const recipeEntries = useMemo(() => Object.entries(recipesMap), [recipesMap])
@@ -129,6 +135,22 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     },
     [activeTabForUI, adapters, compile, onRecipeLoaded, recipesMap, showAlert],
   )
+
+  const hasAppliedInitialRecipeRef = useRef(false)
+  useEffect(() => {
+    if (initialRecipe && !hasAppliedInitialRecipeRef.current) {
+      hasAppliedInitialRecipeRef.current = true
+      applyRecipe(initialRecipe)
+    }
+    // eslint-disable-next-line react/exhaustive-deps
+  }, [])
+
+  // Compile on mount so machine is populated even when the code tab isn't active.
+  // If initialRecipe is also loading, applyRecipe's compile call will win (same worker pattern).
+  useEffect(() => {
+    compile(editorValue)
+    // eslint-disable-next-line react/exhaustive-deps
+  }, [])
 
   const requestTabChange = useCallback(
     (tab: TabId) => {

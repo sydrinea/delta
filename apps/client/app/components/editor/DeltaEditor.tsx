@@ -6,6 +6,7 @@ import Editor, { useMonaco } from '@monaco-editor/react'
 import { AlertTriangle } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useRef, useState } from 'react'
+import { Spinner } from '@/components/ui/spinner'
 import { useCompile } from '@/hooks/useCompile'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfaStore'
@@ -165,6 +166,11 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
         width="100%"
         defaultLanguage="typescript"
         defaultValue={editorValue}
+        loading={(
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Spinner className="size-6" />
+          </div>
+        )}
         onMount={handleMount}
         onChange={handleChange}
         options={{

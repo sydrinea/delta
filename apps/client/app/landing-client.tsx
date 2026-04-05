@@ -31,7 +31,7 @@ const features = [
   {
     title: 'Step-Through Visualizer',
     description: 'Watch your machine process input state by state. The active transition highlights at every step.',
-    href: '/nfa',
+    href: '/tm/debug/binary-palindrome/11011011',
     label: 'try it',
     variant: 'teal' as const,
   },
@@ -118,7 +118,6 @@ export default function LandingClient({ children }: LandingClientProps) {
 
   return (
     <div className="w-full overflow-x-hidden">
-      {/* HERO */}
       <section className="min-h-[calc(100vh-3.5rem)] flex flex-col hero-grid relative">
         {announcement && (
           <div className="absolute top-4 inset-x-0 flex justify-center z-10 pointer-events-none">
@@ -185,7 +184,6 @@ export default function LandingClient({ children }: LandingClientProps) {
         </div>
       </section>
 
-      {/* FEATURES */}
       <section id="features" className="py-20">
         <div className={CONTAINER}>
           <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-lavender font-sans">
@@ -206,7 +204,6 @@ export default function LandingClient({ children }: LandingClientProps) {
         </div>
       </section>
 
-      {/* MACHINES */}
       <section className="bg-ctp-mantle border-y border-ctp-surface0 py-20">
         <div className={CONTAINER}>
           <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-yellow font-sans">
@@ -242,7 +239,6 @@ export default function LandingClient({ children }: LandingClientProps) {
         </div>
       </section>
 
-      {/* EDUCATOR HINT */}
       <section className="py-20">
         <div className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
@@ -281,7 +277,6 @@ export default function LandingClient({ children }: LandingClientProps) {
         </div>
       </section>
 
-      {/* CTA */}
       <section className="bg-ctp-mauve/15 border-y border-ctp-mauve/25 py-20 text-center">
         <div className={CONTAINER}>
           <h2 className="font-sans text-[clamp(1.625rem,3.5vw,2.25rem)] font-bold tracking-tight text-ctp-text mb-3">

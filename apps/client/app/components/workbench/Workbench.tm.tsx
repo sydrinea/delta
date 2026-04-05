@@ -2,12 +2,13 @@
 
 import type { TuringMachine } from '@delta/build'
 import type { TraceBottomPanelContext, TraceInputArgs } from '../visualize/TraceContext'
-import type { EnabledTabs, WorkbenchLogic } from './types'
+import type { EnabledTabs, TabId, WorkbenchLogic } from './types'
 import { recipes } from '@delta/examples/recipes'
 import { simulateTM } from '@delta/simulator'
 import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
 import { useCompile } from '@/hooks/useCompile'
+import { useUrlSync } from '@/hooks/useUrlSync'
 import { toDotTM } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
 import { useTmStore } from '@/store/tmStore'
@@ -25,6 +26,9 @@ import { WorkbenchShell } from './WorkbenchShell'
 
 interface WorkbenchTMProps {
   enabledTabs?: EnabledTabs
+  initialTab?: TabId
+  initialRecipe?: string
+  initialInput?: string
 }
 
 const DEFAULT_TABS: EnabledTabs = {
@@ -39,6 +43,8 @@ const TRAILING_BRACKET_REGEX = /\]$/
 function useTmWorkbenchLogic(
   enabledTabs: EnabledTabs,
   resolvedTheme: string | undefined,
+  initialTab?: TabId,
+  initialRecipe?: string,
 ): WorkbenchLogic<TuringMachine> {
   const machine = useTmStore(s => s.machine)
   const editorValue = useTmStore(s => s.editorValue)
@@ -79,6 +85,8 @@ function useTmWorkbenchLogic(
     dotFromMachine: toDotTM,
     activeDot,
     resolvedTheme,
+    initialTab,
+    initialRecipe,
   })
 
   return {
@@ -135,6 +143,9 @@ function getTmInputTokens(args: TraceInputArgs) {
 
 export function TMComponent({
   enabledTabs = DEFAULT_TABS,
+  initialTab,
+  initialRecipe,
+  initialInput,
 }: WorkbenchTMProps) {
   const machine = useTmStore(s => s.machine)
   const tests = useTmStore(s => s.tests)
@@ -152,6 +163,7 @@ export function TMComponent({
       getDot={(currentMachine, states) =>
         toDotTM(currentMachine, theme, states)}
       getInputTokens={getTmInputTokens}
+      initialInput={initialInput}
       bottomPanel={({
         machine: currentMachine,
         current,
@@ -168,7 +180,12 @@ export function TMComponent({
         />
       )}
     >
-      <TMWorkbenchWithTraceContext enabledTabs={enabledTabs} resolvedTheme={resolvedTheme} />
+      <TMWorkbenchWithTraceContext
+        enabledTabs={enabledTabs}
+        resolvedTheme={resolvedTheme}
+        initialTab={initialTab}
+        initialRecipe={initialRecipe}
+      />
     </TraceProvider>
   )
 }
@@ -176,11 +193,16 @@ export function TMComponent({
 function TMWorkbenchWithTraceContext({
   enabledTabs,
   resolvedTheme,
+  initialTab,
+  initialRecipe,
 }: {
   enabledTabs: EnabledTabs
   resolvedTheme: string | undefined
+  initialTab?: TabId
+  initialRecipe?: string
 }) {
-  const logic = useTmWorkbenchLogic(enabledTabs, resolvedTheme)
+  const logic = useTmWorkbenchLogic(enabledTabs, resolvedTheme, initialTab, initialRecipe)
+  useUrlSync({ machineType: 'tm', activeTab: logic.activeTab, selectedRecipeKey: logic.selectedRecipeKey })
   return (
     <div className="h-full flex flex-col">
       <WorkbenchShell logic={logic} />
