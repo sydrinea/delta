@@ -85,7 +85,7 @@ function NavbarContent() {
         <div className="hidden md:flex h-full items-center justify-between px-6">
           <div className="flex items-center gap-6">
             <Link href="/" onClick={() => handleNavigationStart('/')} className="flex items-center">
-              <Image src={deltaLogo} alt="Delta logo" width={28} height={28} className="mb-0.5 block opacity-80 hover:opacity-100 transition-opacity" />
+              <Image src={deltaLogo} alt="Delta logo" width={28} height={28} className="block opacity-80 hover:opacity-100 transition-opacity" />
             </Link>
 
             <NavigationMenu viewport={false}>
