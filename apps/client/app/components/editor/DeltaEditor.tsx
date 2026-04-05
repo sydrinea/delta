@@ -1,6 +1,6 @@
 'use client'
 
-import type { OnChange, OnMount } from '@monaco-editor/react'
+import type { BeforeMount, OnChange, OnMount } from '@monaco-editor/react'
 import type * as MonacoEditor from 'monaco-editor'
 import Editor, { useMonaco } from '@monaco-editor/react'
 import { AlertTriangle } from 'lucide-react'
@@ -43,18 +43,20 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
 
   const [isEditorReady, setIsEditorReady] = useState(false)
 
+  const beforeMount: BeforeMount = (monaco: typeof MonacoEditor) => {
+    defineThemes(monaco)
+
+    monaco.editor.setTheme(
+      `catppuccin-${themeNames[resolvedTheme ?? 'light']}`,
+    )
+  }
+
   const handleMount: OnMount = (editor, monaco: typeof MonacoEditor) => {
     editorRef.current = editor
 
     setIsEditorReady(true)
 
     compile(editor.getValue())
-
-    defineThemes(monaco)
-
-    monaco.editor.setTheme(
-      `catppuccin-${themeNames[resolvedTheme ?? 'light']}`,
-    )
 
     monaco.typescript.typescriptDefaults.setCompilerOptions({
       target: monaco.typescript.ScriptTarget.ESNext,
@@ -171,6 +173,7 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
             <Spinner className="size-6" />
           </div>
         )}
+        beforeMount={beforeMount}
         onMount={handleMount}
         onChange={handleChange}
         options={{
