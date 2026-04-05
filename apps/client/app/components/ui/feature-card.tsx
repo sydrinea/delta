@@ -1,5 +1,3 @@
-import { ArrowRight } from 'lucide-react'
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 export type FeatureCardVariant = 'sapphire' | 'blue' | 'green' | 'red' | 'mauve' | 'peach' | 'teal' | 'lavender'
@@ -7,11 +5,7 @@ export type FeatureCardVariant = 'sapphire' | 'blue' | 'green' | 'red' | 'mauve'
 export interface FeatureCardProps {
   title: string
   description: string
-  href: string
-  label: string
   variant: FeatureCardVariant
-  external?: boolean
-  onClick?: () => void
   className?: string
 }
 
@@ -53,53 +47,24 @@ const variantStyles: Record<FeatureCardVariant, { container: string, text: strin
 export function FeatureCard({
   title,
   description,
-  href,
-  label,
   variant,
-  external,
-  onClick,
   className,
 }: FeatureCardProps) {
   const styles = variantStyles[variant]
 
-  const containerClasses = cn(
-    'group relative rounded-xl border p-5 transition-all duration-300 overflow-hidden shadow-lg',
-    styles.container,
-    className,
-  )
-
-  const content = (
-    <>
+  return (
+    <div className={cn(
+      'group relative rounded-xl border p-5 transition-all duration-300 overflow-hidden shadow-lg',
+      styles.container,
+      className,
+    )}
+    >
       <div className="flex items-start justify-between mb-2">
         <h2 className={cn('text-sm font-semibold font-mono leading-none', styles.text)}>{title}</h2>
-        <span className={cn('text-xs font-mono transition-colors duration-200 inline-flex items-center gap-1 leading-none', styles.text)}>
-          {label}
-          <ArrowRight className="w-3.5 h-3.5" />
-        </span>
       </div>
       <p className="font-sans text-ctp-subtext1 leading-relaxed">
         {description}
       </p>
-    </>
-  )
-
-  if (external) {
-    return (
-      <a
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        onClick={onClick}
-        className={containerClasses}
-      >
-        {content}
-      </a>
-    )
-  }
-
-  return (
-    <Link href={href} onClick={onClick} className={containerClasses}>
-      {content}
-    </Link>
+    </div>
   )
 }

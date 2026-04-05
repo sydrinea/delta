@@ -24,43 +24,31 @@ const features = [
   {
     title: 'Fluent TypeScript API',
     description: 'Define machines with a chainable builder. Errors surface at compile time, right in the editor.',
-    href: '/guide/quick-start',
-    label: 'read docs',
     variant: 'mauve' as const,
   },
   {
     title: 'Step-Through Visualizer',
     description: 'Watch your machine process input state by state. The active transition highlights at every step.',
-    href: '/tm/debug/binary-palindrome/11011011',
-    label: 'try it',
     variant: 'teal' as const,
   },
   {
     title: 'Inline Test Suites',
     description: 'Pair any machine with a test suite. Delta runs them all and reports pass/fail right next to your code.',
-    href: '/nfa',
-    label: 'learn more',
     variant: 'green' as const,
   },
   {
     title: 'NFA → DFA Conversion',
     description: 'Convert any NFA via subset construction. Optionally preserve human-readable state names throughout.',
-    href: '/guide/thompson#converting-to-a-dfa',
-    label: 'open NFA',
     variant: 'lavender' as const,
   },
   {
     title: 'Shareable URLs',
-    description: 'Every machine encodes into a URL. Share machines with a link — no hoops required.',
-    href: '/nfa',
-    label: 'try it',
+    description: 'Every machine can be turned into a URL. Share machines with a link — no hoops required.',
     variant: 'blue' as const,
   },
   {
     title: 'Thompson\'s Construction',
     description: 'Build NFAs from regular expressions with a stack-based API mirroring union, concat, and Kleene star.',
-    href: '/guide/thompson',
-    label: 'read docs',
     variant: 'peach' as const,
   },
 ]
@@ -197,7 +185,6 @@ export default function LandingClient({ children }: LandingClientProps) {
               <FeatureCard
                 key={f.title}
                 {...f}
-                onClick={() => handleNavigationStart(f.href)}
               />
             ))}
           </div>
