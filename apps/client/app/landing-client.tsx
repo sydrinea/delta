@@ -234,16 +234,16 @@ export default function LandingClient({ children }: LandingClientProps) {
               Machines as code. Verification by unit test.
             </h2>
             <ul className="space-y-4 text-sm text-ctp-subtext0 font-sans leading-relaxed">
-              <li className="flex items-start gap-3">
-                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
+              <li className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
                 Write machines with TypeScript, skip the learning curve.
               </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
+              <li className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
                 Test suites make correctness verifiable and gradeable — not just visually convincing.
               </li>
-              <li className="flex items-start gap-3">
-                <span className="mt-1 w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
+              <li className="flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
                 Runs entirely in the browser. Zero installation required.
               </li>
             </ul>
