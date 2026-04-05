@@ -91,7 +91,7 @@ export function Code({ children, className, ...props }: CodeProps) {
       <pre
         ref={preRef}
         className={cn(
-          'rounded-lg  bg-ctp-mantle pr-12',
+          'rounded-lg bg-ctp-mantle pr-12 overflow-x-auto',
           className,
           isSingleLine && 'py-2',
         )}

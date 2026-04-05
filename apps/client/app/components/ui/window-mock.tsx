@@ -17,7 +17,7 @@ export function WindowMock({ title, className, children }: WindowMockProps) {
           <span className="ml-3 text-xs font-mono text-ctp-overlay0">{title}</span>
         )}
       </div>
-      <div>{children}</div>
+      <div className="overflow-x-auto">{children}</div>
     </div>
   )
 }

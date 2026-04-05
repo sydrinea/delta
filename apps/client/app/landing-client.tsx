@@ -117,8 +117,7 @@ export default function LandingClient({ children }: LandingClientProps) {
           <div className="w-full grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6">
               <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-blue font-sans">
-                <span className="w-8 h-px bg-ctp-blue" />
-                Theory of computation, reimagined
+                Theory reimagined
               </span>
 
               <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight text-ctp-text">
