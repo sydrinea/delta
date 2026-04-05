@@ -121,9 +121,9 @@ export default function LandingClient({ children }: LandingClientProps) {
               </span>
 
               <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight text-ctp-text">
-                Write automata and
+                Define automata and
                 <br />
-                <span className="text-ctp-mauve">see them think</span>
+                <span className="text-ctp-mauve">inspect their behavior</span>
               </h1>
 
               <p className="font-mono text-sm leading-relaxed text-ctp-subtext0 max-w-md">
@@ -172,7 +172,7 @@ export default function LandingClient({ children }: LandingClientProps) {
             What you get
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
-            Everything you need to learn theory of computation
+            A complete theory toolkit
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 min-[900px]:grid-cols-3 gap-3">
             {features.map(f => (
@@ -193,7 +193,7 @@ export default function LandingClient({ children }: LandingClientProps) {
             Machine types
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
-            All of Chomsky's hierarchy
+            Chomsky's hierarchy
           </h2>
           <div className="grid grid-cols-1 min-[700px]:grid-cols-3 gap-5">
             {machines.map(m => (
@@ -231,7 +231,7 @@ export default function LandingClient({ children }: LandingClientProps) {
               Built for rigor
             </div>
             <h2 className="font-sans text-4xl leading-12 font-bold tracking-tight text-ctp-text mb-6">
-              Machines as code. Verification by unit test.
+              Prove machines' correctness
             </h2>
             <ul className="space-y-4 text-sm text-ctp-subtext0 font-sans leading-relaxed">
               <li className="flex items-center gap-3">
@@ -266,7 +266,7 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="bg-ctp-mauve/15 border-y border-ctp-mauve/25 py-20 text-center">
         <div className={CONTAINER}>
           <h2 className="font-sans text-[clamp(1.625rem,3.5vw,2.25rem)] font-bold tracking-tight text-ctp-text mb-3">
-            Start building machines
+            Start building today
           </h2>
           <p className="text-sm text-ctp-subtext0 font-mono mb-8">No install, no account, just open and write.</p>
           <Button asChild variant="accent" size="lg">
