@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import * as React from 'react'
 import { GitHub } from '@/components'
 import Footer from '@/components/layout/Footer'
+import { AnnouncementBadge } from '@/components/ui/announcement-badge'
 import { Button } from '@/components/ui/button'
 import { FeatureCard } from '@/components/ui/feature-card'
 import { TestSuitePreview } from '@/components/ui/TestSuite'
@@ -93,6 +94,8 @@ const machines = [
 
 const CONTAINER = 'px-4 sm:px-8 max-w-6xl mx-auto w-full'
 
+const announcement: { label: string, href?: string, variant?: React.ComponentProps<typeof AnnouncementBadge>['variant'] } | null = null
+
 export default function LandingClient({ children }: LandingClientProps) {
   const pathname = usePathname()
 
@@ -112,7 +115,14 @@ export default function LandingClient({ children }: LandingClientProps) {
   return (
     <div className="w-full overflow-x-hidden">
       {/* HERO */}
-      <section className="min-h-[calc(100vh-3.5rem)] flex flex-col">
+      <section className="min-h-[calc(100vh-3.5rem)] flex flex-col hero-grid relative">
+        {announcement && (
+          <div className="absolute top-4 inset-x-0 flex justify-center z-10 pointer-events-none">
+            <div className="pointer-events-auto">
+              <AnnouncementBadge {...announcement} />
+            </div>
+          </div>
+        )}
         <div className={`${CONTAINER} flex-1 flex items-center py-12 sm:py-20`}>
           <div className="w-full grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6">
@@ -145,10 +155,16 @@ export default function LandingClient({ children }: LandingClientProps) {
               </div>
             </div>
 
-            <div className="min-w-0 w-full">
-              <WindowMock title="machine.ts">
-                {children}
-              </WindowMock>
+            <div className="min-w-0 w-full relative">
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 blur-md bg-linear-to-br from-ctp-mauve/30 via-ctp-lavender/20 to-ctp-blue"
+              />
+              <div className="relative">
+                <WindowMock title="machine.ts">
+                  {children}
+                </WindowMock>
+              </div>
             </div>
           </div>
         </div>

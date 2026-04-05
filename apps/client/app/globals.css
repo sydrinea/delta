@@ -153,6 +153,13 @@ html.mocha :is(pre, code)[data-theme*=' '] * {
   background-color: var(--shiki-dark-bg) !important;
 }
 
+@layer utilities {
+  .hero-grid {
+    background-image: radial-gradient(circle, theme(colors.ctp-surface1 / 0.6) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+}
+
 @layer base {
   :root {
     color: var(--color-ctp-red);
