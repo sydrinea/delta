@@ -158,7 +158,7 @@ export default function LandingClient({ children }: LandingClientProps) {
             <div className="min-w-0 w-full relative">
               <div
                 aria-hidden="true"
-                className="absolute inset-0 blur-md bg-linear-to-br from-ctp-mauve/30 via-ctp-lavender/20 to-ctp-blue"
+                className="absolute -inset-1 blur-md bg-linear-to-br from-ctp-mauve/30 via-ctp-lavender/20 to-ctp-blue"
               />
               <div className="relative">
                 <WindowMock title="machine.ts">
