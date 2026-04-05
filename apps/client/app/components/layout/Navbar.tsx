@@ -1,6 +1,7 @@
 'use client'
 
 import { Heart } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -8,6 +9,7 @@ import {
   shouldTriggerNavigationLoader,
 } from '@/lib/navigation-loader-config'
 import { version } from '../../../package.json'
+import deltaLogo from '../../../public/android-chrome-192x192.png'
 import { Badge } from '../ui/badge'
 import {
   NavigationMenu,
@@ -82,10 +84,8 @@ function NavbarContent() {
       <header className="sticky top-0 z-sticky h-14 w-full shrink-0 border-b border-ctp-surface0 bg-ctp-base/75 backdrop-blur-md">
         <div className="hidden md:flex h-full items-center justify-between px-6">
           <div className="flex items-center gap-6">
-            <Link href="/" onClick={() => handleNavigationStart('/')}>
-              <Badge variant="ghost" className="font-bold tracking-widest uppercase px-3">
-                delta
-              </Badge>
+            <Link href="/" onClick={() => handleNavigationStart('/')} className="flex items-center">
+              <Image src={deltaLogo} alt="Delta logo" width={28} height={28} className="mb-0.5 block opacity-80 hover:opacity-100 transition-opacity" />
             </Link>
 
             <NavigationMenu viewport={false}>
@@ -140,10 +140,8 @@ function NavbarContent() {
           </div>
 
           <div className="flex justify-center">
-            <Link href="/" onClick={() => handleNavigationStart('/')}>
-              <Badge variant="ghost" className="font-bold tracking-widest uppercase px-3">
-                delta
-              </Badge>
+            <Link href="/" onClick={() => handleNavigationStart('/')} className="flex items-center">
+              <Image src={deltaLogo} alt="Delta logo" width={28} height={28} className="block opacity-80 hover:opacity-100 transition-opacity" />
             </Link>
           </div>
 

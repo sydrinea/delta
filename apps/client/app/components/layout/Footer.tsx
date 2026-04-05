@@ -16,8 +16,8 @@ export default function Footer() {
     <footer className="bg-ctp-mantle border-t border-ctp-surface0 px-6 py-5">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
         <Link href="/" className="flex items-center gap-2 text-ctp-subtext0 hover:text-ctp-text transition-colors">
-          <Image src={deltaLogo} alt="Delta logo" width={20} height={20} className="opacity-80" />
-          <span className="text-xs font-semibold font-mono tracking-widest uppercase">delta</span>
+          <Image src={deltaLogo} alt="Delta logo" width={20} height={20} className="mb-0.5 opacity-80" />
+          <span className="text-xs font-semibold font-mono tracking-widest uppercase leading-none">delta</span>
         </Link>
 
         <nav className="flex items-center gap-5">
