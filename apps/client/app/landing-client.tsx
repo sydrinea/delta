@@ -123,7 +123,7 @@ export default function LandingClient({ children }: LandingClientProps) {
               <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight text-ctp-text">
                 Write automata and
                 <br />
-                <span className="text-ctp-mauve">See them think</span>
+                <span className="text-ctp-mauve">see them think</span>
               </h1>
 
               <p className="font-mono text-sm leading-relaxed text-ctp-subtext0 max-w-md">
