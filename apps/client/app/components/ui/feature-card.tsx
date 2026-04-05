@@ -1,3 +1,4 @@
+import { ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -70,9 +71,10 @@ export function FeatureCard({
   const content = (
     <>
       <div className="flex items-start justify-between mb-2">
-        <h2 className={cn('text-sm font-semibold font-mono', styles.text)}>{title}</h2>
-        <span className={cn('text-xs font-mono transition-colors duration-200', styles.text)}>
+        <h2 className={cn('text-sm font-semibold font-mono leading-none', styles.text)}>{title}</h2>
+        <span className={cn('text-xs font-mono transition-colors duration-200 inline-flex items-center gap-1 leading-none', styles.text)}>
           {label}
+          <ArrowRight className="w-3.5 h-3.5" />
         </span>
       </div>
       <p className="font-sans text-ctp-subtext1 leading-relaxed">

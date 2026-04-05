@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronDown } from 'lucide-react'
+import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
@@ -25,42 +25,42 @@ const features = [
     title: 'Fluent TypeScript API',
     description: 'Define machines with a chainable builder. Errors surface at compile time, right in the editor.',
     href: '/guide/quick-start',
-    label: 'read docs →',
+    label: 'read docs',
     variant: 'mauve' as const,
   },
   {
     title: 'Step-Through Visualizer',
     description: 'Watch your machine process input state by state. The active transition highlights at every step.',
     href: '/nfa',
-    label: 'try it →',
+    label: 'try it',
     variant: 'teal' as const,
   },
   {
     title: 'Inline Test Suites',
     description: 'Pair any machine with a test suite. Delta runs them all and reports pass/fail right next to your code.',
     href: '/nfa',
-    label: 'learn more →',
+    label: 'learn more',
     variant: 'green' as const,
   },
   {
     title: 'NFA → DFA Conversion',
     description: 'Convert any NFA via subset construction. Optionally preserve human-readable state names throughout.',
     href: '/guide/thompson#converting-to-a-dfa',
-    label: 'open NFA →',
+    label: 'open NFA',
     variant: 'lavender' as const,
   },
   {
     title: 'Shareable URLs',
     description: 'Every machine encodes into a URL. Share machines with a link — no hoops required.',
     href: '/nfa',
-    label: 'try it →',
+    label: 'try it',
     variant: 'blue' as const,
   },
   {
     title: 'Thompson\'s Construction',
     description: 'Build NFAs from regular expressions with a stack-based API mirroring union, concat, and Kleene star.',
     href: '/guide/thompson',
-    label: 'read docs →',
+    label: 'read docs',
     variant: 'peach' as const,
   },
 ]
@@ -94,7 +94,11 @@ const machines = [
 
 const CONTAINER = 'px-4 sm:px-8 max-w-6xl mx-auto w-full'
 
-const announcement: { label: string, href?: string, variant?: React.ComponentProps<typeof AnnouncementBadge>['variant'] } | null = null
+const announcement: { label: string, href?: string, variant?: React.ComponentProps<typeof AnnouncementBadge>['variant'] } | null = {
+  label: 'Watch the demo on YouTube',
+  href: 'https://youtu.be/zOM9aVSUVi0',
+  variant: 'rainbow',
+}
 
 export default function LandingClient({ children }: LandingClientProps) {
   const pathname = usePathname()
@@ -143,7 +147,7 @@ export default function LandingClient({ children }: LandingClientProps) {
               <div className="flex items-center gap-3 flex-wrap">
                 <Button asChild variant="accent" size="lg">
                   <Link href="/nfa" onClick={() => handleNavigationStart('/nfa')}>
-                    Launch Delta →
+                    Launch Delta
                   </Link>
                 </Button>
                 <Button asChild variant="embossed" size="lg">
@@ -230,8 +234,7 @@ export default function LandingClient({ children }: LandingClientProps) {
                   Open
                   {' '}
                   {m.name}
-                  {' '}
-                  →
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             ))}
@@ -287,7 +290,7 @@ export default function LandingClient({ children }: LandingClientProps) {
           <p className="text-sm text-ctp-subtext0 font-mono mb-8">No install, no account, just open and write.</p>
           <Button asChild variant="accent" size="lg">
             <Link href="/nfa" onClick={() => handleNavigationStart('/nfa')}>
-              Launch Delta →
+              Launch Delta
             </Link>
           </Button>
         </div>
