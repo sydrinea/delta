@@ -128,7 +128,7 @@ export default function LandingClient({ children }: LandingClientProps) {
           </div>
         )}
         <div className={`${CONTAINER} flex-1 flex items-center py-12 sm:py-20`}>
-          <div className="w-full grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
+          <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6">
               <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-blue font-sans">
                 Theory reimagined
