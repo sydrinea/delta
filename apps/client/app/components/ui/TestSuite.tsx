@@ -317,6 +317,59 @@ function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
   )
 }
 
+interface TestSuitePreviewRow {
+  input: string
+  expected: boolean
+  passed: boolean
+}
+
+interface TestSuitePreviewProps {
+  rows: TestSuitePreviewRow[]
+  className?: string
+}
+
+export function TestSuitePreview({ rows, className }: TestSuitePreviewProps) {
+  const passCount = rows.filter(r => r.passed).length
+
+  return (
+    <div className={cn('flex flex-col gap-3', className)}>
+      <div className="flex items-center gap-2">
+        <span className="text-ctp-subtext0 text-xs uppercase tracking-widest">test suite</span>
+        <span className={`text-xs font-bold ${passCount === rows.length ? 'text-ctp-green' : 'text-ctp-red'}`}>
+          (
+          {passCount}
+          {' '}
+          of
+          {' '}
+          {rows.length}
+          )
+        </span>
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        {rows.map((row, i) => (
+          <div
+            key={i}
+            style={{ height: ROW_HEIGHT }}
+            className={`flex items-center gap-2.5 px-3.5 rounded-lg border text-sm ${
+              row.passed
+                ? 'bg-ctp-green/10 border-ctp-green/30'
+                : 'bg-ctp-red/10 border-ctp-red/30'
+            }`}
+          >
+            <span className="flex-1 truncate font-mono">
+              {row.input || <span className="text-ctp-overlay0">ε</span>}
+            </span>
+            <Badge variant={row.expected ? 'success' : 'destructive'}>
+              {row.expected ? 'accept' : 'reject'}
+            </Badge>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 interface TestCaseListProps {
   tests: TestCase[]
   results: Record<string, TestResult>

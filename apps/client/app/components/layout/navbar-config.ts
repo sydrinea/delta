@@ -19,7 +19,7 @@ export const NAVBAR_GROUPS: NavbarGroup[] = [
   {
     heading: 'Automata',
     items: [
-      { label: 'NFA / DFA', href: '/nfa' },
+      { label: 'NFA & DFA', href: '/nfa' },
       { label: 'PDA', href: '/pda' },
       { label: 'TM', href: '/tm' },
     ],

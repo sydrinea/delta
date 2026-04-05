@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { isValidElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
@@ -29,7 +30,7 @@ function getNodeText(node: React.ReactNode): string {
   return ''
 }
 
-export function Code({ children, className, ...props }: CodeProps) {
+export function GuideCode({ children, className, ...props }: CodeProps): ReactNode {
   const [copied, setCopied] = useState(false)
   const timeoutRef = useRef<number | null>(null)
   const preRef = useRef<HTMLPreElement | null>(null)
@@ -71,7 +72,7 @@ export function Code({ children, className, ...props }: CodeProps) {
   }, [])
 
   return (
-    <div className="relative p-4">
+    <div className="relative my-6">
       <ButtonGroup
         className={cn(
           'absolute right-2 z-raised',
@@ -91,7 +92,7 @@ export function Code({ children, className, ...props }: CodeProps) {
       <pre
         ref={preRef}
         className={cn(
-          'rounded-lg  bg-ctp-mantle pr-12',
+          'rounded-lg border border-ctp-surface0 bg-ctp-mantle pr-12',
           className,
           isSingleLine && 'py-2',
         )}

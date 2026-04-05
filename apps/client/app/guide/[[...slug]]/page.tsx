@@ -4,24 +4,11 @@ import path from 'node:path'
 import process from 'node:process'
 import Slugger from 'github-slugger'
 import { notFound } from 'next/navigation'
-import { Fragment, jsx, jsxs } from 'react/jsx-runtime'
-import rehypePrettyCode from 'rehype-pretty-code'
-import rehypeReact from 'rehype-react'
-import rehypeSlug from 'rehype-slug'
-import remarkGfm from 'remark-gfm'
-import remarkParse from 'remark-parse'
-import remarkRehype from 'remark-rehype'
-import { unified } from 'unified'
 import {
-  Code,
   Guide,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
 } from '@/components'
+import { GuideCode } from '@/components/ui/GuideCode'
+import parseMarkdown from '@/lib/parse-markdown'
 import { NAV } from '../nav'
 
 const GITHUB_REPO = 'https://github.com/sydrinea/delta'
@@ -36,37 +23,6 @@ function extractHeadings(markdown: string): Heading[] {
     const text = m[2].trim()
     return [{ level: m[1].length, text, id: slugger.slug(text) }]
   })
-}
-
-async function parseMarkdown(md: string): Promise<React.ReactNode> {
-  const file = await unified()
-    .use(remarkParse)
-    .use(remarkGfm)
-    .use(remarkRehype)
-    .use(rehypeSlug)
-    .use(rehypePrettyCode, {
-      theme: {
-        light: 'catppuccin-latte',
-        dark: 'catppuccin-mocha',
-      },
-      keepBackground: false,
-    })
-    .use(rehypeReact, {
-      Fragment,
-      jsx,
-      jsxs,
-      components: {
-        pre: Code,
-        table: Table,
-        thead: TableHeader,
-        tbody: TableBody,
-        tr: TableRow,
-        th: TableHead,
-        td: TableCell,
-      },
-    })
-    .process(md)
-  return file.result as React.ReactNode
 }
 
 export async function generateStaticParams() {
@@ -94,7 +50,9 @@ export default async function DocsPage({
     notFound()
   }
 
-  const content = await parseMarkdown(markdown)
+  const content = await parseMarkdown(markdown, {
+    code: GuideCode,
+  })
   const headings = extractHeadings(markdown)
 
   const orderedPages = NAV.flatMap(group => group.pages)

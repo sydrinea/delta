@@ -4,7 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import { Cormorant, Recursive, Syne } from 'next/font/google'
 import { cn } from '@/app/lib/utils'
 import { Layout } from '@/components'
-// import { SerwistProvider } from './serwist'
+import { SerwistProvider } from './serwist'
 import './globals.css'
 import 'reactflow/dist/style.css'
 
@@ -72,21 +72,21 @@ export default function RootLayout({
       dir="ltr"
     >
       <body>
-        {/* <SerwistProvider swUrl="/serwist/sw.js"> */}
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem={true}
-          value={{
-            light: 'latte',
-            dark: 'mocha',
-          }}
-        >
-          <div id="dark-mode-root">
-            <Layout>{children}</Layout>
-          </div>
-        </ThemeProvider>
-        {/* </SerwistProvider> */}
+        <SerwistProvider swUrl="/serwist/sw.js">
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem={true}
+            value={{
+              light: 'latte',
+              dark: 'mocha',
+            }}
+          >
+            <div id="dark-mode-root">
+              <Layout>{children}</Layout>
+            </div>
+          </ThemeProvider>
+        </SerwistProvider>
       </body>
     </html>
   )

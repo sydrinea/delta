@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
-export type FeatureCardVariant = 'sapphire' | 'blue' | 'green' | 'red'
+export type FeatureCardVariant = 'sapphire' | 'blue' | 'green' | 'red' | 'mauve' | 'peach' | 'teal' | 'lavender'
 
 export interface FeatureCardProps {
   title: string
@@ -30,6 +30,22 @@ const variantStyles: Record<FeatureCardVariant, { container: string, text: strin
   red: {
     container: 'bg-ctp-red/10 hover:bg-ctp-red/20 border-ctp-red/25 shadow-ctp-red/10',
     text: 'text-ctp-red',
+  },
+  mauve: {
+    container: 'bg-ctp-mauve/10 hover:bg-ctp-mauve/20 border-ctp-mauve/25 shadow-ctp-mauve/10',
+    text: 'text-ctp-mauve',
+  },
+  peach: {
+    container: 'bg-ctp-peach/10 hover:bg-ctp-peach/20 border-ctp-peach/25 shadow-ctp-peach/10',
+    text: 'text-ctp-peach',
+  },
+  teal: {
+    container: 'bg-ctp-teal/10 hover:bg-ctp-teal/20 border-ctp-teal/25 shadow-ctp-teal/10',
+    text: 'text-ctp-teal',
+  },
+  lavender: {
+    container: 'bg-ctp-lavender/10 hover:bg-ctp-lavender/20 border-ctp-lavender/25 shadow-ctp-lavender/10',
+    text: 'text-ctp-lavender',
   },
 }
 
