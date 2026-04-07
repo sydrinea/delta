@@ -115,17 +115,13 @@ export default function LandingClient({ children }: LandingClientProps) {
             </div>
           </div>
         )}
-        <div className={`${CONTAINER} flex-1 flex items-center py-12 sm:py-20`}>
+        <div className={`${CONTAINER} flex-1 flex items-center py-16 sm:py-20`}>
           <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6">
-              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase text-ctp-lavender font-sans tracking-wide">
-                Theory of Computation
-              </span>
-
               <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight text-ctp-text">
                 Define automata and
                 <br />
-                <span className="text-ctp-sapphire">inspect their behavior</span>
+                <span className="text-ctp-sky">inspect their behavior</span>
               </h1>
 
               <p className="font-mono text-sm leading-relaxed text-ctp-subtext0 max-w-md">
@@ -196,8 +192,8 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section id="features" className="py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-lavender font-sans tracking-wide">
-            Tooling
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-sky font-sans tracking-wide">
+            Features
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
             Modeled after an IDE
@@ -215,7 +211,7 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section className="bg-ctp-mantle border-y border-ctp-surface0 py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-yellow font-sans tracking-wide">
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-sky font-sans tracking-wide">
             Machine types
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
@@ -251,7 +247,7 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="py-20">
         <div className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-peach font-sans tracking-wide">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase text-ctp-sky font-sans tracking-wide">
               Correctness
             </div>
             <h2 className="font-sans text-4xl leading-12 font-bold tracking-tight text-ctp-text mb-6">
@@ -259,15 +255,12 @@ export default function LandingClient({ children }: LandingClientProps) {
             </h2>
             <ul className="space-y-4 text-sm text-ctp-subtext0 font-sans leading-relaxed">
               <li className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
                 Compilation errors catch invalid transitions before you run anything.
               </li>
               <li className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
                 Test suites make correctness verifiable — not just visually convincing.
               </li>
               <li className="flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
                 Export test suites to share with instructors or collaborators.
               </li>
             </ul>
