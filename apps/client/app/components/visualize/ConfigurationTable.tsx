@@ -94,7 +94,7 @@ export function ConfigurationTable({
                   }}
                   className={rowClassName}
                 >
-                  <TableCell className="w-12 text-ctp-mauve font-semibold">
+                  <TableCell className="w-12 text-ctp-lavender font-semibold">
                     {config.index}
                   </TableCell>
                   <TableCell className="whitespace-nowrap font-mono">
@@ -102,7 +102,7 @@ export function ConfigurationTable({
                       {prefix}
                     </span>
                     (
-                    <span className="text-ctp-mauve">
+                    <span className="text-ctp-lavender">
                       {`{${config.states.join(', ')}}`}
                     </span>
                     ,

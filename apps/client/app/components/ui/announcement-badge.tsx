@@ -24,7 +24,7 @@ function AnnouncementBadge({ label, href, variant = 'accent', className }: Annou
 
   if (variant === 'rainbow') {
     return (
-      <div className="rounded-full bg-linear-to-r from-ctp-red via-ctp-sapphire to-ctp-mauve p-px shadow-sm shadow-ctp-mauve/30">
+      <div className="rounded-full bg-linear-to-r from-ctp-red via-ctp-sapphire to-ctp-lavender p-px shadow-sm shadow-ctp-lavender/30">
         <Comp
           data-slot="announcement-badge"
           data-variant="rainbow"

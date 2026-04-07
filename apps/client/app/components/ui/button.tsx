@@ -29,6 +29,8 @@ const buttonVariants = cva(
         info:
           'border-ctp-blue/70 bg-ctp-blue/12 text-ctp-blue hover:bg-ctp-blue/18 aria-expanded:bg-ctp-blue/18 focus-visible:border-ctp-blue/80 focus-visible:ring-ctp-blue/25',
         accent:
+          'border-ctp-lavender/70 bg-ctp-lavender/12 text-ctp-lavender hover:bg-ctp-lavender/18 aria-expanded:bg-ctp-lavender/18 focus-visible:border-ctp-lavender/80 focus-visible:ring-ctp-lavender/25',
+        mauve:
           'border-ctp-mauve/70 bg-ctp-mauve/12 text-ctp-mauve hover:bg-ctp-mauve/18 aria-expanded:bg-ctp-mauve/18 focus-visible:border-ctp-mauve/80 focus-visible:ring-ctp-mauve/25',
         embossed:
           'rounded-lg text-ctp-overlay0 hover:text-ctp-text hover:bg-ctp-surface0 border border-transparent hover:border-ctp-surface1 transition-all duration-200',

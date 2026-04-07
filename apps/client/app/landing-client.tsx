@@ -286,7 +286,7 @@ export default function LandingClient({ children }: LandingClientProps) {
         </div>
       </section>
 
-      <section className="bg-ctp-mauve/15 border-y border-ctp-mauve/25 py-20 text-center">
+      <section className="bg-ctp-lavender/15 border-y border-ctp-lavender/25 py-20 text-center">
         <div className={CONTAINER}>
           <h2 className="font-sans text-[clamp(1.625rem,3.5vw,2.25rem)] font-bold tracking-tight text-ctp-text mb-3">
             Start building today

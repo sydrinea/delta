@@ -182,7 +182,7 @@ export function TransitionTable({
                   }}
                   className={rowClassName}
                 >
-                  <TableCell className="text-ctp-mauve font-semibold">
+                  <TableCell className="text-ctp-lavender font-semibold">
                     {row.id}
                   </TableCell>
                   <TableCell>
@@ -204,7 +204,7 @@ export function TransitionTable({
                         <span className="text-ctp-text">{read}</span>
                         <span className="px-1">-&gt;</span>
                         <span className="text-ctp-text">{write}</span>
-                        <span className="pl-1 text-ctp-mauve">{direction}</span>
+                        <span className="pl-1 text-ctp-lavender">{direction}</span>
                       </TableCell>
                     )
                   })}

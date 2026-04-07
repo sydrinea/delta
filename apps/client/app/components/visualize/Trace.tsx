@@ -153,7 +153,7 @@ export function Trace<M extends VisualMachine>() {
                     </span>
                   )}
                   <div className="relative flex-1 basis-0 min-w-0 max-w-full overflow-hidden bg-ctp-crust p-1 rounded border border-ctp-surface1 h-10">
-                    <div className="absolute inset-y-1 left-1/2 w-px bg-ctp-mauve/70 pointer-events-none" />
+                    <div className="absolute inset-y-1 left-1/2 w-px bg-ctp-lavender/70 pointer-events-none" />
                     <div
                       className="relative left-1/2 flex transition-transform duration-150 ease-out will-change-transform"
                       style={{
@@ -189,7 +189,7 @@ export function Trace<M extends VisualMachine>() {
             <span>
               active
               {' '}
-              <span className="text-ctp-mauve font-bold">
+              <span className="text-ctp-lavender font-bold">
                 {`{${[...current.states].join(', ')}}`}
               </span>
             </span>

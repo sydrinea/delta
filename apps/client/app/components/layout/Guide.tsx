@@ -50,7 +50,7 @@ function TableOfContents({ headings, activeId, onNavigate }: ToCProps) {
                 ? 'pl-3'
                 : 'pl-5 text-[12px]',
             activeId === h.id
-              ? 'text-ctp-mauve font-semibold'
+              ? 'text-ctp-lavender font-semibold'
               : 'text-ctp-subtext0 hover:text-ctp-text',
           ].join(' ')}
         >

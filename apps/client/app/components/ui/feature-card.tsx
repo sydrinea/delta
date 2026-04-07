@@ -27,8 +27,8 @@ const variantStyles: Record<FeatureCardVariant, { container: string, text: strin
     text: 'text-ctp-red',
   },
   mauve: {
-    container: 'bg-ctp-mauve/10 hover:bg-ctp-mauve/20 border-ctp-mauve/25 shadow-ctp-mauve/10',
-    text: 'text-ctp-mauve',
+    container: 'bg-ctp-lavender/10 hover:bg-ctp-lavender/20 border-ctp-lavender/25 shadow-ctp-lavender/10',
+    text: 'text-ctp-lavender',
   },
   peach: {
     container: 'bg-ctp-peach/10 hover:bg-ctp-peach/20 border-ctp-peach/25 shadow-ctp-peach/10',

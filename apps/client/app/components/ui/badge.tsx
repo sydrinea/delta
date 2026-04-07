@@ -18,7 +18,7 @@ const badgeVariants = cva(
         success: 'border-ctp-green/65 text-ctp-green',
         warning: 'border-ctp-yellow/65 text-ctp-yellow',
         info: 'border-ctp-lavender/65 text-ctp-lavender',
-        accent: 'border-ctp-mauve/65 text-ctp-mauve',
+        accent: 'border-ctp-lavender/65 text-ctp-lavender',
       },
     },
     defaultVariants: {

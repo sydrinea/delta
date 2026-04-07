@@ -9,7 +9,7 @@ import {
 
 const COLORS = {
   latte: {
-    active: flavors.latte.colors.mauve.hex,
+    active: flavors.latte.colors.lavender.hex,
     activeFontColor: flavors.latte.colors.base.hex,
     default: flavors.latte.colors.text.hex,
     defaultFontColor: flavors.latte.colors.text.hex,
@@ -17,7 +17,7 @@ const COLORS = {
     background: flavors.latte.colors.mantle.hex,
   },
   mocha: {
-    active: flavors.mocha.colors.mauve.hex,
+    active: flavors.mocha.colors.lavender.hex,
     activeFontColor: flavors.mocha.colors.base.hex,
     default: flavors.mocha.colors.text.hex,
     defaultFontColor: flavors.mocha.colors.text.hex,

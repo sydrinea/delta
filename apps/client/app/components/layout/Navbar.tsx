@@ -75,7 +75,7 @@ function NavbarContent() {
                   <NavigationMenuItem key={group.heading}>
                     <NavigationMenuTrigger
                       className={group.items.some(item => isActiveHref(item.href))
-                        ? 'border-ctp-mauve/70 text-ctp-text data-[state=open]:border-ctp-mauve/70'
+                        ? 'border-ctp-lavender/70 text-ctp-text data-[state=open]:border-ctp-lavender/70'
                         : 'border-ctp-base text-ctp-subtext0 hover:text-ctp-text'}
                     >
                       {group.heading}

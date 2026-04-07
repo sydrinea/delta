@@ -174,7 +174,7 @@ function getNfaInputTokens(args: TraceInputArgs) {
         text: args.input[charIndex],
         isActive,
         className: isActive
-          ? 'text-ctp-mauve font-bold bg-ctp-surface0 ring-1 ring-ctp-mauve'
+          ? 'text-ctp-lavender font-bold bg-ctp-surface0 ring-1 ring-ctp-lavender'
           : isPast
             ? 'text-ctp-surface2'
             : 'text-ctp-subtext1',

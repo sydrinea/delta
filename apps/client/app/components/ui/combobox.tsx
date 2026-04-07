@@ -52,7 +52,7 @@ function ComboboxInput({
   return (
     <InputGroup
       className={cn(
-        'h-8 w-full rounded-lg border-ctp-subtext0/25 bg-ctp-mantle transition-colors has-[[data-slot=input-group-control]:focus-visible]:border-ctp-mauve has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-ctp-mauve',
+        'h-8 w-full rounded-lg border-ctp-subtext0/25 bg-ctp-mantle transition-colors has-[[data-slot=input-group-control]:focus-visible]:border-ctp-lavender has-[[data-slot=input-group-control]:focus-visible]:ring-2 has-[[data-slot=input-group-control]:focus-visible]:ring-ctp-lavender',
         className,
       )}
     >

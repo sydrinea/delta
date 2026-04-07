@@ -59,7 +59,7 @@ function PaginationLink({
       className={cn(
         'leading-none',
         isActive
-          ? 'border-ctp-mauve/80 bg-transparent text-ctp-mauve hover:bg-ctp-mauve/12 aria-expanded:bg-ctp-mauve/12'
+          ? 'border-ctp-lavender/80 bg-transparent text-ctp-lavender hover:bg-ctp-lavender/12 aria-expanded:bg-ctp-lavender/12'
           : undefined,
         className,
       )}

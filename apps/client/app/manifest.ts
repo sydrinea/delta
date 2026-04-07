@@ -11,7 +11,7 @@ export default function manifest(): MetadataRoute.Manifest {
     display: 'standalone',
     orientation: 'portrait',
     background_color: flavors.latte.colors.base.hex,
-    theme_color: flavors.latte.colors.mauve.hex,
+    theme_color: flavors.latte.colors.lavender.hex,
     icons: [
       {
         src: '/favicon-16x16.png',

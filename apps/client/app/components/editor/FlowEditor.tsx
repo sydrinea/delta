@@ -145,32 +145,32 @@ function StateNode({ data, selected }: NodeProps) {
       className={`relative w-12 h-12 rounded-full flex items-center justify-center text-sm transition-colors ${data.isAccept
         ? 'border-4 border-double border-ctp-text bg-ctp-mantle text-ctp-text'
         : 'border-2 border-ctp-text bg-ctp-mantle text-ctp-text'
-      } ${selected ? 'border-ctp-mauve!' : ''}`}
+      } ${selected ? 'border-ctp-lavender!' : ''}`}
     >
       <Handle
         id="target-top"
         type="source"
         position={Position.Top}
-        className="bg-ctp-mauve/45! border-0! w-1! h-1!"
+        className="bg-ctp-lavender/45! border-0! w-1! h-1!"
       />
       <Handle
         id="target-left"
         type="source"
         position={Position.Left}
-        className="bg-ctp-mauve/45! border-0! w-1! h-1!"
+        className="bg-ctp-lavender/45! border-0! w-1! h-1!"
       />
       <span className="relative z-raised">{data.label}</span>
       <Handle
         id="source-right"
         type="source"
         position={Position.Right}
-        className="bg-ctp-mauve/45! border-0! w-1! h-1!"
+        className="bg-ctp-lavender/45! border-0! w-1! h-1!"
       />
       <Handle
         id="source-bottom"
         type="source"
         position={Position.Bottom}
-        className="bg-ctp-mauve/45! border-0! w-1! h-1!"
+        className="bg-ctp-lavender/45! border-0! w-1! h-1!"
       />
     </div>
   )

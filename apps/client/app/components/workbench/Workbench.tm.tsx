@@ -127,7 +127,7 @@ function getTmInputTokens(args: TraceInputArgs) {
           isActive: slotIndex === halfWindow,
           className:
             slotIndex === halfWindow
-              ? 'text-ctp-mauve font-bold bg-ctp-surface0 ring-1 ring-ctp-mauve'
+              ? 'text-ctp-lavender font-bold bg-ctp-surface0 ring-1 ring-ctp-lavender'
               : 'text-ctp-text',
         }
       },

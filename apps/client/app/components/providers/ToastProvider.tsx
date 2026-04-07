@@ -64,7 +64,7 @@ function ToastItem({
       <p className="mb-2">{toast.message}</p>
 
       <div
-        className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full overflow-hidden ${exiting ? 'bg-ctp-surface1' : 'bg-ctp-mauve'}`}
+        className={`absolute bottom-0 left-0 right-0 h-0.5 rounded-full overflow-hidden ${exiting ? 'bg-ctp-surface1' : 'bg-ctp-lavender'}`}
       >
         <div
           className="h-full bg-ctp-surface1 rounded-full"

@@ -191,7 +191,7 @@ export function TestSuite({
             <Button
               onClick={handleTestExport}
               disabled={tests.length === 0}
-              variant="accent"
+              variant="mauve"
               size="xs"
             >
               export
