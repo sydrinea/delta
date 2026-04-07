@@ -59,7 +59,7 @@ const machines = [
     tag: 'regular',
     tagClass: 'text-ctp-sapphire bg-ctp-sapphire/10',
     name: 'NFA & DFA',
-    description: 'Build nondeterministic and deterministic finite automata with a fluent API. Step through execution, run test suites, and edit machines visually on the canvas.',
+    description: 'Nondeterministic and deterministic finite automata. Build with the TypeScript API or a visual canvas editor.',
     href: '/nfa',
     linkClass: 'text-ctp-sapphire hover:text-ctp-sapphire/80',
   },
@@ -67,7 +67,7 @@ const machines = [
     tag: 'context-free',
     tagClass: 'text-ctp-lavender bg-ctp-lavender/10',
     name: 'PDA',
-    description: 'Pushdown automata with full stack visualization. Model context-free languages and see each push and pop as your machine runs.',
+    description: 'Pushdown automata with full stack visualization. Model context-free languages and watch each push and pop in real time.',
     href: '/pda',
     linkClass: 'text-ctp-lavender hover:text-ctp-lavender/80',
   },
@@ -75,7 +75,7 @@ const machines = [
     tag: 'recursively enumerable',
     tagClass: 'text-ctp-teal bg-ctp-teal/10',
     name: 'Turing Machine',
-    description: 'Single and multitape Turing machines with full step-through visualization. The transition table highlights the active rule at every step.',
+    description: 'Single and multitape Turing machines. The transition table highlights the active rule at every step.',
     href: '/tm',
     linkClass: 'text-ctp-teal hover:text-ctp-teal/80',
   },
@@ -118,8 +118,8 @@ export default function LandingClient({ children }: LandingClientProps) {
         <div className={`${CONTAINER} flex-1 flex items-center py-12 sm:py-20`}>
           <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6">
-              <span className="inline-flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-blue font-sans">
-                Theory reimagined
+              <span className="inline-flex items-center gap-2 text-xs font-bold  uppercase text-ctp-blue font-sans">
+                Theory of Computation
               </span>
 
               <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight text-ctp-text">
@@ -129,7 +129,7 @@ export default function LandingClient({ children }: LandingClientProps) {
               </h1>
 
               <p className="font-mono text-sm leading-relaxed text-ctp-subtext0 max-w-md">
-                Delta is a code-first web environment for designing, testing, and visualizing finite automata and Turing machines in TypeScript.
+                Delta is a code-first environment for building and testing finite automata and Turing machines in TypeScript.
               </p>
 
               <div className="flex items-center gap-3 flex-wrap">
@@ -196,11 +196,11 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section id="features" className="py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-lavender font-sans">
-            What you get
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-lavender font-sans">
+            Tooling
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
-            A complete theory toolkit
+            Modeled after an IDE
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 min-[900px]:grid-cols-3 gap-3">
             {features.map(f => (
@@ -215,7 +215,7 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section className="bg-ctp-mantle border-y border-ctp-surface0 py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-yellow font-sans">
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-yellow font-sans">
             Machine types
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
@@ -251,24 +251,24 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="py-20">
         <div className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-ctp-peach font-sans">
-              Built for rigor
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-peach font-sans">
+              Correctness
             </div>
             <h2 className="font-sans text-4xl leading-12 font-bold tracking-tight text-ctp-text mb-6">
-              Prove machines' correctness
+              Test your machines
             </h2>
             <ul className="space-y-4 text-sm text-ctp-subtext0 font-sans leading-relaxed">
               <li className="flex items-center gap-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
-                Write machines with TypeScript, skip the learning curve.
+                Compilation errors catch invalid transitions before you run anything.
               </li>
               <li className="flex items-center gap-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
-                Test suites make correctness verifiable and gradeable — not just visually convincing.
+                Test suites make correctness verifiable — not just visually convincing.
               </li>
               <li className="flex items-center gap-3">
                 <span className="w-1.5 h-1.5 rounded-full bg-ctp-peach shrink-0" />
-                Runs entirely in the browser. Zero installation required.
+                Export test suites to share with instructors or collaborators.
               </li>
             </ul>
           </div>
@@ -291,7 +291,7 @@ export default function LandingClient({ children }: LandingClientProps) {
           <h2 className="font-sans text-[clamp(1.625rem,3.5vw,2.25rem)] font-bold tracking-tight text-ctp-text mb-3">
             Start building today
           </h2>
-          <p className="text-sm text-ctp-subtext0 font-mono mb-8">No install, no account, just open and write.</p>
+          <p className="text-sm text-ctp-subtext0 font-mono mb-8">Zero installation required.</p>
           <Button asChild variant="accent" size="lg">
             <Link href="/nfa" onClick={() => handleNavigationStart('/nfa')}>
               Launch Delta
