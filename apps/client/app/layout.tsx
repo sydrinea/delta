@@ -52,7 +52,6 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  //  this is a Next.js pattern
   themeColor: flavors.latte.colors.mauve.hex,
   initialScale: 1,
   width: 'device-width',

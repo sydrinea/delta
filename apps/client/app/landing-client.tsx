@@ -1,5 +1,6 @@
 'use client'
 
+import type { WindowMockTab } from '@/components/ui/window-mock'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -152,9 +153,34 @@ export default function LandingClient({ children }: LandingClientProps) {
                 className="absolute -inset-1 blur-md bg-linear-to-br from-ctp-mauve/30 via-ctp-lavender/20 to-ctp-blue"
               />
               <div className="relative">
-                <WindowMock title="machine.ts">
-                  {children}
-                </WindowMock>
+                <WindowMock
+                  className="h-96"
+                  tabs={[
+                    {
+                      value: 'code',
+                      label: 'code',
+                      content: (
+                        <div className="text-[11pt]">
+                          {children}
+                        </div>
+                      ),
+                    },
+                    {
+                      value: 'debug',
+                      label: 'debug',
+                      content: (
+                        <video
+                          src="/debug-video.mov"
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          className="w-full"
+                        />
+                      ),
+                    },
+                  ] satisfies WindowMockTab[]}
+                />
               </div>
             </div>
           </div>

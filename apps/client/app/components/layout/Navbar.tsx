@@ -1,6 +1,5 @@
 'use client'
 
-import { Heart } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -31,24 +30,6 @@ import {
   useSidebar,
 } from '../ui/sidebar'
 import { NAVBAR_GROUPS, NAVBAR_MOBILE_ITEMS } from './navbar-config'
-
-function MadeBy() {
-  return (
-    <a
-      href="https://github.com/sydrinea"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex items-center gap-1.5 text-ctp-overlay1 hover:text-ctp-text transition-colors text-xs"
-    >
-      made with
-      {' '}
-      <Heart className="w-3 h-3 text-ctp-pink" fill="currentColor" />
-      {' '}
-      by
-      @sydrinea
-    </a>
-  )
-}
 
 function NavbarContent() {
   const pathname = usePathname()
@@ -125,8 +106,6 @@ function NavbarContent() {
           </div>
 
           <div className="flex items-center gap-2">
-            <MadeBy />
-            <span className="text-ctp-overlay1 text-xs">·</span>
             <Badge variant="info">
               v
               {version}
@@ -181,10 +160,6 @@ function NavbarContent() {
               )
             })}
           </SidebarMenu>
-
-          <div className="mt-6 px-3">
-            <MadeBy />
-          </div>
         </SidebarContent>
       </Sidebar>
     </>
