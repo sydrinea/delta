@@ -25,12 +25,12 @@ const features = [
   {
     title: 'Fluent TypeScript API',
     description: 'Define machines with a chainable builder. Errors surface at compile time, right in the editor.',
-    variant: 'mauve' as const,
+    variant: 'red' as const,
   },
   {
     title: 'Step-Through Visualizer',
     description: 'Watch your machine process input state by state. The active transition highlights at every step.',
-    variant: 'teal' as const,
+    variant: 'peach' as const,
   },
   {
     title: 'Inline Test Suites',
@@ -40,28 +40,28 @@ const features = [
   {
     title: 'NFA → DFA Conversion',
     description: 'Convert any NFA via subset construction. Optionally preserve human-readable state names throughout.',
-    variant: 'lavender' as const,
+    variant: 'blue' as const,
   },
   {
     title: 'Shareable URLs',
     description: 'Every machine can be turned into a URL. Share machines with a link — no hoops required.',
-    variant: 'blue' as const,
+    variant: 'sapphire' as const,
   },
   {
     title: 'Thompson\'s Construction',
     description: 'Build NFAs from regular expressions with a stack-based API mirroring union, concat, and Kleene star.',
-    variant: 'peach' as const,
+    variant: 'mauve' as const,
   },
 ]
 
 const machines = [
   {
     tag: 'regular',
-    tagClass: 'text-ctp-sapphire bg-ctp-sapphire/10',
+    tagClass: 'text-ctp-pink bg-ctp-pink/10',
     name: 'NFA & DFA',
     description: 'Nondeterministic and deterministic finite automata. Build with the TypeScript API or a visual canvas editor.',
     href: '/nfa',
-    linkClass: 'text-ctp-sapphire hover:text-ctp-sapphire/80',
+    linkClass: 'text-ctp-pink hover:text-ctp-pink/80',
   },
   {
     tag: 'context-free',
@@ -118,14 +118,14 @@ export default function LandingClient({ children }: LandingClientProps) {
         <div className={`${CONTAINER} flex-1 flex items-center py-12 sm:py-20`}>
           <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6">
-              <span className="inline-flex items-center gap-2 text-xs font-bold  uppercase text-ctp-blue font-sans">
+              <span className="inline-flex items-center gap-2 text-xs font-bold uppercase text-ctp-lavender font-sans tracking-wide">
                 Theory of Computation
               </span>
 
               <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight text-ctp-text">
                 Define automata and
                 <br />
-                <span className="text-ctp-mauve">inspect their behavior</span>
+                <span className="text-ctp-sapphire">inspect their behavior</span>
               </h1>
 
               <p className="font-mono text-sm leading-relaxed text-ctp-subtext0 max-w-md">
@@ -150,7 +150,7 @@ export default function LandingClient({ children }: LandingClientProps) {
             <div className="min-w-0 w-full relative">
               <div
                 aria-hidden="true"
-                className="absolute -inset-1 blur-md bg-linear-to-br from-ctp-mauve/30 via-ctp-lavender/20 to-ctp-blue"
+                className="absolute -inset-1 blur-md bg-linear-to-br from-ctp-blue/30 via-ctp-lavender/20 to-ctp-sapphire"
               />
               <div className="relative">
                 <WindowMock
@@ -196,7 +196,7 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section id="features" className="py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-lavender font-sans">
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-lavender font-sans tracking-wide">
             Tooling
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
@@ -215,7 +215,7 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section className="bg-ctp-mantle border-y border-ctp-surface0 py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-yellow font-sans">
+          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-yellow font-sans tracking-wide">
             Machine types
           </div>
           <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
@@ -251,7 +251,7 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="py-20">
         <div className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-peach font-sans">
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-peach font-sans tracking-wide">
               Correctness
             </div>
             <h2 className="font-sans text-4xl leading-12 font-bold tracking-tight text-ctp-text mb-6">
