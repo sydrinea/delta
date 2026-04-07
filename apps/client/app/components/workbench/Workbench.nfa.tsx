@@ -8,7 +8,9 @@ import { simulate as simulateNFA } from '@delta/simulator'
 import { useTheme } from 'next-themes'
 import { useMemo, useState } from 'react'
 import { ReactFlowProvider } from 'reactflow'
-import { useCompile } from '@/hooks/useCompile'
+import { useCompiledMachine } from '@/hooks/useCompiledMachine'
+import { useEditorState } from '@/hooks/useEditorState'
+import { useTestSuite } from '@/hooks/useTestSuite'
 import { useUrlSync } from '@/hooks/useUrlSync'
 import { containsCustomLogicOrComments } from '@/lib/detect-custom-logic'
 import { toDot } from '@/lib/dot'
@@ -22,7 +24,6 @@ import { useWorkbenchVariantCore } from './useWorkbenchVariantCore'
 import {
   buildSlidingWindowTokens,
   buildTabs,
-  makeStoreAdapters,
   TRACE_WINDOW_SIZE,
 } from './utils'
 import { WorkbenchShell } from './WorkbenchShell'
@@ -56,16 +57,13 @@ function useNfaWorkbenchLogic(
   const [showWarning, setShowWarning] = useState(false)
   const [pendingTab, setPendingTab] = useState<TabId | null>(null)
 
-  const machine = useNfaStore(s => s.machine)
-  const editorValue = useNfaStore(s => s.editorValue)
-  const tests = useNfaStore(s => s.tests)
-  const editorErrors = useNfaStore(s => s.editorErrors)
-  const patchNfa = useNfaStore(s => s.patch)
+  const machine = useCompiledMachine<NFA>('nfa')
+  const { value: editorValue, errors: editorErrors } = useEditorState('nfa')
+  const { tests, setTests } = useTestSuite('nfa')
+  const patchNfaGraph = useNfaStore(s => s.patch)
   const { showAlert } = useAlert()
 
-  const compile = useCompile('nfa')
   const { dot: activeDot } = useTraceSimulationContext<NFA>()
-  const adapters = useMemo(() => makeStoreAdapters(patchNfa), [patchNfa])
 
   const tabs = useMemo(
     () =>
@@ -82,14 +80,12 @@ function useNfaWorkbenchLogic(
   )
 
   const core = useWorkbenchVariantCore<NFA>({
+    scope: 'nfa',
     enabledTabs,
     tabs,
     machine,
     recipesMap: recipes.nfa,
     machineType: 'nfa',
-    editorValue,
-    adapters,
-    compile,
     showAlert,
     dotFromMachine: toDot,
     activeDot,
@@ -118,12 +114,11 @@ function useNfaWorkbenchLogic(
   const confirmTabChange = () => {
     if (pendingTab === 'canvas' && machine) {
       const { nodes, edges } = nfaToFlow(machine)
-      patchNfa({ nodes, edges, startId: machine.startState })
+      patchNfaGraph({ nodes, edges, startId: machine.startState })
     }
 
     if (pendingTab) {
-      adapters.clearEditorErrors()
-      core.setActiveTab(pendingTab)
+      core.base.requestTabChange(pendingTab)
     }
 
     setShowWarning(false)
@@ -141,9 +136,9 @@ function useNfaWorkbenchLogic(
     machine,
     editorErrors,
     editorValue,
-    compile,
+    compile: core.compile,
     tests,
-    setTests: adapters.setTests,
+    setTests,
     simulate: (targetMachine, input) =>
       simulateNFA(targetMachine, input).accepted,
     confirmModal: {
@@ -194,8 +189,8 @@ export function NFAComponent({
   initialRecipe,
   initialInput,
 }: WorkbenchNFAProps) {
-  const machine = useNfaStore(s => s.machine)
-  const tests = useNfaStore(s => s.tests)
+  const machine = useCompiledMachine<NFA>('nfa')
+  const { tests } = useTestSuite('nfa')
   const { resolvedTheme } = useTheme()
   const theme = themeNames[resolvedTheme ?? 'light']
 

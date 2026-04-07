@@ -2,19 +2,24 @@
 
 import type { BeforeMount, OnChange, OnMount } from '@monaco-editor/react'
 import type * as MonacoEditor from 'monaco-editor'
+import type { AutomataScope } from '@/store/automataStore'
 import Editor, { useMonaco } from '@monaco-editor/react'
 import { AlertTriangle } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useEffect, useRef, useState } from 'react'
 import { Spinner } from '@/components/ui/spinner'
 import { useCompile } from '@/hooks/useCompile'
+import { useEditorState } from '@/hooks/useEditorState'
 import { themeNames } from '@/lib/theme'
-import { useNfaStore } from '@/store/nfaStore'
-import { useTmStore } from '@/store/tmStore'
 import defineThemes from './defineTheme'
 
 interface DeltaEditorProps {
-  scope?: 'nfa' | 'tm'
+  scope?: AutomataScope
+}
+
+const EDITOR_PATH: Record<AutomataScope, string> = {
+  nfa: 'file:///main.nfa.ts',
+  tm: 'file:///main.tm.ts',
 }
 
 export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
@@ -23,23 +28,9 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
   )
   const { resolvedTheme } = useTheme()
 
-  const patchNfa = useNfaStore(s => s.patch)
-  const patchTm = useTmStore(s => s.patch)
-  const editorValue = {
-    nfa: useNfaStore(s => s.editorValue),
-    tm: useTmStore(s => s.editorValue),
-  }[scope]
-  const editorErrors = {
-    nfa: useNfaStore(s => s.editorErrors),
-    tm: useTmStore(s => s.editorErrors),
-  }[scope]
-  const editorPath = {
-    nfa: 'file:///main.nfa.ts',
-    tm: 'file:///main.tm.ts',
-  }[scope]
-
-  const monaco = useMonaco()
+  const { value: editorValue, errors: editorErrors, setEditorValue } = useEditorState(scope)
   const compile = useCompile(scope)
+  const monaco = useMonaco()
 
   const [isEditorReady, setIsEditorReady] = useState(false)
 
@@ -150,11 +141,7 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
   }, [monaco, editorErrors])
 
   const handleChange: OnChange = (value) => {
-    const set = {
-      tm: patchTm,
-      nfa: patchNfa,
-    }
-    set[scope]({ editorValue: value ?? '' })
+    setEditorValue(value ?? '')
   }
 
   return (
@@ -163,7 +150,7 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
     >
       <Editor
         theme={`catppuccin-${themeNames[resolvedTheme ?? 'light']}`}
-        path={editorPath}
+        path={EDITOR_PATH[scope]}
         height="100%"
         width="100%"
         defaultLanguage="typescript"

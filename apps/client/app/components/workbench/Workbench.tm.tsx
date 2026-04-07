@@ -7,11 +7,12 @@ import { recipes } from '@delta/examples/recipes'
 import { simulateTM } from '@delta/simulator'
 import { useTheme } from 'next-themes'
 import { useMemo } from 'react'
-import { useCompile } from '@/hooks/useCompile'
+import { useCompiledMachine } from '@/hooks/useCompiledMachine'
+import { useEditorState } from '@/hooks/useEditorState'
+import { useTestSuite } from '@/hooks/useTestSuite'
 import { useUrlSync } from '@/hooks/useUrlSync'
 import { toDotTM } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
-import { useTmStore } from '@/store/tmStore'
 import { DeltaEditor } from '../editor'
 import { useAlert } from '../providers'
 import { Trace, TraceProvider, TransitionTable, useTraceInteractionContext, useTraceSimulationContext } from '../visualize'
@@ -19,7 +20,6 @@ import { useWorkbenchVariantCore } from './useWorkbenchVariantCore'
 import {
   buildSlidingWindowTokens,
   buildTabs,
-  makeStoreAdapters,
   TRACE_WINDOW_SIZE,
 } from './utils'
 import { WorkbenchShell } from './WorkbenchShell'
@@ -46,17 +46,13 @@ function useTmWorkbenchLogic(
   initialTab?: TabId,
   initialRecipe?: string,
 ): WorkbenchLogic<TuringMachine> {
-  const machine = useTmStore(s => s.machine)
-  const editorValue = useTmStore(s => s.editorValue)
-  const tests = useTmStore(s => s.tests)
-  const editorErrors = useTmStore(s => s.editorErrors)
-  const patchTm = useTmStore(s => s.patch)
+  const machine = useCompiledMachine<TuringMachine>('tm')
+  const { value: editorValue, errors: editorErrors } = useEditorState('tm')
+  const { tests, setTests } = useTestSuite('tm')
   const { showAlert } = useAlert()
 
-  const compile = useCompile('tm')
   const { dot: activeDot } = useTraceSimulationContext<TuringMachine>()
   const { setHoveredEdgeId } = useTraceInteractionContext()
-  const adapters = useMemo(() => makeStoreAdapters(patchTm), [patchTm])
 
   const tabs = useMemo(
     () =>
@@ -73,14 +69,12 @@ function useTmWorkbenchLogic(
   )
 
   const core = useWorkbenchVariantCore<TuringMachine>({
+    scope: 'tm',
     enabledTabs,
     tabs,
     machine,
     recipesMap: recipes.tm,
     machineType: 'tm',
-    editorValue,
-    adapters,
-    compile,
     showAlert,
     dotFromMachine: toDotTM,
     activeDot,
@@ -94,9 +88,9 @@ function useTmWorkbenchLogic(
     machine,
     editorErrors,
     editorValue,
-    compile,
+    compile: core.compile,
     tests,
-    setTests: adapters.setTests,
+    setTests,
     simulate: (targetMachine, input) =>
       simulateTM(targetMachine, input, {
         maxSteps: Math.max(1000, input.length * 100),
@@ -147,8 +141,8 @@ export function TMComponent({
   initialRecipe,
   initialInput,
 }: WorkbenchTMProps) {
-  const machine = useTmStore(s => s.machine)
-  const tests = useTmStore(s => s.tests)
+  const machine = useCompiledMachine<TuringMachine>('tm')
+  const { tests } = useTestSuite('tm')
   const { resolvedTheme } = useTheme()
   const theme = themeNames[resolvedTheme ?? 'light']
 

@@ -1,13 +1,10 @@
-import type { TestCase } from '@delta/examples'
 import type { ReactNode } from 'react'
 import type {
   EnabledTabs,
   TabId,
   VisibleTab,
-  WorkbenchStoreAdapters,
 } from './types'
 import type { TraceInputToken } from '@/components/visualize/TraceContext'
-import type { SlicePatch } from '@/store/shared'
 
 export const TAB_ORDER: TabId[] = ['code', 'canvas', 'debug']
 export const TRACE_WINDOW_SIZE = 81
@@ -93,27 +90,4 @@ export function buildSlidingWindowTokens({
   }
 
   return tokens
-}
-
-export function makeStoreAdapters<
-  State extends {
-    editorValue: string
-    tests: TestCase[]
-    editorErrors: unknown[] | null
-  },
->(patch: (patch: SlicePatch<State>) => void): WorkbenchStoreAdapters {
-  type AdapterPatch = Partial<
-    Pick<State, 'editorValue' | 'tests' | 'editorErrors'>
-  >
-
-  const patchAdapterFields = (nextPatch: AdapterPatch) => {
-    patch(nextPatch as SlicePatch<State>)
-  }
-
-  return {
-    setEditorValue: (value: string) =>
-      patchAdapterFields({ editorValue: value }),
-    setTests: (tests: TestCase[]) => patchAdapterFields({ tests }),
-    clearEditorErrors: () => patchAdapterFields({ editorErrors: null }),
-  }
 }

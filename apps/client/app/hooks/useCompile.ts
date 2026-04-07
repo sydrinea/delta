@@ -1,37 +1,20 @@
 import type { NFA, TuringMachine } from '@delta/build'
-import type { ExecutionError } from '@/lib/runCode'
+import type { AutomataScope } from '@/store/automataStore'
 import { useCallback } from 'react'
 import { runCode } from '@/lib/runCode'
-import { useNfaStore } from '@/store/nfaStore'
-import { useTmStore } from '@/store/tmStore'
+import { useAutomataStore } from '@/store/automataStore'
 
-type CompileScope = 'nfa' | 'tm'
-
-export function useCompile(scope: CompileScope) {
-  const patchNfa = useNfaStore(s => s.patch)
-  const patchTm = useTmStore(s => s.patch)
+export function useCompile(scope: AutomataScope) {
+  const patch = useAutomataStore(s => s.patch)
 
   return useCallback(
     (code: string) =>
-      ({
-        nfa: () =>
-          runCode<NFA>(
-            code,
-            'nfa',
-            (compiledMachine: NFA) => patchNfa({ machine: compiledMachine }),
-            (errors: ExecutionError[] | null) =>
-              patchNfa({ editorErrors: errors }),
-          ),
-        tm: () =>
-          runCode<TuringMachine>(
-            code,
-            'tm',
-            (compiledMachine: TuringMachine) =>
-              patchTm({ machine: compiledMachine }),
-            (errors: ExecutionError[] | null) =>
-              patchTm({ editorErrors: errors }),
-          ),
-      })[scope](),
-    [scope, patchNfa, patchTm],
+      runCode<NFA | TuringMachine>(
+        code,
+        scope,
+        machine => patch(scope, { machine }),
+        errors => patch(scope, { editorErrors: errors }),
+      ),
+    [scope, patch],
   )
 }

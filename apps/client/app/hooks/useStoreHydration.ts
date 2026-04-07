@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/store/appStore'
+import { useAutomataStore } from '@/store/automataStore'
 import { useNfaStore } from '@/store/nfaStore'
-import { useTmStore } from '@/store/tmStore'
 
 function hasHydratedAllStores() {
   return (
     useAppStore.persist.hasHydrated()
+    && useAutomataStore.persist.hasHydrated()
     && useNfaStore.persist.hasHydrated()
-    && useTmStore.persist.hasHydrated()
   )
 }
 
@@ -35,23 +35,20 @@ export function useStoreHydration() {
     }
 
     const unhydrateApp = useAppStore.persist.onHydrate(markHydrating)
+    const unhydrateAutomata = useAutomataStore.persist.onHydrate(markHydrating)
     const unhydrateNfa = useNfaStore.persist.onHydrate(markHydrating)
-    const unhydrateTm = useTmStore.persist.onHydrate(markHydrating)
 
-    const finishHydrationApp
-      = useAppStore.persist.onFinishHydration(markFinished)
-    const finishHydrationNfa
-      = useNfaStore.persist.onFinishHydration(markFinished)
-    const finishHydrationTm
-      = useTmStore.persist.onFinishHydration(markFinished)
+    const finishHydrationApp = useAppStore.persist.onFinishHydration(markFinished)
+    const finishHydrationAutomata = useAutomataStore.persist.onFinishHydration(markFinished)
+    const finishHydrationNfa = useNfaStore.persist.onFinishHydration(markFinished)
 
     return () => {
       unhydrateApp()
+      unhydrateAutomata()
       unhydrateNfa()
-      unhydrateTm()
       finishHydrationApp()
+      finishHydrationAutomata()
       finishHydrationNfa()
-      finishHydrationTm()
     }
   }, [])
 

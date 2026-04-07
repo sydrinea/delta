@@ -68,12 +68,6 @@ export interface WorkbenchCoreLogicBase {
   copied: boolean
 }
 
-export interface WorkbenchStoreAdapters {
-  setEditorValue: (value: string) => void
-  setTests: (tests: TestCase[]) => void
-  clearEditorErrors: () => void
-}
-
 export interface WorkbenchLogic<
   M extends { name?: string },
 > extends WorkbenchCoreLogicBase {

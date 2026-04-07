@@ -1,24 +1,27 @@
 'use client'
 
-import type { TestCase } from '@delta/examples'
 import type {
   EnabledTabs,
   TabId,
   VisibleTab,
   WorkbenchCoreLogicBase,
-  WorkbenchStoreAdapters,
 } from './types'
 import type { Theme } from '@/lib/theme'
 import type { MachineType } from '@/lib/worker/protocol'
+import type { AutomataScope } from '@/store/automataStore'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCompile } from '@/hooks/useCompile'
+import { useEditorState } from '@/hooks/useEditorState'
 import { useMachineShare } from '@/hooks/useMachineShare'
+import { useTestSuite } from '@/hooks/useTestSuite'
 import { themeNames } from '@/lib/theme'
+import { useAutomataStore } from '@/store/automataStore'
 import { getInitialTab, isTabEnabled } from './utils'
 
 interface Recipe {
   label: string
   path: string
-  tests: TestCase[]
+  tests: import('@delta/examples').TestCase[]
 }
 
 interface AlertPayload {
@@ -28,14 +31,12 @@ interface AlertPayload {
 }
 
 interface UseWorkbenchVariantCoreOptions<M extends { name?: string }> {
+  scope: AutomataScope
   enabledTabs: EnabledTabs
   tabs: VisibleTab[]
   machine: M | null
   recipesMap: Record<string, Recipe>
   machineType: MachineType
-  editorValue: string
-  adapters: WorkbenchStoreAdapters
-  compile: (code: string) => void
   showAlert: (payload: AlertPayload) => void
   dotFromMachine: (machine: M, themeName: Theme) => string
   activeDot: string | null
@@ -49,14 +50,12 @@ interface UseWorkbenchVariantCoreOptions<M extends { name?: string }> {
 }
 
 export function useWorkbenchVariantCore<M extends { name?: string }>({
+  scope,
   enabledTabs,
   tabs,
   machine,
   recipesMap,
   machineType,
-  editorValue,
-  adapters,
-  compile,
   showAlert,
   dotFromMachine,
   activeDot,
@@ -71,6 +70,10 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     return getInitialTab(enabledTabs)
   })
   const [selectedRecipeKey, setSelectedRecipeKey] = useState('')
+
+  const compile = useCompile(scope)
+  const { value: editorValue, setEditorValue, clearErrors } = useEditorState(scope)
+  const { setTests } = useTestSuite(scope)
 
   const recipeEntries = useMemo(() => Object.entries(recipesMap), [recipesMap])
   const selectedRecipeLabel
@@ -117,11 +120,9 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
         const fetchedCode = await response.text()
         onRecipeLoaded?.({ activeTab: activeTabForUI, setActiveTab })
 
-        adapters.setTests(testsWithFreshIds)
-        adapters.setEditorValue(
-          fetchedCode.replace('//@ts-nocheck', '').trim(),
-        )
-        adapters.clearEditorErrors()
+        setTests(testsWithFreshIds)
+        setEditorValue(fetchedCode.replace('//@ts-nocheck', '').trim())
+        clearErrors()
         compile(fetchedCode)
       }
       catch {
@@ -133,7 +134,7 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
         })
       }
     },
-    [activeTabForUI, adapters, compile, onRecipeLoaded, recipesMap, showAlert],
+    [activeTabForUI, clearErrors, compile, onRecipeLoaded, recipesMap, setEditorValue, setTests, showAlert],
   )
 
   const hasAppliedInitialRecipeRef = useRef(false)
@@ -145,10 +146,21 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     // eslint-disable-next-line react/exhaustive-deps
   }, [])
 
-  // Compile on mount so machine is populated even when the code tab isn't active.
-  // If initialRecipe is also loading, applyRecipe's compile call will win (same worker pattern).
+  // Compile once the store is hydrated so machine is populated regardless of active tab or entry path.
+  // If hydration has already completed (fast path), compile immediately.
+  // Otherwise wait for onFinishHydration so we use the real persisted value, not defaults.
   useEffect(() => {
-    compile(editorValue)
+    if (useAutomataStore.persist.hasHydrated()) {
+      compile(useAutomataStore.getState().automata[scope].editorValue)
+      return
+    }
+
+    const unsub = useAutomataStore.persist.onFinishHydration(() => {
+      compile(useAutomataStore.getState().automata[scope].editorValue)
+      unsub()
+    })
+
+    return unsub
     // eslint-disable-next-line react/exhaustive-deps
   }, [])
 
@@ -175,7 +187,7 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     code: editorValue,
     canShare: machine !== null,
     onLoadCode: (code) => {
-      adapters.setEditorValue(code)
+      setEditorValue(code)
       compile(code)
     },
     onShareError: () => {
@@ -203,6 +215,8 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
 
   return {
     base,
+    compile,
+    editorValue,
     setActiveTab,
   }
 }

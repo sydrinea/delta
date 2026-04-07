@@ -1,5 +1,6 @@
 'use client'
 
+import type { NFA } from '@delta/build'
 import type {
   Connection,
   Edge,
@@ -26,6 +27,7 @@ import ReactFlow, {
   useReactFlow,
   useStoreApi,
 } from 'reactflow'
+import { useCompiledMachine } from '@/hooks/useCompiledMachine'
 import { toDot } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfaStore'
@@ -178,7 +180,7 @@ const nodeTypes = { state: StateNode }
 const edgeTypes = { automata: AutomataEdge }
 
 export function FlowEditor() {
-  const machine = useNfaStore(s => s.machine)
+  const machine = useCompiledMachine<NFA>('nfa')
   const storeNodes = useNfaStore(s => s.nodes)
   const storeEdges = useNfaStore(s => s.edges)
   const startId = useNfaStore(s => s.startId)
@@ -253,7 +255,7 @@ export function FlowEditor() {
 
         setNodes(layoutedNodes)
         setEdges(layoutedEdges)
-        syncFromFlow(layoutedNodes, layoutedEdges, startId)
+        syncFromFlow(layoutedNodes, layoutedEdges, machine.startState)
         setHasInitialLayout(true)
       }
     }
