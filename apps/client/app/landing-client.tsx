@@ -169,14 +169,10 @@ export default function LandingClient({ children }: LandingClientProps) {
                       value: 'debug',
                       label: 'debug',
                       content: (
-                        <video
-                          src="/debug-video.mov"
-                          autoPlay
-                          muted
-                          loop
-                          playsInline
-                          className="w-full"
-                        />
+                        <video autoPlay muted loop playsInline className="w-full">
+                          <source src="/debug-video-light.mp4" media="(prefers-color-scheme: light)" />
+                          <source src="/debug-video.mov" />
+                        </video>
                       ),
                     },
                   ] satisfies WindowMockTab[]}
