@@ -8,8 +8,8 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --font-sans: var(--font-syne);
-  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-lexend);
+  --font-serif: var(--font-lora);
   --font-mono: var(--font-recursive);
 
   /* Slightly increase small typography scale globally; buttons use text-xs. */
@@ -136,7 +136,7 @@ html.mocha :is(pre, code)[data-theme*=' '] * {
 @layer utilities {
   .hero-grid {
     background-image: radial-gradient(circle, theme(colors.ctp-surface1 / 0.6) 1px, transparent 1px);
-    background-size: 28px 28px;
+    background-size: 30px 30px;
   }
 }
 
@@ -156,11 +156,5 @@ html.mocha :is(pre, code)[data-theme*=' '] * {
   }
   html {
     @apply font-mono;
-  }
-
-  /* Sans text should read larger by default than mono text. */
-  .font-sans {
-    font-size: var(--text-sm);
-    line-height: var(--text-sm--line-height);
   }
 }

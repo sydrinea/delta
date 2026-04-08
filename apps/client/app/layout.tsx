@@ -1,15 +1,15 @@
 import type { Metadata, Viewport } from 'next'
 import { flavors } from '@catppuccin/palette'
 import { ThemeProvider } from 'next-themes'
-import { Cormorant, Recursive, Syne } from 'next/font/google'
+import { Lexend, Lora, Recursive } from 'next/font/google'
 import { cn } from '@/app/lib/utils'
 import { Layout } from '@/components'
 import { SerwistProvider } from './serwist'
 import './globals.css'
 import 'reactflow/dist/style.css'
 
-const syne = Syne({
-  variable: '--font-syne',
+const lexend = Lexend({
+  variable: '--font-lexend',
   subsets: ['latin'],
 })
 
@@ -19,8 +19,8 @@ const recursive = Recursive({
   axes: ['MONO'],
 })
 
-const cormorant = Cormorant({
-  variable: '--font-cormorant',
+const lora = Lora({
+  variable: '--font-lora',
   subsets: ['latin'],
 })
 
@@ -67,7 +67,7 @@ export default function RootLayout({
     <html
       suppressHydrationWarning
       lang="en"
-      className={cn('overscroll-none', 'bg-ctp-base', 'antialiased', recursive.variable, syne.variable, cormorant.variable, 'font-mono')}
+      className={cn('overscroll-none', 'bg-ctp-base', 'antialiased', recursive.variable, lora.variable, lexend.variable, 'font-mono')}
       dir="ltr"
     >
       <body>

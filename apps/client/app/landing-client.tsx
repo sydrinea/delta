@@ -38,8 +38,8 @@ const features = [
     variant: 'green' as const,
   },
   {
-    title: 'NFA → DFA Conversion',
-    description: 'Convert any NFA via subset construction. Optionally preserve human-readable state names throughout.',
+    title: 'NFA to DFA Conversion',
+    description: 'Convert any NFA via subset construction and see how they relate with semantic state names.',
     variant: 'blue' as const,
   },
   {
@@ -118,13 +118,13 @@ export default function LandingClient({ children }: LandingClientProps) {
         <div className={`${CONTAINER} flex-1 flex items-center py-16 sm:py-20`}>
           <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
             <div className="flex flex-col gap-6">
-              <h1 className="font-sans text-4xl font-bold leading-tight tracking-tight text-ctp-text">
-                Define automata and
+              <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight text-ctp-text">
+                design automata as
                 <br />
-                <span className="text-ctp-sky">inspect their behavior</span>
+                <span className="text-ctp-sky">software</span>
               </h1>
 
-              <p className="font-mono text-sm leading-relaxed text-ctp-subtext0 max-w-md">
+              <p className="font-sans text-sm md:text-md leading-relaxed text-ctp-subtext1 max-w-md">
                 Delta is a code-first environment for building and testing finite automata and Turing machines in TypeScript.
               </p>
 
@@ -192,10 +192,10 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section id="features" className="py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-sky font-sans tracking-wide">
-            Features
+          <div className="mb-3 flex items-center gap-2 text-lg font-bold  text-ctp-sky font-sans">
+            features
           </div>
-          <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
+          <h2 className="font-serif text-4xl font-bold tracking-tight text-ctp-text mb-12">
             Modeled after an IDE
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 min-[900px]:grid-cols-3 gap-3">
@@ -211,10 +211,10 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section className="bg-ctp-mantle border-y border-ctp-surface0 py-20">
         <div className={CONTAINER}>
-          <div className="mb-3 flex items-center gap-2 text-xs font-bold  uppercase text-ctp-sky font-sans tracking-wide">
-            Machine types
+          <div className="mb-3 flex items-center gap-2 text-lg font-bold  text-ctp-sky font-sans">
+            machine types
           </div>
-          <h2 className="font-sans text-4xl font-bold tracking-tight text-ctp-text mb-12">
+          <h2 className="font-serif text-4xl font-bold tracking-tight text-ctp-text mb-12">
             Chomsky's hierarchy
           </h2>
           <div className="grid grid-cols-1 min-[700px]:grid-cols-3 gap-5">
@@ -247,10 +247,10 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="py-20">
         <div className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
-            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase text-ctp-sky font-sans tracking-wide">
-              Correctness
+            <div className="mb-3 flex items-center gap-2 text-lg font-bold  text-ctp-sky font-sans">
+              correctness
             </div>
-            <h2 className="font-sans text-4xl leading-12 font-bold tracking-tight text-ctp-text mb-6">
+            <h2 className="font-serif text-4xl leading-12 font-bold tracking-tight text-ctp-text mb-6">
               Test your machines
             </h2>
             <ul className="space-y-4 text-sm text-ctp-subtext0 font-sans leading-relaxed">

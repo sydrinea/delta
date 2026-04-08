@@ -60,9 +60,9 @@ export function FeatureCard({
     )}
     >
       <div className="flex items-start justify-between mb-2">
-        <h2 className={cn('text-sm font-semibold font-mono leading-none', styles.text)}>{title}</h2>
+        <h2 className={cn('text-md font-semibold font-sans leading-none', styles.text)}>{title}</h2>
       </div>
-      <p className="font-sans text-ctp-subtext1 leading-relaxed">
+      <p className="text-sm font-sans text-ctp-subtext1 leading-relaxed">
         {description}
       </p>
     </div>
