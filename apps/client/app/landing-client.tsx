@@ -5,7 +5,7 @@ import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import * as React from 'react'
-import { GitHub } from '@/components'
+import { GitHub, ScrollFadeIn } from '@/components'
 import Footer from '@/components/layout/Footer'
 import { AnnouncementBadge } from '@/components/ui/announcement-badge'
 import { Button } from '@/components/ui/button'
@@ -116,7 +116,7 @@ export default function LandingClient({ children }: LandingClientProps) {
           </div>
         )}
         <div className={`${CONTAINER} flex-1 flex items-center py-16 sm:py-20`}>
-          <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center">
+          <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center animate-in fade-in slide-in-from-bottom-15 duration-1000">
             <div className="flex flex-col gap-6">
               <h1 className="font-serif text-4xl md:text-5xl font-bold leading-tight text-ctp-text">
                 design automata as
@@ -191,7 +191,7 @@ export default function LandingClient({ children }: LandingClientProps) {
       </section>
 
       <section id="features" className="py-20">
-        <div className={CONTAINER}>
+        <ScrollFadeIn className={CONTAINER}>
           <div className="mb-3 flex items-center gap-2 text-lg font-bold  text-ctp-sky font-sans">
             features
           </div>
@@ -206,11 +206,11 @@ export default function LandingClient({ children }: LandingClientProps) {
               />
             ))}
           </div>
-        </div>
+        </ScrollFadeIn>
       </section>
 
       <section className="bg-ctp-mantle border-y border-ctp-surface0 py-20">
-        <div className={CONTAINER}>
+        <ScrollFadeIn className={CONTAINER}>
           <div className="mb-3 flex items-center gap-2 text-lg font-bold  text-ctp-sky font-sans">
             machine types
           </div>
@@ -241,11 +241,11 @@ export default function LandingClient({ children }: LandingClientProps) {
               </div>
             ))}
           </div>
-        </div>
+        </ScrollFadeIn>
       </section>
 
       <section className="py-20">
-        <div className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
+        <ScrollFadeIn className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
             <div className="mb-3 flex items-center gap-2 text-lg font-bold  text-ctp-sky font-sans">
               correctness
@@ -276,11 +276,11 @@ export default function LandingClient({ children }: LandingClientProps) {
               { input: 'aaaaaaa', expected: false, passed: false },
             ]}
           />
-        </div>
+        </ScrollFadeIn>
       </section>
 
       <section className="bg-ctp-lavender/15 border-y border-ctp-lavender/25 py-20 text-center">
-        <div className={CONTAINER}>
+        <ScrollFadeIn className={CONTAINER}>
           <h2 className="font-serif text-3xl font-bold tracking-tight text-ctp-text mb-3">
             Ready to dive in?
           </h2>
@@ -290,7 +290,7 @@ export default function LandingClient({ children }: LandingClientProps) {
               Launch Delta
             </Link>
           </Button>
-        </div>
+        </ScrollFadeIn>
       </section>
 
       <Footer />
