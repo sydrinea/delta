@@ -282,9 +282,9 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="bg-ctp-lavender/15 border-y border-ctp-lavender/25 py-20 text-center">
         <div className={CONTAINER}>
           <h2 className="font-sans text-[clamp(1.625rem,3.5vw,2.25rem)] font-bold tracking-tight text-ctp-text mb-3">
-            Start building today
+            Ready to dive in?
           </h2>
-          <p className="text-sm text-ctp-subtext0 font-mono mb-8">Zero installation required.</p>
+          <p className="text-sm text-ctp-subtext0 font-mono mb-5">Write your first automaton in minutes.</p>
           <Button asChild variant="accent" size="lg">
             <Link href="/nfa" onClick={() => handleNavigationStart('/nfa')}>
               Launch Delta
