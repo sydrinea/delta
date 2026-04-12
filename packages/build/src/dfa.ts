@@ -16,7 +16,14 @@ export const DFAMessages = {
 } as const
 
 /**
- * Construct a new DFA with validation.
+ * Builder for a Deterministic Finite Automaton (DFA).
+ *
+ * Extends `NFABuilder` with two extra constraints enforced at build time:
+ * - Epsilon transitions are **not** allowed.
+ * - Every (state, symbol) pair must have **exactly one** transition
+ *   (missing transitions are errors, not just warnings).
+ *
+ * Use the top-level `dfa(name)` factory instead of constructing this directly.
  */
 class DFABuilder extends NFABuilder {
   public override transition(from: string, symbol: string, to: string): this {
@@ -70,9 +77,26 @@ class DFABuilder extends NFABuilder {
 }
 
 /**
- * Construct a DFA
- * @param name the name of the DFA
- * @returns a {@link DFABuilder} (fluent API)
+ * Create a new DFA (Deterministic Finite Automaton) builder.
+ *
+ * Identical API to `nfa()`, but `build()` enforces DFA constraints:
+ * every state must have exactly one transition per alphabet symbol, and
+ * epsilon transitions are forbidden.
+ *
+ * @param name - A label for the automaton, used in debug output.
+ * @returns A fresh `DFABuilder`.
+ *
+ * @example
+ * // DFA that accepts strings over {0, 1} with an even number of 0s
+ * const machine = dfa('even-zeros')
+ *   .alphabet('0', '1')
+ *   .states('q0', 'q1')
+ *   .start('q0').accept('q0')
+ *   .transition('q0', '0', 'q1')
+ *   .transition('q0', '1', 'q0')
+ *   .transition('q1', '0', 'q0')
+ *   .transition('q1', '1', 'q1')
+ *   .build()
  */
 export default function dfa(name: string): DFABuilder {
   return new DFABuilder(name)

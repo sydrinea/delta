@@ -43,7 +43,8 @@ export class RegularGrammarBuilder {
   }
 
   /**
-   * Records a {@link Message} for the automaton.
+   * Records a diagnostic message (warning or error) for the grammar.
+   * Errors prevent `build()` from succeeding.
    */
   protected message(severity: Message['severity'], content: string): void {
     const stack = new Error(content).stack
@@ -51,7 +52,17 @@ export class RegularGrammarBuilder {
   }
 
   /**
-   * Declare the terminal symbols (alphabet)
+   * Declare the terminal symbols (the input alphabet).
+   *
+   * Terminals correspond to the symbols that appear on the right-hand side of
+   * production rules (e.g. the `a` in `A → aB`). They must be declared
+   * before being referenced in `rule()`.
+   *
+   * @param symbols - Terminal symbols, e.g. `'a'`, `'b'`, `'0'`, `'1'`.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * grammar('G').terminals('a', 'b')
    */
   public terminals(...symbols: string[]): this {
     symbols.forEach(s => this._terminals.add(s))
@@ -59,7 +70,17 @@ export class RegularGrammarBuilder {
   }
 
   /**
-   * Declare the nonterminal symbols (states)
+   * Declare the nonterminal symbols (grammar variables / states).
+   *
+   * Nonterminals are the uppercase letters or multi-character names that
+   * appear on the left-hand side of production rules (e.g. `S`, `A`, `B`).
+   * They must be declared before being referenced in `start()` or `rule()`.
+   *
+   * @param symbols - Nonterminal names, e.g. `'S'`, `'A'`, `'B'`.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * grammar('G').nonTerminals('S', 'A', 'B')
    */
   public nonTerminals(...symbols: string[]): this {
     symbols.forEach(s => this._nonTerminals.add(s))
@@ -67,7 +88,15 @@ export class RegularGrammarBuilder {
   }
 
   /**
-   * Set the start symbol
+   * Set the start symbol — the nonterminal from which all derivations begin.
+   *
+   * Must have been declared with `nonTerminals()` first.
+   *
+   * @param symbol - A nonterminal symbol previously declared via `nonTerminals()`.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * grammar('G').nonTerminals('S').start('S')
    */
   public start(symbol: string): this {
     if (!this._nonTerminals.has(symbol)) {
@@ -82,9 +111,31 @@ export class RegularGrammarBuilder {
   }
 
   /**
-   * Add a production rule
-   * A → aB  (pass `to`)
-   * A → a   (omit `to`)
+   * Add a right-regular production rule.
+   *
+   * Two forms are supported:
+   * - `rule('A', 'a', 'B')` — `A → aB` (consume terminal `a`, continue in `B`)
+   * - `rule('A', 'a')` — `A → a` (consume terminal `a` and accept)
+   *
+   * All referenced symbols must have been declared before calling `rule()`.
+   * Epsilon (`EPS` / `EPSILON`) may be used as the terminal for an
+   * epsilon production.
+   *
+   * @param from - The nonterminal on the left-hand side.
+   * @param terminal - The terminal symbol consumed by this rule.
+   * @param to - Optional nonterminal on the right-hand side. Omit for a
+   *   terminal (accepting) production.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * grammar('ab*')
+   *   .terminals('a', 'b')
+   *   .nonTerminals('S', 'B')
+   *   .start('S')
+   *   .rule('S', 'a', 'B') // S → aB
+   *   .rule('B', 'b', 'B') // B → bB
+   *   .rule('B', 'b')       // B → b
+   *   .build()
    */
   public rule(from: string, terminal: string, to?: string): this {
     if (!this._nonTerminals.has(from)) {
@@ -113,12 +164,30 @@ export class RegularGrammarBuilder {
   }
 
   /**
-   * Build into an NFA via the standard right-regular grammar conversion:
-   *   - each nonterminal → state
-   *   - A → aB  becomes δ(A, a) = B
-   *   - A → a   becomes δ(A, a) = Z
-   *   - start symbol → start state
-   *   - synthetic accept state collects all terminal productions
+   * Compile the grammar into an equivalent `NFA`.
+   *
+   * Applies the standard right-regular grammar → NFA conversion:
+   * - Each nonterminal becomes a state.
+   * - `A → aB` becomes transition `δ(A, a) = B`.
+   * - `A → a` (terminal production) becomes `δ(A, a) = F` where `F` is a
+   *   synthetic accepting state that collects all such productions.
+   * - The start symbol maps to the NFA's start state.
+   *
+   * Throws `RegularGrammarBuildError` if any error-severity messages exist
+   * (e.g. references to undeclared symbols or a missing start symbol).
+   *
+   * @returns The constructed `NFA`.
+   * @throws `RegularGrammarBuildError` if the grammar definition contains errors.
+   *
+   * @example
+   * const nfa = grammar('ab*')
+   *   .terminals('a', 'b')
+   *   .nonTerminals('S', 'B')
+   *   .start('S')
+   *   .rule('S', 'a', 'B')
+   *   .rule('B', 'b', 'B')
+   *   .rule('B', 'b')
+   *   .build()
    */
   public build(): NFA {
     if (this._built)
@@ -151,9 +220,24 @@ export class RegularGrammarBuilder {
 }
 
 /**
- * Construct a regular grammar that compiles to an NFA
- * @param name the name of the grammar
- * @returns a {@link RegularGrammarBuilder} (fluent API)
+ * Create a new regular grammar builder that compiles to an NFA.
+ *
+ * Use the fluent API — `terminals()`, `nonTerminals()`, `start()`, `rule()` —
+ * to describe the grammar, then call `build()` to obtain an equivalent `NFA`.
+ *
+ * @param name - A label for the resulting automaton, used in debug output.
+ * @returns A fresh `RegularGrammarBuilder`.
+ *
+ * @example
+ * // Grammar for a(b*)
+ * const machine = grammar('ab*')
+ *   .terminals('a', 'b')
+ *   .nonTerminals('S', 'B')
+ *   .start('S')
+ *   .rule('S', 'a', 'B') // S → aB
+ *   .rule('B', 'b', 'B') // B → bB
+ *   .rule('B', 'b')       // B → b
+ *   .build()
  */
 export default function grammar(name: string): RegularGrammarBuilder {
   return new RegularGrammarBuilder(name)

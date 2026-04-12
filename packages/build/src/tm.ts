@@ -103,9 +103,30 @@ export interface MultiTMStateScope<N extends number> {
     write?: ScopedWrite<N>,
   ) => this
   /**
-   * Scans `tapeIndex` in `direction` looping on `skipSymbols`.
-   * Transitions to `toState` when `targetSymbol` is encountered.
-   * Other tapes remain stationary and read `otherTapesContext` (defaults to blank).
+   * Scan along one tape until a target symbol is found.
+   *
+   * On every step where `tapeIndex` reads a symbol in `skipSymbols`, the
+   * machine stays in the current state and moves in `direction` on that tape;
+   * all other tapes stay stationary and must read `otherTapesContext`
+   * (defaults to the blank symbol).
+   *
+   * When `tapeIndex` reads a symbol in `targetSymbol`, the machine
+   * transitions to `toState`. If `writeTarget` is given the target symbol is
+   * overwritten with it before the head moves.
+   *
+   * @param tapeIndex - Zero-based index of the tape to scan.
+   * @param skipSymbols - Symbol(s) to keep scanning past.
+   * @param targetSymbol - Symbol(s) that stop the scan and trigger `toState`.
+   * @param direction - Head movement direction while scanning (`'L'` or `'R'`).
+   * @param toState - State to enter when `targetSymbol` is found.
+   * @param otherTapesContext - Expected symbol(s) on all other tapes during
+   *   the scan. Defaults to the blank symbol.
+   * @param writeTarget - Optional symbol to write when `targetSymbol` is read.
+   * @returns This scope for chaining.
+   *
+   * @example
+   * // Scan tape 0 rightward over '0'/'1' until blank, then move to 'qDone'
+   * scope.seek(0, ['0', '1'], '_', 'R', 'qDone')
    */
   seek: (
     tapeIndex: number,
@@ -153,7 +174,20 @@ export abstract class BaseTMBuilder extends Automata {
   }
 
   /**
-   * Declare symbols that can appear on the tape.
+   * Declare symbols that can appear on the tape (the tape alphabet).
+   *
+   * The tape alphabet is a superset of the input alphabet and must include
+   * the blank symbol. Call this before `blank()` or `alphabet()` when you
+   * need extra working symbols that are not part of the input.
+   *
+   * Epsilon (`ε`) may not appear in the tape alphabet.
+   *
+   * @param symbols - Tape symbols, including any working symbols and the
+   *   intended blank symbol.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * tm('copy').tape('0', '1', '_', 'X').blank('_')
    */
   public tape(...symbols: string[]): this {
     symbols.forEach((symbol) => {
@@ -167,7 +201,17 @@ export abstract class BaseTMBuilder extends Automata {
   }
 
   /**
-   * Declare the blank symbol (must already be in the tape alphabet).
+   * Set the blank symbol — the default symbol on unused tape cells.
+   *
+   * The symbol must already be part of the tape alphabet (declared via
+   * `tape()`), and must **not** appear in the input alphabet. Conventionally
+   * `'_'` or `'B'` is used.
+   *
+   * @param symbol - The blank symbol.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * tm('example').tape('0', '1', '_').blank('_')
    */
   public blank(symbol: string): this {
     if (!this._tapeAlphabet.has(symbol)) {
@@ -185,7 +229,20 @@ export abstract class BaseTMBuilder extends Automata {
   }
 
   /**
-   * Declare the input alphabet (blank symbol is prohibited).
+   * Declare the input alphabet — the symbols that may appear on the tape as
+   * program input.
+   *
+   * The blank symbol must **not** be included; it is a tape-only symbol.
+   * If `blank()` has not been called yet, these symbols are also added to
+   * the tape alphabet automatically.
+   *
+   * @param symbols - Input symbols. Must not include the blank symbol.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * tm('binary-copy')
+   *   .tape('0', '1', '_').blank('_')
+   *   .alphabet('0', '1')
    */
   public override alphabet(...symbols: string[]): this {
     if (this._blankSymbol === null) {
@@ -338,6 +395,18 @@ export abstract class BaseTMBuilder extends Automata {
   }
 }
 
+/**
+ * Builder for a multi-tape Turing Machine.
+ *
+ * Each transition specifies an N-tuple of read symbols, an N-tuple of write
+ * symbols, and an N-tuple of head directions — one entry per tape.
+ *
+ * For single-tape machines prefer the `TMBuilder` subclass (via `tm()`), which
+ * accepts a more convenient flat notation.
+ *
+ * Use the top-level `multitape(name, N)` factory instead of constructing this
+ * class directly.
+ */
 export class MultiTMBuilder<N extends number> extends BaseTMBuilder {
   constructor(name: string, tapeCount: N) {
     super(name, tapeCount)
@@ -362,6 +431,29 @@ export class MultiTMBuilder<N extends number> extends BaseTMBuilder {
     )
   }
 
+  /**
+   * Add one or more transitions using a tuple specification.
+   *
+   * `read` and `write` are N-element arrays (one entry per tape). Each entry
+   * can be a single symbol or an array of symbols; if an array is given the
+   * transition is expanded into one entry per combination (wildcard-style
+   * matching across the provided alternatives).
+   *
+   * When `write` is omitted (or `undefined` for a tape), the read symbol is
+   * written back unchanged.
+   *
+   * @param spec - The transition specification.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * // 2-tape TM: read '0' on tape 0 and '_' on tape 1,
+   * // write '0' / '_', move both heads right
+   * builder.transition({
+   *   from: 'q0', to: 'q1',
+   *   read: ['0', '_'],
+   *   move: ['R', 'R'],
+   * })
+   */
   public transition(spec: MultiTMTransitionSpec<N>): this {
     const tuples = this.expandReadTuples(spec)
 
@@ -388,6 +480,23 @@ export class MultiTMBuilder<N extends number> extends BaseTMBuilder {
     return this
   }
 
+  /**
+   * Open a scoped editing context for all transitions leaving `fromState`.
+   *
+   * The callback receives a `MultiTMStateScope` with `on()`, `transition()`,
+   * and `seek()` methods that implicitly bind `from` to `fromState`.
+   *
+   * @param fromState - The source state for every transition added in the
+   *   callback.
+   * @param build - Callback in which transitions are defined.
+   * @returns The same builder so calls can be chained.
+   *
+   * @example
+   * builder.state('q0', s => {
+   *   s.on('0', 'R', 'q1')        // read '0', move right, go to q1
+   *   s.on('_', 'S', 'qAccept')   // read blank, stay, accept
+   * })
+   */
   public state(
     fromState: string,
     build: (s: MultiTMStateScope<N>) => void,
@@ -507,6 +616,16 @@ export class MultiTMBuilder<N extends number> extends BaseTMBuilder {
     return this
   }
 
+  /**
+   * Finalise the builder and produce a validated `MultiTM` object.
+   *
+   * Validates that a start state, a blank symbol, and a valid tape alphabet
+   * have all been declared. Throws `TMBuildError` if any error-severity
+   * messages exist.
+   *
+   * @returns The constructed multi-tape Turing Machine.
+   * @throws `TMBuildError` if the machine definition contains errors.
+   */
   public build(): MultiTM<N> {
     this.markBuilt()
     this.validateBuildState()
@@ -530,6 +649,15 @@ export class MultiTMBuilder<N extends number> extends BaseTMBuilder {
   }
 }
 
+/**
+ * Builder for a single-tape Turing Machine.
+ *
+ * Extends `MultiTMBuilder<1>` with a more convenient `transition()` overload
+ * that accepts flat (non-tuple) values for `read`, `write`, and `move` so you
+ * do not have to wrap everything in single-element arrays.
+ *
+ * Use the top-level `tm(name)` factory instead of constructing this directly.
+ */
 export class TMBuilder extends MultiTMBuilder<1> {
   constructor(name: string) {
     super(name, 1)
@@ -582,10 +710,51 @@ export class TMBuilder extends MultiTMBuilder<1> {
   }
 }
 
+/**
+ * Create a new single-tape Turing Machine builder.
+ *
+ * Use the fluent API — `tape()`, `blank()`, `alphabet()`, `states()`,
+ * `start()`, `accept()`, `transition()`, and `state()` — to describe the
+ * machine, then call `build()` to obtain a `TM` object.
+ *
+ * @param name - A label for the machine, used in debug output.
+ * @returns A fresh `TMBuilder`.
+ *
+ * @example
+ * // TM that accepts strings of the form 0^n 1^n
+ * const machine = tm('0n1n')
+ *   .tape('0', '1', 'X', 'Y', '_').blank('_')
+ *   .alphabet('0', '1')
+ *   .states('q0', 'q1', 'q2', 'q3', 'qAccept', 'qReject')
+ *   .start('q0').accept('qAccept')
+ *   // ... transitions ...
+ *   .build()
+ */
 export default function tm(name: string): TMBuilder {
   return new TMBuilder(name)
 }
 
+/**
+ * Create a new multi-tape Turing Machine builder.
+ *
+ * Each transition operates on all `tapeCount` tapes simultaneously.
+ * `read`, `write`, and `move` values are N-element tuples.
+ *
+ * @param name - A label for the machine, used in debug output.
+ * @param tapeCount - Number of tapes (must be a positive integer).
+ * @returns A fresh `MultiTMBuilder<N>`.
+ * @throws if `tapeCount` is not a positive integer.
+ *
+ * @example
+ * // 2-tape TM
+ * const machine = multitape('two-tape', 2)
+ *   .tape('0', '1', '_').blank('_')
+ *   .alphabet('0', '1')
+ *   .states('q0', 'qAccept')
+ *   .start('q0').accept('qAccept')
+ *   .transition({ from: 'q0', to: 'qAccept', read: ['0', '_'], move: ['R', 'S'] })
+ *   .build()
+ */
 export function multitape<const N extends number>(
   name: string,
   tapeCount: N,
