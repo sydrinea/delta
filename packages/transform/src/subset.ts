@@ -11,11 +11,49 @@ function stateName(preserve: boolean): (states: Set<string>) => string {
   }
 }
 
+/**
+ * Options for the NFA-to-DFA conversion.
+ */
 interface ConvertOptions {
+  /**
+   * Name to assign to the resulting DFA.
+   * Defaults to `"<nfa-name>__dfa"`.
+   */
   name?: string
+  /**
+   * When `true` (the default), DFA state names reflect the NFA subsets they
+   * represent — e.g. `{q0,q1}`. When `false`, states are named `q0`, `q1`,
+   * … in the order they are discovered, which produces shorter names but
+   * makes the structure harder to relate back to the original NFA.
+   */
   preserveNames?: boolean
 }
 
+/**
+ * Convert an NFA to an equivalent DFA using the subset (powerset) construction.
+ *
+ * Every state in the resulting DFA corresponds to a set of NFA states, and
+ * epsilon-closures are computed at each step. The output is a valid `NFA`
+ * object (structurally identical to `DFA` output) with no epsilon transitions
+ * and exactly one transition per (state, symbol) pair.
+ *
+ * @param nfa - The NFA to convert.
+ * @param options - Optional name and naming strategy for the output DFA.
+ * @returns An `NFA` value that is also a valid DFA.
+ *
+ * @example
+ * import { nfa } from '@delta/build'
+ * import { convertToDFA } from '@delta/transform'
+ *
+ * const myNFA = nfa('example')
+ *   .alphabet('a', 'b')
+ *   // ... states and transitions ...
+ *   .build()
+ *
+ * const dfa = convertToDFA(myNFA)
+ * // or with options:
+ * const dfa2 = convertToDFA(myNFA, { name: 'my-dfa', preserveNames: false })
+ */
 export function convertToDFA(nfa: NFA, options: ConvertOptions = {}): NFA {
   const { name = `${nfa.name}__dfa`, preserveNames = true } = options
   const subsetToName = new Map<string, string>()

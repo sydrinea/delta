@@ -3,10 +3,18 @@ import { EPS, EPSILON } from './constants'
 import nfa from './nfa'
 
 /**
- * Automates listing of numerical states
- * @param lower the lower bound... i.e., q0
- * @param upper the upper bound... i.e., q15
- * @returns an array from [q0, ..., q15]
+ * Generate a list of numbered state names in the format `q<n>`.
+ *
+ * A convenience for `states(...q(0, 4))` instead of typing out
+ * `states('q0', 'q1', 'q2', 'q3', 'q4')` manually.
+ *
+ * @param lower - The first index (inclusive), e.g. `0` produces `'q0'`.
+ * @param upper - The last index (inclusive), e.g. `4` produces `'q4'`.
+ * @returns An array `['q{lower}', ..., 'q{upper}']`.
+ *
+ * @example
+ * q(0, 3) // ['q0', 'q1', 'q2', 'q3']
+ * nfa('example').states(...q(0, 5))
  */
 export function q(lower: number, upper: number) {
   return Array.from({ length: upper - lower + 1 }, (_, i) => `q${i + lower}`)
@@ -34,6 +42,18 @@ function copyTransitions(
   }
 }
 
+/**
+ * Build a two-state NFA that accepts exactly the single character `s`.
+ *
+ * Produces the machine `q0 --s--> q1` with `q0` as start and `q1` as accept.
+ * Primarily used as a building block for Thompson construction.
+ *
+ * @param s - The single character to match.
+ * @returns An `NFA` accepting only the one-character string `s`.
+ *
+ * @example
+ * const a = char('a') // accepts only "a"
+ */
 export function char(s: string): NFA {
   return nfa(`char_${s}`)
     .alphabet(s)
@@ -44,6 +64,17 @@ export function char(s: string): NFA {
     .build()
 }
 
+/**
+ * Build a two-state NFA that accepts the empty string (ε).
+ *
+ * Produces `q0 --ε--> q1`. Used as a building block when composing NFAs
+ * with Thompson construction.
+ *
+ * @returns An `NFA` that accepts only the empty string.
+ *
+ * @example
+ * const eps = epsilon() // accepts ""
+ */
 export function epsilon(): NFA {
   return nfa(EPS)
     .states('q0', 'q1')
@@ -53,6 +84,20 @@ export function epsilon(): NFA {
     .build()
 }
 
+/**
+ * Build an NFA that accepts the **union** (alternation) of two languages: `a | b`.
+ *
+ * Uses the standard Thompson construction: introduces a new start state with
+ * epsilon transitions to the start states of both machines, and a new accept
+ * state reached from all accept states of both machines via epsilon transitions.
+ *
+ * @param a - First NFA.
+ * @param b - Second NFA.
+ * @returns A new `NFA` accepting any string accepted by `a` or `b`.
+ *
+ * @example
+ * const aOrB = union(char('a'), char('b')) // accepts "a" or "b"
+ */
 export function union(a: NFA, b: NFA): NFA {
   const mapA = renumber(a, 1)
   const mapB = renumber(b, 1 + a.states.size)
@@ -82,6 +127,20 @@ export function union(a: NFA, b: NFA): NFA {
   return builder.build()
 }
 
+/**
+ * Build an NFA that accepts the **concatenation** of two languages: `ab`.
+ *
+ * Connects the accept states of `a` to the start state of `b` via epsilon
+ * transitions, forming a single machine that first processes `a`, then `b`.
+ *
+ * @param a - The first (prefix) NFA.
+ * @param b - The second (suffix) NFA.
+ * @returns A new `NFA` accepting strings of the form `xy` where `x` is in
+ *   the language of `a` and `y` is in the language of `b`.
+ *
+ * @example
+ * const ab = concat(char('a'), char('b')) // accepts only "ab"
+ */
 export function concat(a: NFA, b: NFA): NFA {
   const mapA = renumber(a, 0)
   const mapB = renumber(b, a.states.size)
@@ -106,6 +165,20 @@ export function concat(a: NFA, b: NFA): NFA {
   return builder.build()
 }
 
+/**
+ * Build an NFA that accepts the **Kleene star** of a language: `a*`.
+ *
+ * Wraps `a` in the standard Thompson construction: new start and accept states
+ * with epsilon transitions allowing zero repetitions, and a back-edge from
+ * the accept states of `a` to its own start state enabling multiple passes.
+ *
+ * @param a - The NFA whose language will be repeated.
+ * @returns A new `NFA` accepting zero or more repetitions of any string in
+ *   the language of `a`, including the empty string.
+ *
+ * @example
+ * const astar = star(char('a')) // accepts "", "a", "aa", "aaa", …
+ */
 export function star(a: NFA): NFA {
   const mapA = renumber(a, 1)
   const newStart = 'q0'
