@@ -17,7 +17,7 @@ export interface VisibleTab {
 export interface ConfirmModalConfig {
   isOpen: boolean
   title: string
-  message: string
+  message: ReactNode
   confirmText: string
   cancelText: string
   confirmVariant?:

@@ -13,7 +13,7 @@ import { Button } from './button'
 interface ConfirmModalProps {
   isOpen: boolean
   title: string
-  message: string
+  message: React.ReactNode
   confirmText?: string
   cancelText?: string
   confirmVariant?: React.ComponentProps<typeof Button>['variant']

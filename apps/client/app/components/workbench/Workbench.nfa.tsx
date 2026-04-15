@@ -144,8 +144,14 @@ function useNfaWorkbenchLogic(
     confirmModal: {
       isOpen: showWarning,
       title: 'Switching to Canvas',
-      message:
-        'Entering the canvas will automatically convert your code. Any custom formatting or comments will be lost. Do you want to continue?',
+      message: (
+        <>
+          Entering the canvas will automatically
+          {' '}
+          <a className="underline text-ctp-blue" href="/guide/nfa#canvas">convert your code</a>
+          . Any helper methods, custom formatting, or comments will be lost.
+        </>
+      ),
       confirmText: 'Convert to Canvas',
       cancelText: `Stay in ${TAB_LABELS[core.base.activeTab]}`,
       confirmVariant: 'destructive',
