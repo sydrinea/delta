@@ -23,8 +23,26 @@ const nfaTransitionsAdapter = stringKeyMapAdapter(
   stringKeyMapAdapter(stringSetAdapter),
 )
 
+const tmTransitionSchema = z.object({
+  toState: z.string(),
+  readSymbols: z.array(z.string()),
+  writeSymbols: z.array(z.string()),
+  directions: z.array(z.enum(['L', 'R', 'S'])),
+})
+
 const tmTransitionsAdapter = stringKeyMapAdapter(
-  stringKeyMapAdapter(z.unknown()),
+  stringKeyMapAdapter(tmTransitionSchema),
+)
+
+const pdaTransitionSchema = z.object({
+  toState: z.string(),
+  inputSymbol: z.string(),
+  stackPop: z.string(),
+  stackPush: z.array(z.string()),
+})
+
+const pdaTransitionsAdapter = stringKeyMapAdapter(
+  stringKeyMapAdapter(pdaTransitionSchema),
 )
 
 export const NFASchema = z.strictObject({
@@ -47,5 +65,17 @@ export const TMSchema = z.strictObject({
   tapeAlphabet: stringSetAdapter,
   blankSymbol: z.string(),
   transitions: tmTransitionsAdapter,
+  messages: z.array(MessageSchema),
+})
+
+export const PDASchema = z.strictObject({
+  name: z.string(),
+  alphabet: stringSetAdapter,
+  states: stringSetAdapter,
+  startState: z.string(),
+  acceptStates: stringSetAdapter,
+  stackAlphabet: stringSetAdapter,
+  initialStackSymbol: z.string(),
+  transitions: pdaTransitionsAdapter,
   messages: z.array(MessageSchema),
 })
