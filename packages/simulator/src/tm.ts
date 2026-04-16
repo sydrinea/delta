@@ -1,11 +1,14 @@
 import type { TuringMachine } from '@delta/build'
+import type { FreeAdapter, SimulationOptions } from './core'
+import { simulate as simulateGeneric } from './core'
 
-interface TapeTransition {
-  toState: string
-  writeSymbol: string
-  direction: 'L' | 'R' | 'S'
-}
-
+/**
+ * A full TM configuration: the current state, the position of each tape head,
+ * and the contents of each tape (sparse — only non-blank cells are stored).
+ *
+ * The sparse `Map<number, string>` representation lets the tape grow in either
+ * direction without pre-allocating anything. Missing entries read as blank.
+ */
 export interface TMConfiguration {
   state: string
   heads: number[]
@@ -16,6 +19,10 @@ export interface SimulationStep {
   step: number
   states: Set<string>
   configurations: number
+  /**
+   * Human-readable tape readouts with the active head position bracketed,
+   * e.g. `['0', '[1]', '0', '_']`. One array per tape.
+   */
   tapes: string[][]
 }
 
@@ -26,12 +33,7 @@ export interface SimulationResult {
   trace: SimulationStep[]
 }
 
-export interface SimulationOptions {
-  maxSteps?: number
-  maxConfigurations?: number
-}
-
-const DEFAULT_MAX_STEPS = 10_000
+export { type SimulationOptions }
 
 function writeTapeSymbol(
   tape: Map<number, string>,
@@ -39,64 +41,12 @@ function writeTapeSymbol(
   symbol: string,
   blankSymbol: string,
 ): void {
+  // Store only non-blank symbols to keep the tape sparse.
   if (symbol === blankSymbol) {
     tape.delete(index)
     return
   }
   tape.set(index, symbol)
-}
-
-function applyMultiTapeTransition(
-  config: TMConfiguration,
-  transitions: TapeTransition[],
-  blankSymbol: string,
-): TMConfiguration {
-  const nextTapes = config.tapes.map(t => new Map(t))
-  const nextHeads = [...config.heads]
-
-  transitions.forEach((transition, tapeIndex) => {
-    const head = nextHeads[tapeIndex] ?? 0
-    const tape = nextTapes[tapeIndex] ?? new Map<number, string>()
-    writeTapeSymbol(tape, head, transition.writeSymbol, blankSymbol)
-
-    nextHeads[tapeIndex]
-      = head
-        + (transition.direction === 'L'
-          ? -1
-          : transition.direction === 'R'
-            ? 1
-            : 0)
-
-    nextTapes[tapeIndex] = tape
-  })
-
-  return {
-    state: transitions[0]?.toState ?? config.state,
-    heads: nextHeads,
-    tapes: nextTapes,
-  }
-}
-
-function resolveMultiTapeStep(
-  machine: TuringMachine<any>,
-  config: TMConfiguration,
-  blankSymbol: string,
-): TapeTransition[] | null {
-  const readTuple = Array.from({ length: machine.tapeCount }, (_, tapeIndex) =>
-    config.tapes[tapeIndex]?.get(config.heads[tapeIndex] ?? 0) ?? blankSymbol)
-  const tupleKey = readTuple.join('\u001F')
-  const stateTuples = machine.transitions.get(config.state)
-  const tupleTransition = stateTuples?.get(tupleKey)
-  if (!tupleTransition) {
-    return null
-  }
-
-  return tupleTransition.directions.map((direction, tapeIndex) => ({
-    toState: tupleTransition.toState,
-    writeSymbol:
-      tupleTransition.writeSymbols[tapeIndex] ?? readTuple[tapeIndex],
-    direction,
-  }))
 }
 
 function contentBounds(
@@ -108,18 +58,23 @@ function contentBounds(
 
   for (const [index, symbol] of tape.entries()) {
     if (symbol !== blankSymbol) {
-      if (index < min) {
+      if (index < min)
         min = index
-      }
-      if (index > max) {
+      if (index > max)
         max = index
-      }
     }
   }
 
   return min <= max ? [min, max] : null
 }
 
+/**
+ * Convert a sparse tape map to a flat string array for display.
+ *
+ * The head position is bracketed so the client can identify which cell is
+ * currently being read. A padding of one cell on each side of the content
+ * bounds ensures the display shows context around the written region.
+ */
 function tapeToReadout(
   tape: Map<number, string>,
   head: number,
@@ -147,89 +102,140 @@ function tapesOf(config: TMConfiguration, blankSymbol: string): string[][] {
   )
 }
 
-export function formatTrace(trace: SimulationStep[]): string {
-  return trace
-    .map((step) => {
-      const states = [...step.states].sort().join(', ') || '(none)'
-      const header = `step ${step.step} | states: ${states} | configurations: ${step.configurations}`
-      const tapes = step.tapes.map(
-        (tape, i) => `  ${i + 1}. ${tape.join(' ')}`,
+/**
+ * Build a `FreeAdapter<TMConfiguration>` for a Turing Machine.
+ *
+ * TM simulation is free-step: the machine reads from its tape on each step
+ * rather than consuming characters from an external input stream. There are no
+ * epsilon transitions — each step either finds a valid transition and fires it,
+ * or halts.
+ *
+ * Returning multiple successors from `freeStep` is what enables NDTM support:
+ * for a standard (deterministic) TM there is at most one successor per step.
+ * The core loop in `runFree` handles branching uniformly.
+ */
+function buildTMAdapter(machine: TuringMachine<any>): FreeAdapter<TMConfiguration> {
+  return {
+    mode: 'free',
+    initial: [], // populated by the caller after initializing tape contents
+    acceptStates: machine.acceptStates,
+    epsilonStep: () => [],
+
+    // Encode enough of the configuration to detect revisited states during
+    // epsilon expansion. For TM the epsilon step is always empty so this key
+    // is never actually used for deduplication, but the adapter interface
+    // requires it for consistency.
+    configKey: config =>
+      `${config.state}|${config.heads.join(',')}|${JSON.stringify(
+        config.tapes.map(t => [...t.entries()].sort((a, b) => a[0] - b[0])),
+      )}`,
+
+    getState: config => config.state,
+    isAccepted: (config, acceptStates) => acceptStates.has(config.state),
+
+    freeStep: (config) => {
+      const readTuple = Array.from(
+        { length: machine.tapeCount },
+        (_, tapeIndex) =>
+          config.tapes[tapeIndex]?.get(config.heads[tapeIndex] ?? 0)
+          ?? machine.blankSymbol,
       )
-      return [header, ...tapes].join('\n')
-    })
-    .join('\n\n')
+      // The tuple key joins read symbols with the same separator used by the
+      // TM builder when it stores transitions. Keeping the separator consistent
+      // avoids mismatches between build and simulation.
+      const tupleKey = readTuple.join('\u001F')
+      const tupleTransition = machine.transitions.get(config.state)?.get(tupleKey)
+
+      if (!tupleTransition) {
+        // No transition defined for this (state, tape-read) combination —
+        // this branch halts. Return [] so the core loop marks it as halted.
+        return []
+      }
+
+      const nextTapes = config.tapes.map(t => new Map(t))
+      const nextHeads = [...config.heads]
+
+      tupleTransition.directions.forEach((direction: string, tapeIndex: number) => {
+        const head = nextHeads[tapeIndex] ?? 0
+        writeTapeSymbol(
+          nextTapes[tapeIndex]!,
+          head,
+          tupleTransition.writeSymbols[tapeIndex] ?? readTuple[tapeIndex],
+          machine.blankSymbol,
+        )
+        nextHeads[tapeIndex]
+          = head + (direction === 'L' ? -1 : direction === 'R' ? 1 : 0)
+      })
+
+      return [{
+        state: tupleTransition.toState,
+        heads: nextHeads,
+        tapes: nextTapes,
+      }]
+    },
+  }
 }
 
+export { type SimulationOptions as TMSimulationOptions }
+
+/**
+ * Simulate a Turing Machine over `input` and return the accepted result with a
+ * trace.
+ *
+ * The input is written onto tape 0 starting at cell 1 (cell 0 carries a blank
+ * sentinel). All other tape cells start blank.
+ *
+ * Accepts nondeterministic TMs — `freeStep` may return multiple successors if
+ * the machine's transition function is non-deterministic. For a standard DTM
+ * each step has at most one successor and the behaviour is identical to the
+ * original single-configuration loop.
+ *
+ * @example
+ * const result = simulateTM(machine, '001100', { maxSteps: 5000 })
+ * result.accepted          // true / false
+ * result.halted            // true if the machine halted naturally
+ * result.exceededStepLimit // true if cut short by maxSteps
+ */
 export function simulate(
   machine: TuringMachine<any>,
   input: string,
   options: SimulationOptions = {},
 ): SimulationResult {
-  const maxSteps = options.maxSteps ?? DEFAULT_MAX_STEPS
-
   const tapeCount = machine.tapeCount
-  const tapes = Array.from({ length: tapeCount }, () => {
-    const tape = new Map<number, string>()
-    tape.set(0, machine.blankSymbol)
-    tape.set(1, machine.blankSymbol)
-    return tape
-  })
 
-  for (let i = 0; i < input.length; i += 1) {
-    tapes[0]?.set(i + 1, input[i])
+  // Initialize tapes: tape 0 gets the input, all other tapes start blank.
+  const tapes = Array.from({ length: tapeCount }, () => new Map<number, string>())
+  tapes[0]!.set(0, machine.blankSymbol)
+  for (let i = 0; i < input.length; i++) {
+    tapes[0]!.set(i + 1, input[i]!)
   }
-  tapes[0]?.set(input.length + 1, machine.blankSymbol)
+  tapes[0]!.set(input.length + 1, machine.blankSymbol)
 
-  const initial: TMConfiguration = {
+  const initialConfig: TMConfiguration = {
     state: machine.startState,
-    heads: Array.from({ length: tapeCount }).fill(0) as number[],
+    heads: Array.from<number>({ length: tapeCount }).fill(0),
     tapes,
   }
 
-  const trace: SimulationStep[] = [
-    {
-      step: 0,
-      states: new Set([initial.state]),
-      configurations: 1,
-      tapes: tapesOf(initial, machine.blankSymbol),
-    },
-  ]
+  const adapter = buildTMAdapter(machine)
+  adapter.initial = [initialConfig]
 
-  let current = initial
-  for (let step = 0; step < maxSteps; step += 1) {
-    const transitions = resolveMultiTapeStep(
-      machine,
-      current,
-      machine.blankSymbol,
-    )
+  const result = simulateGeneric(adapter, '', options)
 
-    if (!transitions || transitions.length === 0) {
-      return {
-        accepted: machine.acceptStates.has(current.state),
-        halted: true,
-        exceededStepLimit: false,
-        trace,
-      }
-    }
-
-    current = applyMultiTapeTransition(
-      current,
-      transitions,
-      machine.blankSymbol,
-    )
-
-    trace.push({
-      step: step + 1,
-      states: new Set([current.state]),
-      configurations: 1,
-      tapes: tapesOf(current, machine.blankSymbol),
-    })
-  }
+  // Convert the generic SimulationStep<TMConfiguration> trace back to the
+  // TM-specific shape. Tape readouts are computed here rather than inside the
+  // core loop because tapeToReadout is a TM-specific concern.
+  const trace: SimulationStep[] = result.trace.map((step, i) => ({
+    step: i,
+    states: step.states,
+    configurations: step.configs.length,
+    tapes: step.configs[0] ? tapesOf(step.configs[0], machine.blankSymbol) : [],
+  }))
 
   return {
-    accepted: false,
-    halted: false,
-    exceededStepLimit: true,
+    accepted: result.accepted,
+    halted: result.halted,
+    exceededStepLimit: result.exceededStepLimit,
     trace,
   }
 }
