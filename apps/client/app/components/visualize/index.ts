@@ -1,8 +1,8 @@
 export { ConfigurationTable } from './ConfigurationTable'
-export { PDABottomPanel } from './PDABottomPanel'
-export { StackVisualizer } from './StackVisualizer'
 export { GraphvizViewer } from './GraphvizViewer'
 export { useScrollableTable } from './hooks/useScrollableTable'
+export { PDABottomPanel } from './PDABottomPanel'
+export { StackVisualizer } from './StackVisualizer'
 export { Trace } from './Trace'
 export type { PDAConfiguration, TraceBottomPanelContext, TraceInputArgs, TraceStep } from './TraceContext'
 export {

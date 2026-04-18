@@ -1,6 +1,6 @@
+import { Globe } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { Globe } from 'lucide-react'
 import { GitHub } from '@/components'
 import { Button } from '@/components/ui/button'
 import deltaLogo from '../../../public/android-chrome-192x192.png'
