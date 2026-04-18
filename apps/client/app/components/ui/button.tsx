@@ -11,29 +11,29 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          'border-ctp-subtext0/25 bg-ctp-surface0/85 hover:bg-ctp-surface1/70 aria-expanded:bg-ctp-surface1/70 focus-visible:border-ctp-surface2 focus-visible:ring-ctp-surface2/30',
+          'border-muted-foreground/25 bg-panel-border/85 hover:bg-muted/70 aria-expanded:bg-muted/70 focus-visible:border-muted focus-visible:ring-muted/30',
         outline:
           'border-border bg-background hover:bg-muted hover:text-foreground aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50',
         secondary:
-          'border-ctp-subtext0/25 bg-ctp-surface0/45 hover:bg-ctp-surface0/60 aria-expanded:bg-ctp-surface0/60 focus-visible:border-ctp-subtext0/25 focus-visible:ring-ctp-surface1/25',
+          'border-muted-foreground/25 bg-panel-border/45 hover:bg-panel-border/60 aria-expanded:bg-panel-border/60 focus-visible:border-muted-foreground/25 focus-visible:ring-muted/25',
         danger:
-          'border-ctp-yellow/70 bg-ctp-yellow/12 text-ctp-yellow hover:bg-ctp-yellow/18 aria-expanded:bg-ctp-yellow/18 focus-visible:border-ctp-yellow/80 focus-visible:ring-ctp-yellow/25',
+          'border-warning/70 bg-warning/12 text-warning hover:bg-warning/18 aria-expanded:bg-warning/18 focus-visible:border-warning/80 focus-visible:ring-warning/25',
         ghost:
-          'border-ctp-subtext0/25 bg-ctp-surface0/45 text-ctp-overlay0 hover:bg-ctp-surface1/55 hover:text-ctp-text aria-expanded:bg-ctp-surface1/55 aria-expanded:text-ctp-text',
+          'border-muted-foreground/25 bg-panel-border/45 text-muted-foreground hover:bg-muted/55 hover:text-foreground aria-expanded:bg-muted/55 aria-expanded:text-foreground',
         destructive:
-          'border-ctp-red/70 bg-ctp-red/12 text-ctp-red hover:bg-ctp-red/18 aria-expanded:bg-ctp-red/18 focus-visible:border-ctp-red/80 focus-visible:ring-ctp-red/25',
+          'border-destructive/70 bg-destructive/12 text-destructive hover:bg-destructive/18 aria-expanded:bg-destructive/18 focus-visible:border-destructive/80 focus-visible:ring-destructive/25',
         warning:
-          'border-ctp-peach/70 bg-ctp-peach/12 text-ctp-peach hover:bg-ctp-peach/18 aria-expanded:bg-ctp-peach/18 focus-visible:border-ctp-peach/80 focus-visible:ring-ctp-peach/25',
+          'border-warning/70 bg-warning/12 text-warning hover:bg-warning/18 aria-expanded:bg-warning/18 focus-visible:border-warning/80 focus-visible:ring-warning/25',
         success:
-          'border-ctp-green/70 bg-ctp-green/12 text-ctp-green hover:bg-ctp-green/18 aria-expanded:bg-ctp-green/18 focus-visible:border-ctp-green/80 focus-visible:ring-ctp-green/25',
+          'border-success/70 bg-success/12 text-success hover:bg-success/18 aria-expanded:bg-success/18 focus-visible:border-success/80 focus-visible:ring-success/25',
         info:
-          'border-ctp-blue/70 bg-ctp-blue/12 text-ctp-blue hover:bg-ctp-blue/18 aria-expanded:bg-ctp-blue/18 focus-visible:border-ctp-blue/80 focus-visible:ring-ctp-blue/25',
+          'border-primary/70 bg-primary/12 text-primary hover:bg-primary/18 aria-expanded:bg-primary/18 focus-visible:border-primary/80 focus-visible:ring-primary/25',
         accent:
-          'border-ctp-lavender/70 bg-ctp-lavender/12 text-ctp-lavender hover:bg-ctp-lavender/18 aria-expanded:bg-ctp-lavender/18 focus-visible:border-ctp-lavender/80 focus-visible:ring-ctp-lavender/25',
+          'border-primary/70 bg-primary/12 text-primary hover:bg-primary/18 aria-expanded:bg-primary/18 focus-visible:border-primary/80 focus-visible:ring-primary/25',
         mauve:
-          'border-ctp-mauve/70 bg-ctp-mauve/12 text-ctp-mauve hover:bg-ctp-mauve/18 aria-expanded:bg-ctp-mauve/18 focus-visible:border-ctp-mauve/80 focus-visible:ring-ctp-mauve/25',
+          'border-primary/70 bg-primary/12 text-primary hover:bg-primary/18 aria-expanded:bg-primary/18 focus-visible:border-primary/80 focus-visible:ring-primary/25',
         embossed:
-          'rounded-lg text-ctp-overlay0 hover:text-ctp-text hover:bg-ctp-surface0 border border-transparent hover:border-ctp-surface1 transition-all duration-200',
+          'rounded-lg text-muted-foreground hover:text-foreground hover:bg-panel-border border border-transparent hover:border-muted transition-all duration-200',
         link: 'text-primary hover:text-primary/85 underline-offset-4 hover:underline',
       },
       size: {

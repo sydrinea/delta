@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { useStoreHydration } from '@/hooks/useStoreHydration'
+import { useStoreHydration } from '@/hooks/use-store-hydration'
 import {
   shouldAnimateLoader,
   shouldEnableLoader,
@@ -108,7 +108,7 @@ export function Loader() {
   }
 
   return (
-    <div className="fixed inset-0 z-toast flex items-center justify-center bg-ctp-base">
+    <div className="fixed inset-0 z-toast flex items-center justify-center bg-background">
       <div
         className="flex items-center gap-2"
         role="status"
@@ -120,8 +120,8 @@ export function Loader() {
             key={index}
             className={
               shouldAnimate
-                ? 'workbench-loader-dot bg-ctp-surface0'
-                : 'h-2 w-2 rounded-full bg-ctp-surface0'
+                ? 'workbench-loader-dot bg-panel-border'
+                : 'h-2 w-2 rounded-full bg-panel-border'
             }
             style={
               shouldAnimate ? { animationDelay: `${index * 220}ms` } : undefined

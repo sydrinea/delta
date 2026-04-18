@@ -1,30 +1,9 @@
 import type { NFA, PDA, TuringMachine } from '@delta/build'
-import type { Theme } from './theme'
-import { flavors } from '@catppuccin/palette'
 import { EPSILON } from '@delta/build'
 import {
   buildTMTransitionRows,
   formatReadTuple,
 } from './tm-metadata'
-
-const COLORS = {
-  latte: {
-    active: flavors.latte.colors.lavender.hex,
-    activeFontColor: flavors.latte.colors.base.hex,
-    default: flavors.latte.colors.text.hex,
-    defaultFontColor: flavors.latte.colors.text.hex,
-    edge: flavors.latte.colors.text.hex,
-    background: flavors.latte.colors.mantle.hex,
-  },
-  mocha: {
-    active: flavors.mocha.colors.lavender.hex,
-    activeFontColor: flavors.mocha.colors.base.hex,
-    default: flavors.mocha.colors.text.hex,
-    defaultFontColor: flavors.mocha.colors.text.hex,
-    edge: flavors.mocha.colors.text.hex,
-    background: flavors.mocha.colors.mantle.hex,
-  },
-} as const
 
 export interface DotMachineBase {
   name: string
@@ -41,15 +20,6 @@ interface DotEdge {
   edgeId?: string
 }
 
-/**
- * Machine-specific configuration passed to `toDot`.
- *
- * `edges` yields one `DotEdge` per raw transition; the shared `buildEdgeLines`
- * helper groups them by `(from, to)` and renders the DOT edge statements.
- * `graphAttrs` adds Graphviz graph-level attributes (e.g. layout tuning for TM).
- * `sortLabels` sorts the grouped labels before joining — TM enables this for
- * deterministic output since transition rows can arrive in insertion order.
- */
 export interface DotConfig<M extends DotMachineBase> {
   edges: (machine: M) => Iterable<DotEdge>
   graphAttrs?: string[]
@@ -59,19 +29,17 @@ export interface DotConfig<M extends DotMachineBase> {
 function dotMachineStateStyle(
   state: string,
   machine: DotMachineBase,
-  theme: Theme,
   activeStates?: Set<string>,
 ): string {
   const isAccept = machine.acceptStates.has(state)
   const isActive = activeStates?.has(state) ?? false
   const shape = isAccept ? 'doublecircle' : 'circle'
-  const palette = COLORS[theme]
 
   if (isActive) {
-    return `"${state}" [shape=${shape} style=filled fillcolor="${palette.active}" fontcolor="${palette.activeFontColor}" color="${palette.active}"]`
+    return `"${state}" [shape=${shape} class="state active"]`
   }
 
-  return `"${state}" [shape=${shape} style=filled fillcolor="${palette.background}" fontcolor="${palette.defaultFontColor}" color="${palette.default}"]`
+  return `"${state}" [shape=${shape} class="state default"]`
 }
 
 function* nfaEdges(nfa: NFA): Iterable<DotEdge> {
@@ -139,26 +107,25 @@ export const tmDotConfig: DotConfig<TuringMachine<number>> = {
 export function toDot<M extends DotMachineBase>(
   machine: M,
   config: DotConfig<M>,
-  theme: Theme,
+  _theme: any, // kept for signature backwards compatibility temporarily
   activeStates?: Set<string>,
 ): string {
-  const palette = COLORS[theme]
   const attrs = config.graphAttrs?.length
     ? `\n  ${config.graphAttrs.join('\n  ')}`
     : ''
 
   const states = Array.from(
     machine.states,
-    s => `  ${dotMachineStateStyle(s, machine, theme, activeStates)}`,
+    s => `  ${dotMachineStateStyle(s, machine, activeStates)}`,
   ).join('\n')
 
-  const start = `  __start__ [shape=point fillcolor="${palette.default}" color="${palette.default}"]\n  __start__ -> "${machine.startState}" [color="${palette.edge}"]`
+  const start = `  __start__ [shape=point class="start-point"]\n  __start__ -> "${machine.startState}" [class="start-edge"]`
 
   return `digraph "${machine.name}" {
   rankdir=LR${attrs}
-  bgcolor="${palette.background}"
+  class="graph-machine"
   node [fontname="Helvetica" fontsize=12]
-  edge [fontname="Helvetica" fontsize=11 color="${palette.edge}" fontcolor="${palette.edge}"]
+  edge [fontname="Helvetica" fontsize=11 class="transition"]
 
 ${start}
 

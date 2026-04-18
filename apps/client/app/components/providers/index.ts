@@ -1,2 +1,2 @@
-export { AlertProvider, useAlert } from './AlertProvider'
-export { ToastProvider, useToast } from './ToastProvider'
+export { AlertProvider, useAlert } from './alert-provider'
+export { ToastProvider, useToast } from './toast-provider'

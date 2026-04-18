@@ -39,7 +39,7 @@ export function Alert({
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-ctp-crust/60 backdrop-blur-sm transition-opacity" />
+          <div className="fixed inset-0 bg-background/60 backdrop-blur-sm transition-opacity" />
         </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -53,12 +53,12 @@ export function Alert({
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <DialogPanel className="relative w-full max-w-md transform overflow-hidden bg-ctp-base border border-ctp-subtext0/25 p-6 text-left align-middle rounded-2xl shadow-xl transition-all flex flex-col gap-4">
+              <DialogPanel className="relative w-full max-w-md transform overflow-hidden bg-background border border-muted-foreground/25 p-6 text-left align-middle rounded-2xl shadow-xl transition-all flex flex-col gap-4">
                 <div className="flex flex-col gap-2">
-                  <DialogTitle className="text-lg font-bold text-ctp-text">
+                  <DialogTitle className="text-lg font-bold text-foreground">
                     {title}
                   </DialogTitle>
-                  <p className="text-sm text-ctp-subtext0 leading-relaxed">
+                  <p className="text-sm text-muted-foreground leading-relaxed">
                     {message}
                   </p>
                 </div>

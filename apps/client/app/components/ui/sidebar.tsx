@@ -166,7 +166,7 @@ function Sidebar({
       <div
         data-slot="sidebar"
         className={cn(
-          'flex h-full w-(--sidebar-width) flex-col bg-ctp-base text-ctp-text',
+          'flex h-full w-(--sidebar-width) flex-col bg-background text-foreground',
           className,
         )}
         {...props}
@@ -184,7 +184,7 @@ function Sidebar({
           data-sidebar="sidebar"
           data-slot="sidebar"
           data-mobile="true"
-          className="w-(--sidebar-width) border-ctp-subtext0/25 bg-ctp-base p-0 text-ctp-text [&>button]:hidden"
+          className="w-(--sidebar-width) border-muted-foreground/25 bg-background p-0 text-foreground [&>button]:hidden"
           style={
             {
               '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
@@ -204,7 +204,7 @@ function Sidebar({
 
   return (
     <div
-      className="group peer hidden text-ctp-text md:block"
+      className="group peer hidden text-foreground md:block"
       data-state={state}
       data-collapsible={state === 'collapsed' ? collapsible : ''}
       data-variant={variant}
@@ -239,7 +239,7 @@ function Sidebar({
         <div
           data-sidebar="sidebar"
           data-slot="sidebar-inner"
-          className="flex size-full flex-col bg-ctp-base text-ctp-text group-data-[variant=floating]:rounded-none group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-ctp-surface0"
+          className="flex size-full flex-col bg-background text-foreground group-data-[variant=floating]:rounded-none group-data-[variant=floating]:shadow-sm group-data-[variant=floating]:ring-1 group-data-[variant=floating]:ring-panel-border"
         >
           {children}
         </div>
@@ -286,7 +286,7 @@ function SidebarRail({ className, ...props }: React.ComponentProps<'button'>) {
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        'absolute inset-y-0 z-dropdown hidden w-6 transition-all ease-linear group-data-[side=left]:-right-3 group-data-[side=right]:-left-3 after:absolute after:inset-y-0 after:inset-s-1/2 after:w-0.5 after:bg-ctp-surface0 hover:after:bg-ctp-surface1 sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2',
+        'absolute inset-y-0 z-dropdown hidden w-6 transition-all ease-linear group-data-[side=left]:-right-3 group-data-[side=right]:-left-3 after:absolute after:inset-y-0 after:inset-s-1/2 after:w-0.5 after:bg-panel-border hover:after:bg-muted sm:flex ltr:-translate-x-1/2 rtl:-translate-x-1/2',
         'in-data-[side=left]:cursor-w-resize in-data-[side=right]:cursor-e-resize',
         '[[data-side=left][data-state=collapsed]_&]:cursor-e-resize [[data-side=right][data-state=collapsed]_&]:cursor-w-resize',
         'group-data-[collapsible=offcanvas]:translate-x-0 group-data-[collapsible=offcanvas]:after:left-full',

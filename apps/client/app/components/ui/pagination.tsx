@@ -59,7 +59,7 @@ function PaginationLink({
       className={cn(
         'leading-none',
         isActive
-          ? 'border-ctp-lavender/80 bg-transparent text-ctp-lavender hover:bg-ctp-lavender/12 aria-expanded:bg-ctp-lavender/12'
+          ? 'border-primary/80 bg-transparent text-primary hover:bg-primary/12 aria-expanded:bg-primary/12'
           : undefined,
         className,
       )}
@@ -119,7 +119,7 @@ function PaginationEllipsis({
       aria-hidden
       data-slot="pagination-ellipsis"
       className={cn(
-        'flex size-6 items-center justify-center text-ctp-subtext0 [&_svg:not([class*=\'size-\'])]:size-3',
+        'flex size-6 items-center justify-center text-muted-foreground [&_svg:not([class*=\'size-\'])]:size-3',
         className,
       )}
       {...props}

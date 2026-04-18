@@ -18,8 +18,8 @@ function TooltipContent({ ref, className, sideOffset = 6, ...props }: React.Comp
         sideOffset={sideOffset}
         className={cn(
           'z-toast overflow-hidden',
-          'rounded-md border border-ctp-subtext0/25 bg-ctp-mantle',
-          'px-2.5 py-1.5 text-xs text-ctp-text shadow-md',
+          'rounded-md border border-muted-foreground/25 bg-panel',
+          'px-2.5 py-1.5 text-xs text-foreground shadow-md',
           'animate-in fade-in-0 zoom-in-95',
           'data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
           'data-[side=bottom]:slide-in-from-top-2',
@@ -98,9 +98,9 @@ function Kbd({
           <kbd
             className={cn(
               'inline-flex items-center justify-center',
-              'rounded border border-ctp-surface2 border-b-2',
-              'bg-ctp-surface0 px-1.5 py-px',
-              'font-mono text-[10px] leading-4 text-ctp-subtext1',
+              'rounded border border-muted border-b-2',
+              'bg-panel-border px-1.5 py-px',
+              'font-mono text-[10px] leading-4 text-muted-foreground',
               'shadow-sm',
             )}
           >

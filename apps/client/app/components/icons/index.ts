@@ -1,1 +1,1 @@
-export { GitHub } from './GitHub'
+export { GitHub } from './github'

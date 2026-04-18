@@ -3,7 +3,7 @@
 import { AlertProvider, ToastProvider } from '../providers'
 import { Loader, OfflineReadyToast } from '../ui'
 import { TooltipProvider } from '../ui/tooltip'
-import Navbar from './Navbar'
+import Navbar from './navbar'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (

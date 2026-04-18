@@ -140,9 +140,31 @@ html.mocha :is(pre, code)[data-theme*=' '] * {
   }
 }
 
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-panel: var(--panel);
+  --color-panel-border: var(--panel-border);
+  --color-primary: var(--primary);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-success: var(--success);
+  --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+}
+
 @layer base {
   :root {
-    color: var(--color-ctp-red);
+    --background: var(--color-ctp-base);
+    --foreground: var(--color-ctp-text);
+    --panel: var(--color-ctp-mantle);
+    --panel-border: var(--color-ctp-surface0);
+    --primary: var(--color-ctp-lavender);
+    --muted: var(--color-ctp-surface1);
+    --muted-foreground: var(--color-ctp-subtext0);
+    --success: var(--color-ctp-green);
+    --destructive: var(--color-ctp-red);
+    --warning: var(--color-ctp-yellow);
   }
 
   * {
@@ -152,9 +174,57 @@ html.mocha :is(pre, code)[data-theme*=' '] * {
   html,
   body {
     background-color: var(--background);
-    color: var(--color-ctp-text);
+    color: var(--foreground);
   }
   html {
     @apply font-mono;
+  }
+}
+
+@layer components {
+  /* Graphviz overrides */
+  .graph-machine polygon {
+    fill: transparent;
+    stroke: transparent;
+  }
+  
+  .graph-machine .state.default ellipse,
+  .graph-machine .state.default polygon {
+    fill: var(--panel) !important;
+    stroke: var(--foreground) !important;
+  }
+  
+  .graph-machine .state.default text {
+    fill: var(--foreground) !important;
+  }
+  
+  .graph-machine .state.active ellipse,
+  .graph-machine .state.active polygon {
+    fill: var(--primary) !important;
+    stroke: var(--primary) !important;
+  }
+  
+  .graph-machine .state.active text {
+    fill: var(--background) !important;
+  }
+  
+  .graph-machine .start-point ellipse {
+    fill: var(--foreground) !important;
+    stroke: var(--foreground) !important;
+  }
+  
+  .graph-machine .transition path,
+  .graph-machine .start-edge path {
+    stroke: var(--foreground) !important;
+  }
+  
+  .graph-machine .transition polygon,
+  .graph-machine .start-edge polygon {
+    fill: var(--foreground) !important;
+    stroke: var(--foreground) !important;
+  }
+  
+  .graph-machine .transition text {
+    fill: var(--foreground) !important;
   }
 }

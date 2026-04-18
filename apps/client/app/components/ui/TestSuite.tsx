@@ -1,14 +1,21 @@
 'use client'
 
 import type { TestCase } from '@delta/examples'
-import type { TestResult } from '@/hooks/useTestRunner'
+import type { TestResult } from '@/hooks/use-test-runner'
+import type { MachineType } from '@/lib/worker/protocol'
+import { useCompiledMachine } from '@/hooks/use-compiled-machine'
+import { useTestSuite } from '@/hooks/use-test-suite'
+import { useWorkbenchStore } from '@/store/workbench-store'
+import { WORKBENCH_CONFIGS } from '../workbench/workbench-configs'
 import { useEffect, useState } from 'react'
+
 import { cn } from '@/app/lib/utils'
-import { testImportExport } from '@/hooks/testImportExport'
-import { useKeyboardShortcut } from '@/hooks/useKeyboardShortcut'
-import { useTestRunner } from '@/hooks/useTestRunner'
+import { testImportExport } from '@/hooks/test-import-export'
+import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
+import { useTestRunner } from '@/hooks/use-test-runner'
 import { useAlert } from '../providers'
 import { Badge } from './badge'
+import { LabelText } from './label-text'
 import { Button, buttonVariants } from './button'
 import { Input } from './input'
 import {
@@ -20,29 +27,30 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from './pagination'
-import { ROW_HEIGHT, TestRow } from './TestRow'
+import { ROW_HEIGHT, TestRow } from './test-row'
 import { WithTooltip } from './tooltip'
 
 const TESTS_PER_PAGE = 6
 const ROW_GAP = 6
 
 interface TestSuiteProps {
-  tests: TestCase[]
-  setTests: (tests: TestCase[]) => void
-  evaluateInput?: (input: string) => boolean
-  machineName?: string
-  resetKeys?: unknown[]
+  scope: MachineType
   inputPlaceholder?: string
 }
 
 export function TestSuite({
-  tests,
-  setTests,
-  evaluateInput,
-  machineName = 'delta',
-  resetKeys,
+  scope,
   inputPlaceholder = 'input string',
 }: TestSuiteProps) {
+  const machine = useCompiledMachine(scope) as any
+  const { tests, setTests } = useTestSuite(scope)
+  const selectedRecipeKey = useWorkbenchStore(s => s.selectedRecipeKey)
+  const config = WORKBENCH_CONFIGS[scope]
+  
+  const machineName = machine?.name ?? 'delta'
+  const resetKeys = [machine, selectedRecipeKey]
+  const evaluateInput = machine ? (input: string) => config.simulate(machine as any, input).accepted : undefined
+
   const { showAlert } = useAlert()
   const { results, runTests, clearResults, removeResult } = useTestRunner({ tests, evaluateInput })
   const { handleTestImport, handleTestExport } = testImportExport({ tests, setTests, machineName, showAlert })
@@ -66,11 +74,11 @@ export function TestSuite({
     <div className="flex flex-col gap-3">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-ctp-subtext0 text-xs uppercase tracking-widest">
-            test suite
-          </span>
+          <LabelText>
+            Test Suite
+          </LabelText>
           {hasResults && (
-            <span className={`text-xs font-bold ${allPassed ? 'text-ctp-green' : 'text-ctp-red'}`}>
+            <span className={`text-xs font-bold ${allPassed ? 'text-success' : 'text-destructive'}`}>
               (
               {passCount}
               {' '}
@@ -138,7 +146,7 @@ function NewTestForm({ onSubmit, inputPlaceholder }: NewTestFormProps) {
   }
 
   return (
-    <div className="flex items-center gap-2 border-t border-ctp-subtext0/25 pt-3">
+    <div className="flex items-center gap-2 border-t border-muted-foreground/25 pt-3">
       <Input
         type="text"
         value={input}
@@ -174,8 +182,8 @@ export function TestSuitePreview({ rows, className }: TestSuitePreviewProps) {
   return (
     <div className={cn('flex flex-col gap-3', className)}>
       <div className="flex items-center gap-2">
-        <span className="text-ctp-subtext0 text-xs uppercase tracking-widest">test suite</span>
-        <span className={`text-xs font-bold ${passCount === rows.length ? 'text-ctp-green' : 'text-ctp-red'}`}>
+        <LabelText>test suite</LabelText>
+        <span className={`text-xs font-bold ${passCount === rows.length ? 'text-success' : 'text-destructive'}`}>
           (
           {passCount}
           {' '}
@@ -192,11 +200,11 @@ export function TestSuitePreview({ rows, className }: TestSuitePreviewProps) {
             key={row.input}
             style={{ height: ROW_HEIGHT }}
             className={`flex items-center gap-2.5 px-3.5 rounded-lg border text-sm ${
-              row.passed ? 'bg-ctp-green/10 border-ctp-green/30' : 'bg-ctp-red/10 border-ctp-red/30'
+              row.passed ? 'bg-success/10 border-success/30' : 'bg-destructive/10 border-destructive/30'
             }`}
           >
             <span className="flex-1 truncate font-mono">
-              {row.input || <span className="text-ctp-overlay0">ε</span>}
+              {row.input || <span className="text-muted-foreground">ε</span>}
             </span>
             <Badge variant={row.expected ? 'success' : 'destructive'}>
               {row.expected ? 'accept' : 'reject'}
@@ -274,7 +282,7 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
           <div
             key={`empty-${slot}`}
             style={{ height: ROW_HEIGHT }}
-            className="rounded-lg border border-dashed border-ctp-subtext0/25 bg-ctp-base/30"
+            className="rounded-lg border border-dashed border-muted-foreground/25 bg-background/30"
           />
         ))}
       </div>
@@ -294,7 +302,7 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
                     if (safePage > 0)
                       setPage(safePage - 1)
                   }}
-                  className={cn('text-ctp-subtext0 hover:text-ctp-text', safePage === 0 && 'pointer-events-none opacity-50')}
+                  className={cn('text-muted-foreground hover:text-foreground', safePage === 0 && 'pointer-events-none opacity-50')}
                 />
               </PaginationItem>
 
@@ -315,7 +323,7 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
                             event.preventDefault()
                             setPage(token.page)
                           }}
-                          className={cn('font-semibold text-ctp-subtext0 hover:text-ctp-text', token.page === safePage && 'text-ctp-text')}
+                          className={cn('font-semibold text-muted-foreground hover:text-foreground', token.page === safePage && 'text-foreground')}
                         >
                           {token.page + 1}
                         </PaginationLink>
@@ -334,7 +342,7 @@ function TestCaseList({ tests, results, onRemove }: TestCaseListProps) {
                     if (safePage < maxPage)
                       setPage(safePage + 1)
                   }}
-                  className={cn('text-ctp-subtext0 hover:text-ctp-text', safePage === maxPage && 'pointer-events-none opacity-50')}
+                  className={cn('text-muted-foreground hover:text-foreground', safePage === maxPage && 'pointer-events-none opacity-50')}
                 />
               </PaginationItem>
             </PaginationContent>

@@ -13,4 +13,4 @@ export * from './providers'
 // UI components
 export * from './ui'
 export * from './visualize'
-export { Workbench, WorkbenchShell } from './workbench'
+export { Workbench } from './workbench'

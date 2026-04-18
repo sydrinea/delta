@@ -6,7 +6,7 @@ import { Separator } from '@/app/components/ui/separator'
 import { cn } from '@/app/lib/utils'
 
 const buttonGroupVariants = cva(
-  'flex w-fit items-center overflow-hidden rounded-full bg-ctp-base/35 ring-1 ring-ctp-surface1/40 backdrop-blur-sm *:focus-visible:relative *:focus-visible:z-10 [&>[data-slot=button]]:rounded-none [&>[data-slot=button]:first-child]:rounded-l-full [&>[data-slot=button]:last-child]:rounded-r-full [&>[data-slot=button]]:border-transparent [&>[data-slot=button]]:bg-transparent [&>[data-slot=button]]:text-ctp-overlay0 [&>[data-slot=button]]:shadow-none [&>[data-slot=button]:hover]:bg-ctp-surface0/70 has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-none [&>[data-slot=select-trigger]:not([class*=\'w-\'])]:w-fit [&>input]:flex-1',
+  'flex w-fit items-center overflow-hidden rounded-full bg-background/35 ring-1 ring-muted/40 backdrop-blur-sm *:focus-visible:relative *:focus-visible:z-10 [&>[data-slot=button]]:rounded-none [&>[data-slot=button]:first-child]:rounded-l-full [&>[data-slot=button]:last-child]:rounded-r-full [&>[data-slot=button]]:border-transparent [&>[data-slot=button]]:bg-transparent [&>[data-slot=button]]:text-muted-foreground [&>[data-slot=button]]:shadow-none [&>[data-slot=button]:hover]:bg-panel-border/70 has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-none [&>[data-slot=select-trigger]:not([class*=\'w-\'])]:w-fit [&>input]:flex-1',
   {
     variants: {
       orientation: {
@@ -68,7 +68,7 @@ function ButtonGroupSeparator({
       data-slot="button-group-separator"
       orientation={orientation}
       className={cn(
-        'relative self-stretch bg-ctp-surface1 data-horizontal:mx-0.5 data-horizontal:w-px data-horizontal:my-2 data-vertical:my-0.5 data-vertical:h-px',
+        'relative self-stretch bg-muted data-horizontal:mx-0.5 data-horizontal:w-px data-horizontal:my-2 data-vertical:my-0.5 data-vertical:h-px',
         className,
       )}
       {...props}

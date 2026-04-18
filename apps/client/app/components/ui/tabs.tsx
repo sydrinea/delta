@@ -24,7 +24,7 @@ function Tabs({
 }
 
 const tabsListVariants = cva(
-  'group/tabs-list relative inline-flex w-fit items-center justify-center overflow-hidden rounded-full border border-ctp-subtext0/25 bg-ctp-mantle p-1 text-muted-foreground backdrop-blur-sm group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col',
+  'group/tabs-list relative inline-flex w-fit items-center justify-center overflow-hidden rounded-full border border-muted-foreground/25 bg-panel p-1 text-muted-foreground backdrop-blur-sm group-data-horizontal/tabs:h-9 group-data-vertical/tabs:h-fit group-data-vertical/tabs:flex-col',
   {
     variants: {
       variant: {
@@ -101,7 +101,7 @@ function TabsList({
     >
       <span
         aria-hidden="true"
-        className="pointer-events-none absolute top-0 left-0 z-0 rounded-full bg-ctp-overlay0/35 transition-[transform,width,height,opacity] duration-300 ease-out"
+        className="pointer-events-none absolute top-0 left-0 z-0 rounded-full bg-muted-foreground/35 transition-[transform,width,height,opacity] duration-300 ease-out"
         style={indicatorStyle}
       />
       {children}
@@ -117,8 +117,8 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        'relative z-raised inline-flex h-full flex-1 cursor-pointer items-center justify-center rounded-full border border-transparent px-2.5 py-1 text-xs font-medium whitespace-nowrap text-ctp-text/75 transition-colors duration-200 group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start group-data-vertical/tabs:py-[calc(--spacing(1.25))] hover:text-ctp-text focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
-        'data-[state=active]:border-ctp-lavender/45 data-[state=active]:bg-ctp-lavender/14 data-[state=active]:text-ctp-lavender',
+        'relative z-raised inline-flex h-full flex-1 cursor-pointer items-center justify-center rounded-full border border-transparent px-2.5 py-1 text-xs font-medium whitespace-nowrap text-foreground/75 transition-colors duration-200 group-data-vertical/tabs:w-full group-data-vertical/tabs:justify-start group-data-vertical/tabs:py-[calc(--spacing(1.25))] hover:text-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-1 focus-visible:outline-ring disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50',
+        'data-[state=active]:border-primary/45 data-[state=active]:bg-primary/14 data-[state=active]:text-primary',
         className,
       )}
       {...props}

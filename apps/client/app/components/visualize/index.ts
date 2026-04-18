@@ -1,15 +1,8 @@
-export { ConfigurationTable } from './ConfigurationTable'
-export { GraphvizViewer } from './GraphvizViewer'
-export { useScrollableTable } from './hooks/useScrollableTable'
-export { PDABottomPanel } from './PDABottomPanel'
-export { StackVisualizer } from './StackVisualizer'
-export { Trace } from './Trace'
-export type { PDAConfiguration, TraceBottomPanelContext, TraceInputArgs, TraceStep } from './TraceContext'
-export {
-  TraceProvider,
-  useTraceInputContext,
-  useTraceInteractionContext,
-  useTraceSimulationContext,
-} from './TraceContext'
-export { TransitionTable } from './TransitionTable'
+export { ConfigurationTable } from './configuration-table'
+export { GraphvizViewer } from './graphviz-viewer'
+export { useScrollableTable } from './hooks/use-scrollable-table'
+export { PDABottomPanel } from './pda-bottom-panel'
+export { StackVisualizer } from './stack-visualizer'
+export { Trace } from './trace'
+export { TransitionTable } from './transition-table'
 export type { TMTransitionRow } from '@/lib/tm-metadata'

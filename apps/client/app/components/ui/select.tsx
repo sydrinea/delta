@@ -64,14 +64,14 @@ function SelectTrigger({
       data-size={size}
       className={cn(
         navigationMenuSharedTriggerClasses,
-        'group/select-trigger w-fit justify-between gap-2 rounded-lg border-ctp-subtext0/25 bg-ctp-mantle py-1.5 pr-3 pl-3 transition-all select-none hover:border-ctp-subtext0/25 hover:bg-ctp-surface0/60 data-[state=open]:border-ctp-lavender data-[state=open]:bg-ctp-surface0/60 focus:border-ctp-lavender focus:ring-0 focus-visible:border-ctp-lavender focus-visible:ring-0 focus-visible:outline-none data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=lg]:h-9 *:data-[slot=select-value]:max-w-[calc(100%-1rem)] *:data-[slot=select-value]:overflow-hidden *:data-[slot=select-value]:text-clip *:data-[slot=select-value]:whitespace-nowrap *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4',
+        'group/select-trigger w-fit justify-between gap-2 rounded-lg border-muted-foreground/25 bg-panel py-1.5 pr-3 pl-3 transition-all select-none hover:border-muted-foreground/25 hover:bg-panel-border/60 data-[state=open]:border-primary data-[state=open]:bg-panel-border/60 focus:border-primary focus:ring-0 focus-visible:border-primary focus-visible:ring-0 focus-visible:outline-none data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=lg]:h-9 *:data-[slot=select-value]:max-w-[calc(100%-1rem)] *:data-[slot=select-value]:overflow-hidden *:data-[slot=select-value]:text-clip *:data-[slot=select-value]:whitespace-nowrap *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4',
         className,
       )}
       {...props}
     >
       {children}
       <SelectPrimitive.Icon asChild>
-        <CaretDownIcon className="pointer-events-none ml-1 size-3 text-ctp-overlay0 transition duration-300 group-data-[state=open]/select-trigger:rotate-180" />
+        <CaretDownIcon className="pointer-events-none ml-1 size-3 text-muted-foreground transition duration-300 group-data-[state=open]/select-trigger:rotate-180" />
       </SelectPrimitive.Icon>
     </SelectPrimitive.Trigger>
   )
@@ -91,7 +91,7 @@ function SelectContent({
         data-align-trigger={position === 'item-aligned'}
         className={cn(
           navigationMenuSharedPanelClasses,
-          'relative z-dropdown max-h-(--radix-select-content-available-height) min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto bg-ctp-mantle p-1 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
+          'relative z-dropdown max-h-(--radix-select-content-available-height) min-w-36 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto bg-panel p-1 duration-100 data-[align-trigger=true]:animate-none data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95',
           position === 'popper' && 'data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1',
           className,
         )}
@@ -122,7 +122,7 @@ function SelectLabel({
   return (
     <SelectPrimitive.Label
       data-slot="select-label"
-      className={cn('px-2 py-2 text-xs text-ctp-overlay0', className)}
+      className={cn('px-2 py-2 text-xs text-muted-foreground', className)}
       {...props}
     />
   )
@@ -138,7 +138,7 @@ function SelectItem({
       data-slot="select-item"
       className={cn(
         navigationMenuSharedItemClasses,
-        'relative w-full border border-transparent hover:border-transparent data-highlighted:border-transparent data-highlighted:bg-ctp-surface0/60 data-highlighted:text-ctp-text data-[state=checked]:border-transparent data-[state=checked]:bg-ctp-surface0/60 data-[state=checked]:text-ctp-text focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none data-disabled:pointer-events-none data-disabled:opacity-50 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2',
+        'relative w-full border border-transparent hover:border-transparent data-highlighted:border-transparent data-highlighted:bg-panel-border/60 data-highlighted:text-foreground data-[state=checked]:border-transparent data-[state=checked]:bg-panel-border/60 data-[state=checked]:text-foreground focus-visible:border-transparent focus-visible:ring-0 focus-visible:outline-none data-disabled:pointer-events-none data-disabled:opacity-50 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2',
         className,
       )}
       {...props}
@@ -169,7 +169,7 @@ function SelectScrollUpButton({
     <SelectPrimitive.ScrollUpButton
       data-slot="select-scroll-up-button"
       className={cn(
-        'z-10 flex cursor-default items-center justify-center bg-ctp-mantle py-1 [&_svg:not([class*=\'size-\'])]:size-4',
+        'z-10 flex cursor-default items-center justify-center bg-panel py-1 [&_svg:not([class*=\'size-\'])]:size-4',
         className,
       )}
       {...props}
@@ -187,7 +187,7 @@ function SelectScrollDownButton({
     <SelectPrimitive.ScrollDownButton
       data-slot="select-scroll-down-button"
       className={cn(
-        'z-10 flex cursor-default items-center justify-center bg-ctp-mantle py-1 [&_svg:not([class*=\'size-\'])]:size-4',
+        'z-10 flex cursor-default items-center justify-center bg-panel py-1 [&_svg:not([class*=\'size-\'])]:size-4',
         className,
       )}
       {...props}
