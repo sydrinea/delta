@@ -293,10 +293,6 @@ function runFree<C>(
     // Eagerly accept: if any halted branch is in an accept state, we're done.
     // We don't need to wait for all branches to halt.
     if (halted.some(c => adapter.isAccepted(c, adapter.acceptStates))) {
-      // Add the halted configs to the trace so the visualizer can show the
-      // final accepting state before returning.
-      const finalConfigs = [...halted, ...continuing]
-      trace.push({ states: configsToStates(finalConfigs, adapter), configs: finalConfigs })
       return { accepted: true, trace, halted: true, exceededStepLimit: false }
     }
 
