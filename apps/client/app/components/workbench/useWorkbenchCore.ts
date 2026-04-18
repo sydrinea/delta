@@ -1,14 +1,16 @@
 'use client'
 
 import type {
+  ConfirmModalConfig,
   EnabledTabs,
+  Recipe,
+  TabGuardResult,
   TabId,
   VisibleTab,
-  WorkbenchCoreLogicBase,
 } from './types'
+import type { AlertPayload } from '@/components/providers/AlertProvider'
 import type { Theme } from '@/lib/theme'
 import type { MachineType } from '@/lib/worker/protocol'
-import type { AutomataScope } from '@/store/automataStore'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useCompile } from '@/hooks/useCompile'
 import { useEditorState } from '@/hooks/useEditorState'
@@ -18,20 +20,8 @@ import { themeNames } from '@/lib/theme'
 import { useAutomataStore } from '@/store/automataStore'
 import { getInitialTab, isTabEnabled } from './utils'
 
-interface Recipe {
-  label: string
-  path: string
-  tests: import('@delta/examples').TestCase[]
-}
-
-interface AlertPayload {
-  title: string
-  message: string
-  confirmText?: string
-}
-
-interface UseWorkbenchVariantCoreOptions<M extends { name?: string }> {
-  scope: AutomataScope
+interface UseWorkbenchCoreOptions<M extends { name?: string }> {
+  scope: MachineType
   enabledTabs: EnabledTabs
   tabs: VisibleTab[]
   machine: M | null
@@ -47,9 +37,14 @@ interface UseWorkbenchVariantCoreOptions<M extends { name?: string }> {
     activeTab: TabId
     setActiveTab: (tab: TabId) => void
   }) => void
+  /**
+   * Called when a tab change is requested. Return a `TabGuardResult` to block
+   *  and show a confirmation modal, or `null` to allow immediately.
+   */
+  tabGuard?: (tab: TabId) => TabGuardResult | null
 }
 
-export function useWorkbenchVariantCore<M extends { name?: string }>({
+export function useWorkbenchCore<M extends { name?: string }>({
   scope,
   enabledTabs,
   tabs,
@@ -63,31 +58,37 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
   initialTab,
   initialRecipe,
   onRecipeLoaded,
-}: UseWorkbenchVariantCoreOptions<M>) {
+  tabGuard,
+}: UseWorkbenchCoreOptions<M>) {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     if (initialTab && isTabEnabled(enabledTabs, initialTab))
       return initialTab
     return getInitialTab(enabledTabs)
   })
   const [selectedRecipeKey, setSelectedRecipeKey] = useState('')
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalConfig | null>(null)
+
+  // Always holds the latest tabGuard so requestTabChange's useCallback can
+  // reference it without needing to be re-created on every render.
+  const tabGuardRef = useRef(tabGuard)
+  useEffect(() => {
+    tabGuardRef.current = tabGuard
+  }, [tabGuard])
 
   const compile = useCompile(scope)
   const { value: editorValue, setEditorValue, clearErrors } = useEditorState(scope)
   const { setTests } = useTestSuite(scope)
 
   const recipeEntries = useMemo(() => Object.entries(recipesMap), [recipesMap])
-  const selectedRecipeLabel
-    = recipesMap[selectedRecipeKey]?.label ?? 'load example'
+  const selectedRecipeLabel = recipesMap[selectedRecipeKey]?.label ?? 'load example'
 
   const visibleTabs = useMemo(
     () => tabs.filter(tab => isTabEnabled(enabledTabs, tab.id)),
     [enabledTabs, tabs],
   )
   const activeTabForUI = useMemo(() => {
-    if (visibleTabs.some(tab => tab.id === activeTab)) {
+    if (visibleTabs.some(tab => tab.id === activeTab))
       return activeTab
-    }
-
     return visibleTabs[0]?.id ?? activeTab
   }, [activeTab, visibleTabs])
 
@@ -113,9 +114,8 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
 
       try {
         const response = await fetch(recipe.path)
-        if (!response.ok) {
+        if (!response.ok)
           throw new Error(`Failed to load recipe at ${recipe.path}`)
-        }
 
         const fetchedCode = await response.text()
         onRecipeLoaded?.({ activeTab: activeTabForUI, setActiveTab })
@@ -128,8 +128,7 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
       catch {
         showAlert({
           title: 'Recipe Import Failed',
-          message:
-            'Could not load the example code right now. Please try again later.',
+          message: 'Could not load the example code right now. Please try again later.',
           confirmText: 'OK',
         })
       }
@@ -146,9 +145,8 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     // eslint-disable-next-line react/exhaustive-deps
   }, [])
 
-  // Compile once the store is hydrated so machine is populated regardless of active tab or entry path.
-  // If hydration has already completed (fast path), compile immediately.
-  // Otherwise wait for onFinishHydration so we use the real persisted value, not defaults.
+  // Compile once the store is hydrated so machine is populated regardless of
+  // active tab or entry path.
   useEffect(() => {
     if (useAutomataStore.persist.hasHydrated()) {
       compile(useAutomataStore.getState().automata[scope].editorValue)
@@ -168,6 +166,23 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     (tab: TabId) => {
       if (!isTabEnabled(enabledTabs, tab))
         return
+
+      const guard = tabGuardRef.current?.(tab)
+      if (guard) {
+        const { onConfirm: sideEffect, ...modalProps } = guard
+        setConfirmModal({
+          ...modalProps,
+          isOpen: true,
+          onConfirm: () => {
+            sideEffect?.()
+            setActiveTab(tab)
+            setConfirmModal(null)
+          },
+          onCancel: () => setConfirmModal(null),
+        })
+        return
+      }
+
       setActiveTab(tab)
     },
     [enabledTabs],
@@ -178,7 +193,6 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
       return activeDot
     if (!machine)
       return null
-
     return dotFromMachine(machine, themeNames[resolvedTheme ?? 'light'])
   }, [activeDot, dotFromMachine, machine, resolvedTheme])
 
@@ -193,13 +207,12 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     onShareError: () => {
       showAlert({
         title: 'Share Failed',
-        message:
-          'Could not generate a share link right now. Please try again later.',
+        message: 'Could not generate a share link right now. Please try again later.',
       })
     },
   })
 
-  const base: WorkbenchCoreLogicBase = {
+  return {
     activeTab: activeTabForUI,
     requestTabChange,
     visibleTabs,
@@ -211,10 +224,7 @@ export function useWorkbenchVariantCore<M extends { name?: string }>({
     machineDot,
     copied,
     handleShare,
-  }
-
-  return {
-    base,
+    confirmModal,
     compile,
     editorValue,
     setActiveTab,

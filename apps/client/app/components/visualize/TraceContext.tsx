@@ -11,14 +11,22 @@ import {
 } from 'react'
 import { useStepNavigation } from '@/hooks/useStepNavigation'
 
+export interface PDAConfiguration {
+  state: string
+  stack: string[]
+}
+
 export interface TraceStep {
   states: Set<string>
   tapes?: string[][]
+  configurations?: PDAConfiguration[]
 }
 
 export interface TraceSimulationResult {
   accepted: boolean
   trace: TraceStep[]
+  halted?: boolean
+  exceededStepLimit?: boolean
 }
 
 export interface VisualMachine {
@@ -88,7 +96,6 @@ interface TraceInteractionContextValue {
   onBlur: () => void
   onTouchStart: (e: React.TouchEvent) => void
   onTouchEnd: (e: React.TouchEvent) => void
-  // Step navigation — exposed so mobile UI can provide explicit buttons
   stepBack: () => void
   stepForward: () => void
 }
@@ -155,7 +162,6 @@ export function TraceProvider<M extends VisualMachine>({
     onBlur,
     onTouchStart,
     onTouchEnd,
-    // These are the new additions you need to expose from useStepNavigation:
     stepBack,
     stepForward,
   } = useStepNavigation({

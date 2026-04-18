@@ -2,10 +2,11 @@
 
 interface TestCase { id: string, input: string, expected: boolean }
 interface Recipe { label: string, path: string, tests: TestCase[] }
-interface Recipes { nfa: Record<string, Recipe>, tm: Record<string, Recipe> }
+interface Recipes { nfa: Record<string, Recipe>, pda: Record<string, Recipe>, tm: Record<string, Recipe> }
 
 export const recipes: Recipes = {
   nfa: {},
+  pda: {},
   tm: {},
 }
 

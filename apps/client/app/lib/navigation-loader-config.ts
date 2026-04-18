@@ -6,6 +6,7 @@ export interface RouteLoaderConfig {
 
 const ROUTE_LOADING_CONFIG: Record<string, RouteLoaderConfig> = {
   '/nfa': { enabled: true, triggerOnNavigate: true, animate: true },
+  '/pda': { enabled: true, triggerOnNavigate: true, animate: true },
   '/tm': { enabled: true, triggerOnNavigate: true, animate: true },
 }
 

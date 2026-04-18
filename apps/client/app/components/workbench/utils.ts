@@ -4,7 +4,7 @@ import type {
   TabId,
   VisibleTab,
 } from './types'
-import type { TraceInputToken } from '@/components/visualize/TraceContext'
+import type { TraceInputArgs, TraceInputToken } from '@/components/visualize/TraceContext'
 
 export const TAB_ORDER: TabId[] = ['code', 'canvas', 'debug']
 export const TRACE_WINDOW_SIZE = 81
@@ -90,4 +90,32 @@ export function buildSlidingWindowTokens({
   }
 
   return tokens
+}
+
+export function buildSingleStreamInputTokens(
+  args: TraceInputArgs,
+  keyPrefix: string,
+): TraceInputToken[] {
+  return buildSlidingWindowTokens({
+    centerIndex: args.step,
+    windowSize: TRACE_WINDOW_SIZE,
+    makeKey: (charIndex, slotIndex) => `${keyPrefix}-${slotIndex}-${charIndex}`,
+    resolveToken: (charIndex, slotIndex) => {
+      if (charIndex < 0 || charIndex >= args.input.length)
+        return null
+
+      const isActive = !args.isLast && slotIndex === Math.floor(TRACE_WINDOW_SIZE / 2)
+      const isPast = args.isLast || charIndex < args.step
+
+      return {
+        text: args.input[charIndex]!,
+        isActive,
+        className: isActive
+          ? 'text-ctp-lavender font-bold bg-ctp-surface0 ring-1 ring-ctp-lavender'
+          : isPast
+            ? 'text-ctp-surface2'
+            : 'text-ctp-subtext1',
+      }
+    },
+  })
 }

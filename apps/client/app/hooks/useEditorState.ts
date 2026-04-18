@@ -1,8 +1,8 @@
-import type { AutomataScope } from '@/store/automataStore'
+import type { MachineType } from '@/lib/worker/protocol'
 import { useCallback } from 'react'
 import { useAutomataStore } from '@/store/automataStore'
 
-export function useEditorState(scope: AutomataScope) {
+export function useEditorState(scope: MachineType) {
   const value = useAutomataStore(s => s.automata[scope].editorValue)
   const errors = useAutomataStore(s => s.automata[scope].editorErrors)
   const patch = useAutomataStore(s => s.patch)

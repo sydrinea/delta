@@ -1,3 +1,5 @@
+import z from 'zod'
+
 export const WorkerMethods = {
   Compile: 'compile',
 } as const
@@ -6,6 +8,7 @@ export type WorkerMethod = (typeof WorkerMethods)[keyof typeof WorkerMethods]
 
 export const MachineTypes = {
   NFA: 'nfa',
+  PDA: 'pda',
   TM: 'tm',
 } as const
 
@@ -74,18 +77,21 @@ export type WorkerResponse<TData = unknown, TDetail = unknown>
   = | WorkerSuccessResponse<TData>
     | WorkerErrorResponse<TDetail>
 
-export function isWorkerRequest(value: unknown): value is WorkerRequest {
-  if (!value || typeof value !== 'object')
-    return false
-  const candidate = value as WorkerRequest
+const MachineTypeSchema = z.enum(
+  Object.values(MachineTypes) as [MachineType, ...MachineType[]],
+)
 
-  return (
-    typeof candidate.id === 'string'
-    && typeof candidate.method === 'string'
-    && typeof candidate.params?.code === 'string'
-    && (candidate.params?.machineType === MachineTypes.NFA
-      || candidate.params?.machineType === MachineTypes.TM)
-  )
+const WorkerRequestSchema = z.object({
+  id: z.string(),
+  method: z.string(),
+  params: z.object({
+    code: z.string(),
+    machineType: MachineTypeSchema,
+  }),
+})
+
+export function isWorkerRequest(value: unknown): value is WorkerRequest {
+  return WorkerRequestSchema.safeParse(value).success
 }
 
 export function isWorkerResponse(

@@ -41,6 +41,7 @@ interface BuildErrorShape {
 
 const BUILD_ERROR_NAMES = new Set([
   'NFABuildError',
+  'PDABuildError',
   'TMBuildError',
   'RegularGrammarBuildError',
 ])

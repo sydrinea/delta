@@ -1,11 +1,11 @@
-import type { NFA, TuringMachine } from '@delta/build'
+import type { NFA, PDA, TuringMachine } from '@delta/build'
 import type { Theme } from './theme'
 import { flavors } from '@catppuccin/palette'
 import { EPSILON } from '@delta/build'
 import {
   buildTMTransitionRows,
   formatReadTuple,
-} from '../components/visualize/metadata'
+} from './tm-metadata'
 
 const COLORS = {
   latte: {
@@ -26,11 +26,34 @@ const COLORS = {
   },
 } as const
 
-interface DotMachineBase {
+export interface DotMachineBase {
   name: string
   states: Set<string>
   startState: string
   acceptStates: Set<string>
+}
+
+interface DotEdge {
+  from: string
+  to: string
+  label: string
+  /** Present on TM edges — used by the visualizer to highlight active transitions. */
+  edgeId?: string
+}
+
+/**
+ * Machine-specific configuration passed to `toDot`.
+ *
+ * `edges` yields one `DotEdge` per raw transition; the shared `buildEdgeLines`
+ * helper groups them by `(from, to)` and renders the DOT edge statements.
+ * `graphAttrs` adds Graphviz graph-level attributes (e.g. layout tuning for TM).
+ * `sortLabels` sorts the grouped labels before joining — TM enables this for
+ * deterministic output since transition rows can arrive in insertion order.
+ */
+export interface DotConfig<M extends DotMachineBase> {
+  edges: (machine: M) => Iterable<DotEdge>
+  graphAttrs?: string[]
+  sortLabels?: boolean
 }
 
 function dotMachineStateStyle(
@@ -51,71 +74,85 @@ function dotMachineStateStyle(
   return `"${state}" [shape=${shape} style=filled fillcolor="${palette.background}" fontcolor="${palette.defaultFontColor}" color="${palette.default}"]`
 }
 
-function dotTransitions(nfa: NFA): string {
-  const edgeMap = new Map<string, string[]>()
-
+function* nfaEdges(nfa: NFA): Iterable<DotEdge> {
   for (const [from, symbolMap] of nfa.transitions) {
     for (const [symbol, toSet] of symbolMap) {
-      for (const to of toSet) {
-        const key = `${from}→${to}`
-        if (!edgeMap.has(key)) {
-          edgeMap.set(key, [])
-        }
-        edgeMap.get(key)!.push(symbol === EPSILON ? 'ε' : symbol)
-      }
+      for (const to of toSet)
+        yield { from, to, label: symbol === EPSILON ? 'ε' : symbol }
     }
   }
-
-  return Array.from(edgeMap.entries(), ([key, symbols]) => {
-    const [from, to] = key.split('→')
-    return `  "${from}" -> "${to}" [label="${symbols.join(', ')}"]`
-  })
-    .join('\n')
 }
 
-function dotTMTransitions(tm: TuringMachine<any>): string {
-  const edgeMap = new Map<
-    string,
-    { edgeId: string, fromState: string, toState: string, labels: Set<string> }
-  >()
-
-  for (const row of buildTMTransitionRows(tm)) {
-    const existing = edgeMap.get(row.edgeKey)
-    if (existing) {
-      existing.labels.add(formatReadTuple(row.readSymbols))
-      continue
+function* pdaEdges(pda: PDA): Iterable<DotEdge> {
+  for (const [from, keyMap] of pda.transitions) {
+    for (const t of keyMap.values()) {
+      const input = t.inputSymbol === EPSILON ? 'ε' : t.inputSymbol
+      const pop = t.stackPop === EPSILON ? 'ε' : t.stackPop
+      const push = t.stackPush.length === 0 ? 'ε' : t.stackPush.join('')
+      yield { from, to: t.toState, label: `${input}, ${pop} → ${push}` }
     }
+  }
+}
 
-    edgeMap.set(row.edgeKey, {
-      edgeId: row.edgeId,
-      fromState: row.fromState,
-      toState: row.toState,
-      labels: new Set([formatReadTuple(row.readSymbols)]),
-    })
+function* tmEdges(tm: TuringMachine<any>): Iterable<DotEdge> {
+  for (const row of buildTMTransitionRows(tm))
+    yield { from: row.fromState, to: row.toState, label: formatReadTuple(row.readSymbols), edgeId: row.edgeId }
+}
+
+function buildEdgeLines(edges: Iterable<DotEdge>, sortLabels = false): string {
+  const edgeMap = new Map<string, { from: string, to: string, edgeId: string | undefined, labels: string[] }>()
+
+  for (const { from, to, label, edgeId } of edges) {
+    const key = `${from}→${to}`
+    if (!edgeMap.has(key))
+      edgeMap.set(key, { from, to, edgeId, labels: [] })
+    edgeMap.get(key)!.labels.push(label)
   }
 
-  return Array.from(edgeMap.values(), (edge) => {
-    const label = [...edge.labels].sort().join('\\n')
-    return `  "${edge.fromState}" -> "${edge.toState}" [id="${edge.edgeId}" label="${label}"]`
-  })
-    .join('\n')
+  return Array.from(edgeMap.values(), ({ from, to, edgeId, labels }) => {
+    const ordered = sortLabels ? [...labels].sort() : labels
+    const idAttr = edgeId ? `id="${edgeId}" ` : ''
+    return `  "${from}" -> "${to}" [${idAttr}label="${ordered.join('\\n')}"]`
+  }).join('\n')
 }
 
-function toDotWithStyle<T extends DotMachineBase>(
-  machine: T,
-  transitions: (machine: T) => string,
+export const nfaDotConfig: DotConfig<NFA> = {
+  edges: nfaEdges,
+}
+
+export const pdaDotConfig: DotConfig<PDA> = {
+  edges: pdaEdges,
+}
+
+export const tmDotConfig: DotConfig<TuringMachine<any>> = {
+  edges: tmEdges,
+  sortLabels: true,
+  graphAttrs: [
+    'splines=true',
+    'overlap=false',
+    'concentrate=false',
+    'nodesep=0.45',
+    'ranksep=0.6',
+  ],
+}
+
+export function toDot<M extends DotMachineBase>(
+  machine: M,
+  config: DotConfig<M>,
   theme: Theme,
   activeStates?: Set<string>,
-  graphAttributes: string[] = [],
 ): string {
   const palette = COLORS[theme]
+  const attrs = config.graphAttrs?.length
+    ? `\n  ${config.graphAttrs.join('\n  ')}`
+    : ''
 
-  const states = Array.from(machine.states, s => `  ${dotMachineStateStyle(s, machine, theme, activeStates)}`)
-    .join('\n')
+  const states = Array.from(
+    machine.states,
+    s => `  ${dotMachineStateStyle(s, machine, theme, activeStates)}`,
+  ).join('\n')
 
   const start = `  __start__ [shape=point fillcolor="${palette.default}" color="${palette.default}"]\n  __start__ -> "${machine.startState}" [color="${palette.edge}"]`
-  const attrs
-    = graphAttributes.length > 0 ? `\n  ${graphAttributes.join('\n  ')}` : ''
 
   return `digraph "${machine.name}" {
   rankdir=LR${attrs}
@@ -127,28 +164,6 @@ ${start}
 
 ${states}
 
-${transitions(machine)}
+${buildEdgeLines(config.edges(machine), config.sortLabels)}
 }`
-}
-
-export function toDot(
-  nfa: NFA,
-  theme: Theme,
-  activeStates?: Set<string>,
-): string {
-  return toDotWithStyle(nfa, dotTransitions, theme, activeStates)
-}
-
-export function toDotTM(
-  tm: TuringMachine<any>,
-  theme: Theme,
-  activeStates?: Set<string>,
-): string {
-  return toDotWithStyle(tm, dotTMTransitions, theme, activeStates, [
-    'splines=true',
-    'overlap=false',
-    'concentrate=false',
-    'nodesep=0.45',
-    'ranksep=0.6',
-  ])
 }

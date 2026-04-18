@@ -13,7 +13,7 @@ import { Alert } from '../ui'
 
 const CLOSE_TEXT_CLEAR_DELAY_MS = 300
 
-interface AlertPayload {
+export interface AlertPayload {
   title: string
   message: string
   confirmText?: string

@@ -2,7 +2,7 @@ import z from 'zod'
 
 export interface ExampleMeta {
   label: string
-  type: 'nfa' | 'tm'
+  type: 'nfa' | 'pda' | 'tm'
   tests?: TestCase[]
 }
 
@@ -22,7 +22,7 @@ export const TestCaseArraySchema = z.array(TestCaseSchema)
 
 export const ExampleMetaSchema = z.object({
   label: z.string(),
-  type: z.enum(['nfa', 'tm']),
+  type: z.enum(['nfa', 'pda', 'tm']),
   tests: z.array(TestCaseSchema).optional(),
 })
 

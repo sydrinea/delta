@@ -32,7 +32,7 @@ export function useMachineShare({
       fetch(`${SHARE_URL}/machine/${machineId}`)
         .then(
           res =>
-            res.json() as Promise<{ machineType: 'nfa' | 'tm', code: string }>,
+            res.json() as Promise<{ machineType: MachineType, code: string }>,
         )
         .then((payload) => {
           if (payload.machineType !== machineType) {

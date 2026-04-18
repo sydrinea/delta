@@ -1,9 +1,15 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import type { TraceStep } from './TraceContext'
 import { useEffect, useMemo } from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { useScrollableTable } from './hooks/useScrollableTable'
+
+interface ExtraColumn {
+  header: ReactNode
+  cell: (step: TraceStep, index: number) => ReactNode
+}
 
 interface ConfigurationTableProps {
   trace: TraceStep[]
@@ -11,6 +17,7 @@ interface ConfigurationTableProps {
   input: string
   isLast: boolean
   accepted: boolean
+  extraColumns?: ExtraColumn[]
 }
 
 export function ConfigurationTable({
@@ -19,6 +26,7 @@ export function ConfigurationTable({
   input,
   isLast,
   accepted,
+  extraColumns = [],
 }: ConfigurationTableProps) {
   const { scrollContainerRef, rowRef, scrollRowToCenter }
     = useScrollableTable()
@@ -78,6 +86,10 @@ export function ConfigurationTable({
               <TableHead>
                 Configuration
               </TableHead>
+              {extraColumns.map((col, i) => (
+                // eslint-disable-next-line react/no-array-index-key
+                <TableHead key={i}>{col.header}</TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -112,6 +124,12 @@ export function ConfigurationTable({
                     </span>
                     )
                   </TableCell>
+                  {extraColumns.map((col, i) => (
+                    // eslint-disable-next-line react/no-array-index-key
+                    <TableCell key={i}>
+                      {col.cell(trace[config.index]!, config.index)}
+                    </TableCell>
+                  ))}
                 </TableRow>
               )
             })}

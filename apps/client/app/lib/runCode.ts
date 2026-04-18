@@ -1,9 +1,9 @@
-import type { NFA, TuringMachine } from '@delta/build'
 import type { z } from 'zod'
 import type { CompileErrorDetail, CompileSuccessData, MachineType } from '@/lib/worker/protocol'
+import type { AnyMachine } from '@/store/automataStore'
 import {
-
   NFASchema,
+  PDASchema,
   TMSchema,
 } from '@delta/build'
 import {
@@ -23,7 +23,7 @@ export interface ExecutionError {
   column: number
 }
 
-function validateMachine<M extends NFA | TuringMachine>(payload: unknown, schema: z.ZodType, machineType: MachineType, onError: (errors: ExecutionError[] | null) => void, onValidMachine: (machine: M) => void): boolean {
+function validateMachine<M extends AnyMachine>(payload: unknown, schema: z.ZodType, machineType: MachineType, onError: (errors: ExecutionError[] | null) => void, onValidMachine: (machine: M) => void): boolean {
   const parse = schema.safeParse(payload)
   if (!parse.success) {
     onError([
@@ -41,7 +41,7 @@ function validateMachine<M extends NFA | TuringMachine>(payload: unknown, schema
   return true
 }
 
-export async function runCode<M extends NFA | TuringMachine>(value: string, machineType: MachineType, onValidMachine: (machine: M) => void, onError: (errors: ExecutionError[] | null) => void) {
+export async function runCode<M extends AnyMachine>(value: string, machineType: MachineType, onValidMachine: (machine: M) => void, onError: (errors: ExecutionError[] | null) => void) {
   const worker = new Worker(new URL('./worker/index.ts', import.meta.url), {
     type: 'module',
   })
@@ -98,7 +98,7 @@ export async function runCode<M extends NFA | TuringMachine>(value: string, mach
     }
 
     const payload = response.data.machine
-    const schema = { nfa: NFASchema, tm: TMSchema }
+    const schema: Record<MachineType, z.ZodType> = { nfa: NFASchema, pda: PDASchema, tm: TMSchema }
     validateMachine(
       payload,
       schema[machineType],

@@ -8,7 +8,7 @@ import * as t from '@babel/types'
 const RECIPE_TYPES = `
 type TestCase = { id: string; input: string; expected: boolean };
 type Recipe = { label: string; path: string; tests: TestCase[] };
-type Recipes = { nfa: Record<string, Recipe>; tm: Record<string, Recipe> };
+type Recipes = { nfa: Record<string, Recipe>; pda: Record<string, Recipe>; tm: Record<string, Recipe> };
 `.trim()
 
 async function walk(dir: string): Promise<string[]> {
@@ -111,7 +111,7 @@ async function main() {
     f =>
       f.endsWith('.ts')
       && !f.endsWith('.meta.ts')
-      && (f.includes('/src/nfa/') || f.includes('/src/tm/')),
+      && (f.includes('/src/nfa/') || f.includes('/src/pda/') || f.includes('/src/tm/')),
   )
 
   const entries: {
@@ -144,7 +144,7 @@ async function main() {
 
   let out = `// GENERATED FILE - DO NOT EDIT\n\n`
   out += `${RECIPE_TYPES}\n\n`
-  out += `export const recipes: Recipes = {\n  nfa: {},\n  tm: {}\n};\n\n`
+  out += `export const recipes: Recipes = {\n  nfa: {},\n  pda: {},\n  tm: {}\n};\n\n`
 
   for (const { type, key, path, label, tests } of entries) {
     out += `recipes.${type}["${key}"] = {\n`

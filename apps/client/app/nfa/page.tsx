@@ -1,11 +1,8 @@
 'use client'
 
 import { Workbench } from '@/components'
+import { MachinePage } from '@/lib/machine-pages'
 
 export default function Page() {
-  return (
-    <section className="flex flex-col flex-1 h-full overflow-hidden">
-      <Workbench.NFA />
-    </section>
-  )
+  return <MachinePage Component={Workbench.NFA} />
 }

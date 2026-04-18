@@ -1,7 +1,7 @@
-import type { NFA, TuringMachine } from '@delta/build'
-import type { AutomataScope } from '@/store/automataStore'
+import type { MachineType } from '@/lib/worker/protocol'
+import type { AnyMachine } from '@/store/automataStore'
 import { useAutomataStore } from '@/store/automataStore'
 
-export function useCompiledMachine<M extends NFA | TuringMachine>(scope: AutomataScope): M | null {
+export function useCompiledMachine<M extends AnyMachine>(scope: MachineType): M | null {
   return useAutomataStore(s => s.automata[scope].machine) as M | null
 }

@@ -3,6 +3,11 @@
 import type { TuringMachine } from '@delta/build'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  activeTupleFromTapes,
+  buildTMTransitionRows,
+  formatReadTuple,
+} from '@/lib/tm-metadata'
+import {
   Table,
   TableBody,
   TableCell,
@@ -12,11 +17,6 @@ import {
 } from '../ui/table'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
 import { useScrollableTable } from './hooks/useScrollableTable'
-import {
-  activeTupleFromTapes,
-  buildTMTransitionRows,
-  formatReadTuple,
-} from './metadata'
 
 interface TransitionTableCurrentStep {
   states: Set<string>

@@ -1,9 +1,9 @@
 import type { TestCase } from '@delta/examples'
-import type { AutomataScope } from '@/store/automataStore'
+import type { MachineType } from '@/lib/worker/protocol'
 import { useCallback } from 'react'
 import { useAutomataStore } from '@/store/automataStore'
 
-export function useTestSuite(scope: AutomataScope) {
+export function useTestSuite(scope: MachineType) {
   const tests = useAutomataStore(s => s.automata[scope].tests)
   const patch = useAutomataStore(s => s.patch)
 

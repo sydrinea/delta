@@ -2,103 +2,22 @@
 
 import type { TuringMachine } from '@delta/build'
 import type { TraceBottomPanelContext, TraceInputArgs } from '../visualize/TraceContext'
-import type { EnabledTabs, TabId, WorkbenchLogic } from './types'
+import type { MachineWorkbenchConfig } from './MachineWorkbench'
+import type { EnabledTabs, TabId } from './types'
 import { recipes } from '@delta/examples/recipes'
 import { simulateTM } from '@delta/simulator'
-import { useTheme } from 'next-themes'
-import { useMemo } from 'react'
-import { useCompiledMachine } from '@/hooks/useCompiledMachine'
-import { useEditorState } from '@/hooks/useEditorState'
-import { useTestSuite } from '@/hooks/useTestSuite'
-import { useUrlSync } from '@/hooks/useUrlSync'
-import { toDotTM } from '@/lib/dot'
-import { themeNames } from '@/lib/theme'
-import { DeltaEditor } from '../editor'
-import { useAlert } from '../providers'
-import { Trace, TraceProvider, TransitionTable, useTraceInteractionContext, useTraceSimulationContext } from '../visualize'
-import { useWorkbenchVariantCore } from './useWorkbenchVariantCore'
+import { tmDotConfig } from '@/lib/dot'
+import { TransitionTable } from '../visualize'
+import { MachineWorkbench } from './MachineWorkbench'
 import {
   buildSlidingWindowTokens,
-  buildTabs,
   TRACE_WINDOW_SIZE,
 } from './utils'
-import { WorkbenchShell } from './WorkbenchShell'
-
-interface WorkbenchTMProps {
-  enabledTabs?: EnabledTabs
-  initialTab?: TabId
-  initialRecipe?: string
-  initialInput?: string
-}
-
-const DEFAULT_TABS: EnabledTabs = {
-  code: true,
-  canvas: false,
-  debug: true,
-}
 
 const LEADING_BRACKET_REGEX = /^\[/
 const TRAILING_BRACKET_REGEX = /\]$/
 
-function useTmWorkbenchLogic(
-  enabledTabs: EnabledTabs,
-  resolvedTheme: string | undefined,
-  initialTab?: TabId,
-  initialRecipe?: string,
-): WorkbenchLogic<TuringMachine> {
-  const machine = useCompiledMachine<TuringMachine>('tm')
-  const { value: editorValue, errors: editorErrors } = useEditorState('tm')
-  const { tests, setTests } = useTestSuite('tm')
-  const { showAlert } = useAlert()
-
-  const { dot: activeDot } = useTraceSimulationContext<TuringMachine>()
-  const { setHoveredEdgeId } = useTraceInteractionContext()
-
-  const tabs = useMemo(
-    () =>
-      buildTabs({
-        codeContent: <DeltaEditor scope="tm" />,
-        canvasContent: (
-          <div className="h-full flex items-center justify-center text-sm text-ctp-subtext0">
-            Canvas is only available for NFA machines.
-          </div>
-        ),
-        debugContent: <Trace />,
-      }),
-    [],
-  )
-
-  const core = useWorkbenchVariantCore<TuringMachine>({
-    scope: 'tm',
-    enabledTabs,
-    tabs,
-    machine,
-    recipesMap: recipes.tm,
-    machineType: 'tm',
-    showAlert,
-    dotFromMachine: toDotTM,
-    activeDot,
-    resolvedTheme,
-    initialTab,
-    initialRecipe,
-  })
-
-  return {
-    ...core.base,
-    machine,
-    editorErrors,
-    editorValue,
-    compile: core.compile,
-    tests,
-    setTests,
-    simulate: (targetMachine, input) =>
-      simulateTM(targetMachine, input, {
-        maxSteps: Math.max(1000, input.length * 100),
-      }).accepted,
-    graphvizOnEdgeHover: setHoveredEdgeId,
-  }
-}
-
+// Multi-tape variant — for single-stream machines see buildSingleStreamInputTokens in utils.ts
 function getTmInputTokens(args: TraceInputArgs) {
   const halfWindow = Math.floor(TRACE_WINDOW_SIZE / 2)
   const tapes = args.current.tapes ?? []
@@ -114,9 +33,8 @@ function getTmInputTokens(args: TraceInputArgs) {
       makeKey: (charIndex, slotIndex) => `t${row}-${slotIndex}-${charIndex}`,
       resolveToken: (charIndex, slotIndex) => {
         const cell = tape[charIndex]
-        if (cell === undefined) {
+        if (cell === undefined)
           return null
-        }
 
         const symbol = cell
           .replace(LEADING_BRACKET_REGEX, '')
@@ -125,81 +43,69 @@ function getTmInputTokens(args: TraceInputArgs) {
           text: symbol,
           row,
           isActive: slotIndex === halfWindow,
-          className:
-            slotIndex === halfWindow
-              ? 'text-ctp-lavender font-bold bg-ctp-surface0 ring-1 ring-ctp-lavender'
-              : 'text-ctp-text',
+          className: slotIndex === halfWindow
+            ? 'text-ctp-lavender font-bold bg-ctp-surface0 ring-1 ring-ctp-lavender'
+            : 'text-ctp-text',
         }
       },
     }).map(token => ({ ...token, row }))
   })
 }
 
+const tmConfig: MachineWorkbenchConfig<TuringMachine> = {
+  scope: 'tm',
+  defaultTabs: { code: true, canvas: false, debug: true },
+  recipesMap: recipes.tm,
+  simulate: (machine, input) => {
+    const result = simulateTM(machine, input, {
+      maxSteps: Math.max(1000, input.length * 100),
+    })
+    return {
+      accepted: result.accepted,
+      halted: result.halted,
+      exceededStepLimit: result.exceededStepLimit,
+      trace: result.trace.map(s => ({ states: s.states, tapes: s.tapes })),
+    }
+  },
+  dotConfig: tmDotConfig,
+  getInputTokens: getTmInputTokens,
+  bottomPanel: ({
+    machine: currentMachine,
+    current,
+    hoveredEdgeId,
+    isLast,
+    accepted,
+  }: TraceBottomPanelContext<TuringMachine>) => (
+    <TransitionTable
+      machine={currentMachine}
+      current={current}
+      hoveredEdgeId={hoveredEdgeId}
+      isLast={isLast}
+      accepted={accepted}
+    />
+  ),
+}
+
+interface WorkbenchTMProps {
+  enabledTabs?: EnabledTabs
+  initialTab?: TabId
+  initialRecipe?: string
+  initialInput?: string
+}
+
 export function TMComponent({
-  enabledTabs = DEFAULT_TABS,
+  enabledTabs,
   initialTab,
   initialRecipe,
   initialInput,
 }: WorkbenchTMProps) {
-  const machine = useCompiledMachine<TuringMachine>('tm')
-  const { tests } = useTestSuite('tm')
-  const { resolvedTheme } = useTheme()
-  const theme = themeNames[resolvedTheme ?? 'light']
-
   return (
-    <TraceProvider<TuringMachine>
-      machine={machine}
-      tests={tests}
-      simulate={(currentMachine, input) =>
-        simulateTM(currentMachine, input, {
-          maxSteps: Math.max(1000, input.length * 100),
-        })}
-      getDot={(currentMachine, states) =>
-        toDotTM(currentMachine, theme, states)}
-      getInputTokens={getTmInputTokens}
+    <MachineWorkbench
+      config={tmConfig}
+      enabledTabs={enabledTabs}
+      initialTab={initialTab}
+      initialRecipe={initialRecipe}
       initialInput={initialInput}
-      bottomPanel={({
-        machine: currentMachine,
-        current,
-        hoveredEdgeId,
-        isLast,
-        accepted,
-      }: TraceBottomPanelContext<TuringMachine>) => (
-        <TransitionTable
-          machine={currentMachine}
-          current={current}
-          hoveredEdgeId={hoveredEdgeId}
-          isLast={isLast}
-          accepted={accepted}
-        />
-      )}
-    >
-      <TMWorkbenchWithTraceContext
-        enabledTabs={enabledTabs}
-        resolvedTheme={resolvedTheme}
-        initialTab={initialTab}
-        initialRecipe={initialRecipe}
-      />
-    </TraceProvider>
-  )
-}
-
-function TMWorkbenchWithTraceContext({
-  enabledTabs,
-  resolvedTheme,
-  initialTab,
-  initialRecipe,
-}: {
-  enabledTabs: EnabledTabs
-  resolvedTheme: string | undefined
-  initialTab?: TabId
-  initialRecipe?: string
-}) {
-  const logic = useTmWorkbenchLogic(enabledTabs, resolvedTheme, initialTab, initialRecipe)
-  useUrlSync({ machineType: 'tm', activeTab: logic.activeTab, selectedRecipeKey: logic.selectedRecipeKey })
-  return (
-    <div className="h-full flex flex-col">
-      <WorkbenchShell logic={logic} />
-    </div>
+    />
   )
 }

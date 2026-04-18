@@ -2,7 +2,7 @@
 
 import type { BeforeMount, OnChange, OnMount } from '@monaco-editor/react'
 import type * as MonacoEditor from 'monaco-editor'
-import type { AutomataScope } from '@/store/automataStore'
+import type { MachineType } from '@/lib/worker/protocol'
 import Editor, { useMonaco } from '@monaco-editor/react'
 import { AlertTriangle } from 'lucide-react'
 import { useTheme } from 'next-themes'
@@ -11,16 +11,16 @@ import { Spinner } from '@/components/ui/spinner'
 import { useCompile } from '@/hooks/useCompile'
 import { useEditorState } from '@/hooks/useEditorState'
 import { themeNames } from '@/lib/theme'
+import { MachineTypes } from '@/lib/worker/protocol'
 import defineThemes from './defineTheme'
 
 interface DeltaEditorProps {
-  scope?: AutomataScope
+  scope?: MachineType
 }
 
-const EDITOR_PATH: Record<AutomataScope, string> = {
-  nfa: 'file:///main.nfa.ts',
-  tm: 'file:///main.tm.ts',
-}
+const EDITOR_PATH = Object.fromEntries(
+  Object.values(MachineTypes).map(t => [t, `file:///main.${t}.ts`]),
+) as Record<MachineType, string>
 
 export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
   const editorRef = useRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(

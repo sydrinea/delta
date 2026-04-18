@@ -1,3 +1,5 @@
+import { flavors } from '@catppuccin/palette'
+
 export function toSvg(svg: SVGSVGElement): string {
   return new XMLSerializer().serializeToString(svg)
 }
@@ -22,7 +24,7 @@ export function toPng(svg: SVGSVGElement): Promise<Blob> {
 
     const img = new Image()
     img.onload = () => {
-      ctx.fillStyle = '#1e1e2e' // ctp-mantle
+      ctx.fillStyle = flavors.mocha.colors.base.hex
       ctx.fillRect(0, 0, canvas.width, canvas.height)
       ctx.drawImage(img, 0, 0, width * scale, height * scale)
 

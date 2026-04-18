@@ -28,7 +28,7 @@ import ReactFlow, {
   useStoreApi,
 } from 'reactflow'
 import { useCompiledMachine } from '@/hooks/useCompiledMachine'
-import { toDot } from '@/lib/dot'
+import { nfaDotConfig, toDot } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfaStore'
 import { Button } from '../ui/button'
@@ -249,7 +249,7 @@ export function FlowEditor() {
   useEffect(() => {
     async function initializeLayout() {
       if (machine) {
-        const dotString = toDot(machine, themeNames[resolvedTheme ?? 'light'])
+        const dotString = toDot(machine, nfaDotConfig, themeNames[resolvedTheme ?? 'light'])
         const { nodes: layoutedNodes, edges: layoutedEdges }
           = await getFlowElementsFromDot(dotString)
 

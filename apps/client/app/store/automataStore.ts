@@ -1,23 +1,24 @@
-import type { NFA, TuringMachine } from '@delta/build'
+import type { NFA, PDA, TuringMachine } from '@delta/build'
 import type { TestCase } from '@delta/examples'
 import type { ExecutionError } from '@/lib/runCode'
+import type { MachineType } from '@/lib/worker/protocol'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { defaultNFA, defaultTM } from '@/lib/defaults'
+import { defaultNFA, defaultPDA, defaultTM } from '@/lib/defaults'
 import { applyPatch, createHybridStorage } from './shared'
 
-export type AutomataScope = 'nfa' | 'tm'
+export type AnyMachine = NFA | PDA | TuringMachine
 
 export interface AutomataState {
   editorValue: string
   tests: TestCase[]
-  machine: NFA | TuringMachine | null
+  machine: AnyMachine | null
   editorErrors: ExecutionError[] | null
 }
 
 interface AutomataStore {
-  automata: Record<AutomataScope, AutomataState>
-  patch: (scope: AutomataScope, update: Partial<AutomataState>) => void
+  automata: Record<MachineType, AutomataState>
+  patch: (scope: MachineType, update: Partial<AutomataState>) => void
 }
 
 const DEFAULT_NFA_TESTS: TestCase[] = [
@@ -42,10 +43,25 @@ const DEFAULT_TM_TESTS: TestCase[] = [
   { id: 'long-bad', input: '011010', expected: false },
 ]
 
-const DEFAULT_AUTOMATA_STATE: Record<AutomataScope, AutomataState> = {
+const DEFAULT_PDA_TESTS: TestCase[] = [
+  { id: crypto.randomUUID(), input: '', expected: true },
+  { id: crypto.randomUUID(), input: 'ab', expected: true },
+  { id: crypto.randomUUID(), input: 'aabb', expected: true },
+  { id: crypto.randomUUID(), input: 'aaabbb', expected: true },
+  { id: crypto.randomUUID(), input: 'a', expected: false },
+  { id: crypto.randomUUID(), input: 'aab', expected: false },
+]
+
+const DEFAULT_AUTOMATA_STATE: Record<MachineType, AutomataState> = {
   nfa: {
     editorValue: defaultNFA,
     tests: DEFAULT_NFA_TESTS,
+    machine: null,
+    editorErrors: [],
+  },
+  pda: {
+    editorValue: defaultPDA,
+    tests: DEFAULT_PDA_TESTS,
     machine: null,
     editorErrors: [],
   },
@@ -78,6 +94,10 @@ export const useAutomataStore = create<AutomataStore>()(
           nfa: {
             editorValue: state.automata.nfa.editorValue,
             tests: state.automata.nfa.tests,
+          },
+          pda: {
+            editorValue: state.automata.pda.editorValue,
+            tests: state.automata.pda.tests,
           },
           tm: {
             editorValue: state.automata.tm.editorValue,
