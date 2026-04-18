@@ -24,7 +24,7 @@ interface TransitionTableCurrentStep {
 }
 
 interface TransitionTableProps {
-  machine: TuringMachine<any>
+  machine: TuringMachine<number>
   current: TransitionTableCurrentStep
   hoveredEdgeId: string | null
   isLast: boolean

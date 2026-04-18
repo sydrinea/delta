@@ -100,10 +100,6 @@ interface TraceInteractionContextValue {
   stepForward: () => void
 }
 
-type TraceContextValue<M extends VisualMachine> = TraceInputContextValue
-  & TraceSimulationContextValue<M>
-  & TraceInteractionContextValue
-
 const TraceInputContext = createContext<TraceInputContextValue | null>(null)
 const TraceSimulationContext
   = createContext<TraceSimulationContextValue<VisualMachine> | null>(null)
@@ -283,16 +279,4 @@ export function useTraceInteractionContext() {
     )
   }
   return context
-}
-
-export function useTraceContext<M extends VisualMachine>() {
-  const inputContext = useTraceInputContext()
-  const simulationContext = useTraceSimulationContext<M>()
-  const interactionContext = useTraceInteractionContext()
-
-  return {
-    ...inputContext,
-    ...simulationContext,
-    ...interactionContext,
-  } as TraceContextValue<M>
 }

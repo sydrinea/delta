@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import type { TraceBottomPanelContext, TraceInputArgs, TraceInputToken, TraceSimulationResult, VisualMachine } from '../visualize/TraceContext'
+import type { TraceBottomPanelContext, TraceInputArgs, TraceInputToken, TraceSimulationResult } from '../visualize/TraceContext'
 import type { EnabledTabs, Recipe, TabGuardResult, TabId, WorkbenchLogic } from './types'
 import type { DotConfig, DotMachineBase } from '@/lib/dot'
 import type { MachineType } from '@/lib/worker/protocol'
@@ -21,7 +21,7 @@ import { useWorkbenchCore } from './useWorkbenchCore'
 import { buildTabs } from './utils'
 import { WorkbenchShell } from './WorkbenchShell'
 
-export interface MachineWorkbenchConfig<M extends VisualMachine & DotMachineBase> {
+export interface MachineWorkbenchConfig<M extends DotMachineBase> {
   scope: MachineType
   defaultTabs: EnabledTabs
   recipesMap: Record<string, Recipe>
@@ -44,7 +44,7 @@ export interface MachineWorkbenchConfig<M extends VisualMachine & DotMachineBase
   onRecipeLoaded?: (args: { activeTab: TabId, setActiveTab: (tab: TabId) => void }) => void
 }
 
-interface MachineWorkbenchProps<M extends VisualMachine & DotMachineBase> {
+interface MachineWorkbenchProps<M extends DotMachineBase> {
   config: MachineWorkbenchConfig<M>
   enabledTabs?: EnabledTabs
   initialTab?: TabId
@@ -52,7 +52,7 @@ interface MachineWorkbenchProps<M extends VisualMachine & DotMachineBase> {
   initialInput?: string
 }
 
-export function MachineWorkbench<M extends VisualMachine & DotMachineBase & AnyMachine>({
+export function MachineWorkbench<M extends DotMachineBase & AnyMachine>({
   config,
   enabledTabs = config.defaultTabs,
   initialTab,
@@ -85,7 +85,7 @@ export function MachineWorkbench<M extends VisualMachine & DotMachineBase & AnyM
   )
 }
 
-function MachineWorkbenchInner<M extends VisualMachine & DotMachineBase & AnyMachine>({
+function MachineWorkbenchInner<M extends DotMachineBase & AnyMachine>({
   config,
   enabledTabs,
   resolvedTheme,
@@ -125,7 +125,7 @@ function MachineWorkbenchInner<M extends VisualMachine & DotMachineBase & AnyMac
   const core = useWorkbenchCore<M>({
     scope: config.scope,
     enabledTabs,
-    tabs,
+    tabDefs: tabs,
     machine,
     recipesMap: config.recipesMap,
     machineType: config.scope,

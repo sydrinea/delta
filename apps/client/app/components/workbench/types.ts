@@ -1,5 +1,11 @@
 import type { TestCase } from '@delta/examples'
 import type { ReactNode } from 'react'
+import type { ExecutionError } from '@/lib/worker/protocol'
+
+/** Minimal constraint for machines used in workbench components. */
+export interface WorkbenchMachine {
+  name?: string
+}
 
 export interface Recipe {
   label: string
@@ -54,12 +60,6 @@ export interface ConfirmModalConfig {
   onCancel: () => void
 }
 
-export interface WorkbenchEditorError {
-  message: string
-  line: number
-  column: number
-}
-
 /**
  * Returned by a `tabGuard` to block a tab change and show a confirmation modal.
  * `onConfirm` is an optional side-effect called before the tab change proceeds
@@ -84,16 +84,32 @@ export interface WorkbenchCoreLogicBase {
   copied: boolean
 }
 
-export interface WorkbenchLogic<
-  M extends { name?: string },
-> extends WorkbenchCoreLogicBase {
+/** Fields needed by header/compile/share UI only. */
+export interface WorkbenchHeaderLogic<M extends WorkbenchMachine> {
   machine: M | null
-  editorErrors: WorkbenchEditorError[] | null
+  editorErrors: ExecutionError[] | null
   editorValue: string
   compile: (code: string) => void
+  handleShare: () => void
+  copied: boolean
+  recipeEntries: [string, { label: string }][]
+  selectedRecipeKey: string
+  applyRecipe: (key: string) => void
+  selectedRecipeLabel: string
+}
+
+/** Fields needed by test suite and simulation panels. */
+export interface WorkbenchTestLogic<M extends WorkbenchMachine> {
+  machine: M | null
   tests: TestCase[]
   setTests: (tests: TestCase[]) => void
   simulate: (machine: M, input: string) => boolean
+  selectedRecipeKey: string
+}
+
+export interface WorkbenchLogic<
+  M extends WorkbenchMachine,
+> extends WorkbenchCoreLogicBase, WorkbenchHeaderLogic<M>, WorkbenchTestLogic<M> {
   graphvizOnEdgeHover?: (edgeId: string | null) => void
   confirmModal: ConfirmModalConfig | null
 }

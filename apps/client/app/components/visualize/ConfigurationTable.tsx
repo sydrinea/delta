@@ -32,7 +32,6 @@ export function ConfigurationTable({
     = useScrollableTable()
 
   const configurations = useMemo(() => {
-    // Only show configurations up to the current step
     const currentTrace = trace.slice(0, step + 1)
 
     return currentTrace
@@ -48,7 +47,6 @@ export function ConfigurationTable({
   }, [trace, step, input])
 
   useEffect(() => {
-    // Scroll to the most recent step whenever it changes
     scrollRowToCenter(step.toString())
   }, [step, scrollRowToCenter])
 

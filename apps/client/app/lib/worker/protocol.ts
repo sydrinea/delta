@@ -26,7 +26,7 @@ export const WorkerErrorCodes = {
 export type WorkerErrorCode
   = (typeof WorkerErrorCodes)[keyof typeof WorkerErrorCodes]
 
-export interface ExecutionErrorPayload {
+export interface ExecutionError {
   message: string
   line: number
   column: number
@@ -42,7 +42,7 @@ export interface CompileSuccessData {
 }
 
 export interface CompileErrorDetail {
-  errors: ExecutionErrorPayload[]
+  errors: ExecutionError[]
 }
 
 export interface WorkerRequest {

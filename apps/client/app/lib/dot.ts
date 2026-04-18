@@ -94,7 +94,7 @@ function* pdaEdges(pda: PDA): Iterable<DotEdge> {
   }
 }
 
-function* tmEdges(tm: TuringMachine<any>): Iterable<DotEdge> {
+function* tmEdges(tm: TuringMachine<number>): Iterable<DotEdge> {
   for (const row of buildTMTransitionRows(tm))
     yield { from: row.fromState, to: row.toState, label: formatReadTuple(row.readSymbols), edgeId: row.edgeId }
 }
@@ -112,7 +112,7 @@ function buildEdgeLines(edges: Iterable<DotEdge>, sortLabels = false): string {
   return Array.from(edgeMap.values(), ({ from, to, edgeId, labels }) => {
     const ordered = sortLabels ? [...labels].sort() : labels
     const idAttr = edgeId ? `id="${edgeId}" ` : ''
-    return `  "${from}" -> "${to}" [${idAttr}label="${ordered.join('\\n')}"]`
+    return `  "${from}" -> "${to}" [${idAttr}label="${ordered.join(',')}"]`
   }).join('\n')
 }
 
@@ -124,7 +124,7 @@ export const pdaDotConfig: DotConfig<PDA> = {
   edges: pdaEdges,
 }
 
-export const tmDotConfig: DotConfig<TuringMachine<any>> = {
+export const tmDotConfig: DotConfig<TuringMachine<number>> = {
   edges: tmEdges,
   sortLabels: true,
   graphAttrs: [

@@ -28,6 +28,7 @@ import ReactFlow, {
   useStoreApi,
 } from 'reactflow'
 import { useCompiledMachine } from '@/hooks/useCompiledMachine'
+import { useSyncFromFlow } from '@/hooks/useSyncFromFlow'
 import { nfaDotConfig, toDot } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfaStore'
@@ -53,7 +54,7 @@ function AutomataEdge({
   const nodes = useNfaStore(s => s.nodes)
   const edges = useNfaStore(s => s.edges)
   const startId = useNfaStore(s => s.startId)
-  const syncFromFlow = useNfaStore(s => s.syncFromFlow)
+  const syncFromFlow = useSyncFromFlow()
 
   const { resolvedTheme } = useTheme()
 
@@ -185,7 +186,7 @@ export function FlowEditor() {
   const storeEdges = useNfaStore(s => s.edges)
   const startId = useNfaStore(s => s.startId)
   const patchNfa = useNfaStore(s => s.patch)
-  const syncFromFlow = useNfaStore(s => s.syncFromFlow)
+  const syncFromFlow = useSyncFromFlow()
 
   const [nodes, setNodes, onNodesChange] = useNodesState(storeNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(storeEdges)

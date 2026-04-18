@@ -2,6 +2,7 @@
 
 import type { MachineType } from '@/lib/worker/protocol'
 import { useEffect, useState } from 'react'
+import { getShareBaseUrl } from '@/lib/shareUrl'
 
 interface UseMachineShareOptions {
   machineType: MachineType
@@ -24,9 +25,7 @@ export function useMachineShare({
     const params = new URLSearchParams(window.location.search)
     const machineId = params.get('m')
 
-    const SHARE_URL = window.location.hostname.includes('comptheory.tools')
-      ? 'https://share.comptheory.tools'
-      : 'https://share.delta.sydneyn.dev'
+    const SHARE_URL = getShareBaseUrl()
 
     if (machineId) {
       fetch(`${SHARE_URL}/machine/${machineId}`)
@@ -52,9 +51,7 @@ export function useMachineShare({
     if (!canShare)
       return
 
-    const SHARE_URL = window.location.hostname.includes('comptheory.tools')
-      ? 'https://share.comptheory.tools'
-      : 'https://share.delta.sydneyn.dev'
+    const SHARE_URL = getShareBaseUrl()
 
     try {
       const res = await fetch(`${SHARE_URL}/machine`, {

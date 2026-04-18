@@ -50,7 +50,7 @@ export function formatReadTuple(readSymbols: string[]): string {
 }
 
 export function buildTMTransitionRows(
-  tm: TuringMachine<any>,
+  tm: TuringMachine<number>,
 ): TMTransitionRow[] {
   const rows: Omit<TMTransitionRow, 'id' | 'edgeKey' | 'edgeId'>[] = []
 

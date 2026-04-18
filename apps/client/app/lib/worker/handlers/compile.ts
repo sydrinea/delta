@@ -1,4 +1,4 @@
-import type { CompileErrorDetail, CompileParams, CompileSuccessData, ExecutionErrorPayload } from '../protocol'
+import type { CompileErrorDetail, CompileParams, CompileSuccessData, ExecutionError } from '../protocol'
 import * as build from '@delta/build'
 import * as transform from '@delta/transform'
 import {
@@ -71,7 +71,7 @@ function parseLocation(stack: string | undefined, userUrl: string) {
 function toExecutionErrors(
   err: unknown,
   userUrl: string,
-): ExecutionErrorPayload[] {
+): ExecutionError[] {
   if (
     isBuildErrorShape(err)
     && err.name

@@ -1,11 +1,6 @@
-import type { NFA } from '@delta/build'
 import type { Edge, Node } from 'reactflow'
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { flowToCode } from '@/lib/flow/fromFlow'
-import { runCode } from '@/lib/runCode'
-import { MachineTypes } from '@/lib/worker/protocol'
-import { useAutomataStore } from './automataStore'
 import { createHybridStorage } from './shared'
 
 export interface NfaGraphState {
@@ -16,7 +11,7 @@ export interface NfaGraphState {
 
 interface NfaGraphStore extends NfaGraphState {
   patch: (update: Partial<NfaGraphState>) => void
-  syncFromFlow: (nodes: Node[], edges: Edge[], startId: string | null) => void
+  patchGraph: (nodes: Node[], edges: Edge[], startId: string | null) => void
 }
 
 export const useNfaStore = create<NfaGraphStore>()(
@@ -29,20 +24,8 @@ export const useNfaStore = create<NfaGraphStore>()(
       patch: update =>
         set(state => ({ ...state, ...update })),
 
-      syncFromFlow: (nodes, edges, startId) => {
-        const code = flowToCode(nodes, edges, startId)
-        set(state => ({ ...state, nodes, edges, startId }))
-
-        const { patch: patchAutomata } = useAutomataStore.getState()
-        patchAutomata('nfa', { editorValue: code })
-
-        runCode<NFA>(
-          code,
-          MachineTypes.NFA,
-          machine => patchAutomata('nfa', { machine }),
-          errors => patchAutomata('nfa', { editorErrors: errors }),
-        )
-      },
+      patchGraph: (nodes, edges, startId) =>
+        set(() => ({ nodes, edges, startId })),
     }),
     {
       name: 'delta-nfa-store',

@@ -108,7 +108,6 @@ export function Trace<M extends VisualMachine>() {
       onBlur={onBlur}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
-      // Added pb-24 so the user can scroll past the bottom content, ensuring the floating button doesn't cover anything
       className="flex flex-col gap-4 md:p-4 focus:outline-none min-w-0 w-full max-w-full relative pb-24 min-h-full"
     >
       {/* Input combobox */}

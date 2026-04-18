@@ -10,8 +10,7 @@ export const TAB_ORDER: TabId[] = ['code', 'canvas', 'debug']
 export const TRACE_WINDOW_SIZE = 81
 
 export function isTabEnabled(enabledTabs: EnabledTabs, tab: TabId): boolean {
-  // @ts-expect-error -- this is guaranteed to be valid
-  return enabledTabs[tab] !== false
+  return (enabledTabs as Record<string, boolean | undefined>)[tab] !== false
 }
 
 export function getInitialTab(enabledTabs: EnabledTabs): TabId {

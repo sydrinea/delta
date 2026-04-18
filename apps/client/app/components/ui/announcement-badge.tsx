@@ -1,6 +1,5 @@
 import type { VariantProps } from 'class-variance-authority'
 import { ExternalLink } from 'lucide-react'
-import * as React from 'react'
 
 import { cn } from '@/app/lib/utils'
 import { badgeVariants } from '@/components/ui/badge'
