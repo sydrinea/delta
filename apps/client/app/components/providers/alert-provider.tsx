@@ -26,7 +26,11 @@ interface AlertContextValue {
 
 const AlertContext = createContext<AlertContextValue | null>(null)
 
-export function AlertProvider({ children }: { children: React.ReactNode }) {
+interface AlertProviderProps {
+  children: React.ReactNode
+}
+
+export function AlertProvider({ children }: AlertProviderProps) {
   const [activeAlert, setActiveAlert] = useState<AlertPayload | null>(null)
   const [isOpen, setIsOpen] = useState(false)
   const clearTextTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(

@@ -28,13 +28,15 @@ export function useToast() {
   return ctx
 }
 
+interface ToastItemProps {
+  toast: Toast
+  onDone: (id: string) => void
+}
+
 function ToastItem({
   toast,
   onDone,
-}: {
-  toast: Toast
-  onDone: (id: string) => void
-}) {
+}: ToastItemProps) {
   const [exiting, setExiting] = useState(false)
   const doneRef = useRef(false)
 
@@ -77,7 +79,11 @@ function ToastItem({
   )
 }
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
+interface ToastProviderProps {
+  children: React.ReactNode
+}
+
+export function ToastProvider({ children }: ToastProviderProps) {
   const [queue, setQueue] = useState<Toast[]>([])
 
   const setToast = useCallback((message: string, duration = 3000) => {

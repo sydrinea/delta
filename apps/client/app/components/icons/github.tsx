@@ -1,6 +1,7 @@
+import type { IconProps } from './shared'
 import { siGithub } from 'simple-icons/icons'
 
-export function GitHub({ className }: { className?: string }) {
+export function GitHub({ className }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"

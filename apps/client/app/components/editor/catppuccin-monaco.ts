@@ -3,15 +3,17 @@ import type { editor } from 'monaco-editor'
 
 type TokenStyle = string | { fg?: string, bg?: string, fontStyle?: string }
 
+interface Theme {
+  rules: editor.ITokenThemeRule[]
+  colors: Record<string, string>
+}
+
 /**
  * Generates Monaco Editor rules and UI colors
  * @param colors A flavor palette from @catppuccin/palette (e.g., flavors.mocha.colors)
  * @returns An object containing the formatted rules array and the colors dictionary
  */
-export function getCatppuccinMonacoTheme(colors: CatppuccinColors): {
-  rules: editor.ITokenThemeRule[]
-  colors: Record<string, string>
-} {
+export function getCatppuccinMonacoTheme(colors: CatppuccinColors): Theme {
   const tokenMap: Record<string, TokenStyle> = {
     // Base
     '': { fg: colors.text.hex, bg: colors.base.hex },

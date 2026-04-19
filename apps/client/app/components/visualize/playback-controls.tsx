@@ -8,7 +8,11 @@ import { Button } from '../ui/button'
 import { ButtonGroup, ButtonGroupSeparator } from '../ui/button-group'
 import { WithTooltip } from '../ui/tooltip'
 
-export function PlaybackControls({ focused = true }: { focused?: boolean }) {
+interface PlaybackControlsProps {
+  focused?: boolean
+}
+
+export function PlaybackControls({ focused = true }: PlaybackControlsProps) {
   const step = useSimulatorStore(s => s.step)
   const trace = useSimulatorStore(s => s.trace)
   const setStep = useSimulatorStore(s => s.setStep)

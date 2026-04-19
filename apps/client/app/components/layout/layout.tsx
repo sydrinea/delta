@@ -5,7 +5,11 @@ import { Loader, OfflineReadyToast } from '../ui'
 import { TooltipProvider } from '../ui/tooltip'
 import Navbar from './navbar'
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+interface LayoutProps {
+  children: React.ReactNode
+}
+
+export default function Layout({ children }: LayoutProps) {
   return (
     <TooltipProvider delayDuration={50}>
       <ToastProvider>

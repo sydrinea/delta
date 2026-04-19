@@ -79,13 +79,15 @@ function toKeyLabel(token: string) {
   return trimmed
 }
 
+interface KbdProps {
+  keys: string[]
+  className?: string
+}
+
 function Kbd({
   keys,
   className,
-}: {
-  keys: string[]
-  className?: string
-}) {
+}: KbdProps) {
   const labels = keys.map(toKeyLabel).filter(Boolean)
 
   if (!labels.length)

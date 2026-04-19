@@ -1,27 +1,26 @@
 'use client'
 
+import type { TabId } from './types'
+import type { MachineType } from '@/lib/worker/protocol'
 import { useTheme } from 'next-themes'
 import { useEffect, useMemo, useState } from 'react'
-import type { MachineType } from '@/lib/worker/protocol'
-import { useCompiledMachine } from '@/hooks/use-compiled-machine'
-import { useEditorState } from '@/hooks/use-editor-state'
-import { useUrlSync } from '@/hooks/use-url-sync'
 import { useCompile } from '@/hooks/use-compile'
-import { useAutomataStore } from '@/store/automata-store'
+import { useCompiledMachine } from '@/hooks/use-compiled-machine'
+import { useUrlSync } from '@/hooks/use-url-sync'
 import { toDot } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
+import { useAutomataStore } from '@/store/automata-store'
+import { useSimulatorStore } from '@/store/simulator-store'
+import { useWorkbenchStore } from '@/store/workbench-store'
 import { DeltaEditor } from '../editor'
-import { Trace, GraphvizViewer } from '../visualize'
+import { ConfirmModal, TestSuite } from '../ui'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '../ui/resizable'
 import { Tabs, TabsList, TabsTrigger } from '../ui/tabs'
-import { TestSuite, ConfirmModal } from '../ui'
-import { WorkbenchHeader } from './workbench-header'
+import { GraphvizViewer, Trace } from '../visualize'
 import { MobileHeader } from './mobile-header'
 import { RecipeDropdown } from './recipe-dropdown'
-import { useWorkbenchStore } from '@/store/workbench-store'
-import { useSimulatorStore } from '@/store/simulator-store'
 import { WORKBENCH_CONFIGS } from './workbench-configs'
-import type { TabId } from './types'
+import { WorkbenchHeader } from './workbench-header'
 
 const TAB_LABELS: Partial<Record<TabId, string>> = {
   code: 'Code',
@@ -29,52 +28,53 @@ const TAB_LABELS: Partial<Record<TabId, string>> = {
   canvas: 'Canvas',
 }
 
-export function Workbench({ 
-  scope,
-  initialTab,
-  initialRecipe,
-  initialInput
-}: { 
+interface WorkbenchProps {
   scope: MachineType
   initialTab?: TabId
   initialRecipe?: string
   initialInput?: string
-}) {
+}
+
+export function Workbench({
+  scope,
+  initialTab,
+  initialRecipe,
+}: WorkbenchProps) {
   return (
     <WorkbenchLayout scope={scope} initialTab={initialTab} initialRecipe={initialRecipe} />
   )
 }
 
-
-
-function WorkbenchLayout({ 
-  scope,
-  initialTab,
-  initialRecipe
-}: { 
+interface WorkbenchLayoutProps {
   scope: MachineType
   initialTab?: TabId
   initialRecipe?: string
-}) {
+}
+
+function WorkbenchLayout({
+  scope,
+  initialTab,
+  initialRecipe,
+}: WorkbenchLayoutProps) {
   const config = WORKBENCH_CONFIGS[scope]
   const machine = useCompiledMachine(scope) as any
-  
-  
+
   const trace = useSimulatorStore(s => s.trace)
   const step = useSimulatorStore(s => s.step)
   const setHoveredEdgeId = useSimulatorStore(s => s.setHoveredEdgeId)
-  
+
   const { resolvedTheme } = useTheme()
   const theme = themeNames[resolvedTheme ?? 'light']
   const machineDot = useMemo(() => {
-    if (!machine) return null
+    if (!machine)
+      return null
     const current = trace[step]
     if (current) {
       return toDot(machine, config.dotConfig as any, theme, current.states)
     }
     return toDot(machine, config.dotConfig as any, theme)
   }, [machine, trace, step, config.dotConfig, theme])
-  
+
   const activeTab = useWorkbenchStore(s => s.activeTab)
   const setActiveTab = useWorkbenchStore(s => s.setActiveTab)
   const selectedRecipeKey = useWorkbenchStore(s => s.selectedRecipeKey)
@@ -83,12 +83,14 @@ function WorkbenchLayout({
   const setConfirmModal = useWorkbenchStore(s => s.setConfirmModal)
 
   useEffect(() => {
-    if (initialTab) setActiveTab(initialTab)
-    if (initialRecipe) setSelectedRecipeKey(initialRecipe)
+    if (initialTab)
+      setActiveTab(initialTab)
+    if (initialRecipe)
+      setSelectedRecipeKey(initialRecipe)
   }, [initialTab, initialRecipe, setActiveTab, setSelectedRecipeKey])
 
   const compile = useCompile(scope)
-  
+
   useEffect(() => {
     if (useAutomataStore.persist.hasHydrated()) {
       compile(useAutomataStore.getState().automata[scope].editorValue)
@@ -113,13 +115,13 @@ function WorkbenchLayout({
         Canvas is only available for NFA machines.
       </div>
     )
-    
+
     const tabs = [
       { id: 'code' as TabId, content: <DeltaEditor scope={scope} /> },
       { id: 'canvas' as TabId, content: config.canvasContent ?? defaultCanvasContent },
-      { id: 'debug' as TabId, content: <Trace scope={scope} /> }
+      { id: 'debug' as TabId, content: <Trace scope={scope} /> },
     ]
-    
+
     if (!config.hasCanvas) {
       return tabs.filter(t => t.id !== 'canvas')
     }
@@ -154,13 +156,14 @@ function WorkbenchLayout({
   const [mobileTab, setMobileTab] = useState<string>(() => {
     return activeTab === 'code' || activeTab === 'canvas' ? 'debug' : activeTab
   })
-  
+
   useEffect(() => {
     if (activeTab !== 'code' && activeTab !== 'canvas') {
+      // eslint-disable-next-line react/set-state-in-effect
       setMobileTab(activeTab)
     }
   }, [activeTab])
-  
+
   const handleMobileTabChange = (value: string) => {
     setMobileTab(value)
     if (value !== 'tests') {

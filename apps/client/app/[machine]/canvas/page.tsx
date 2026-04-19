@@ -1,8 +1,8 @@
+import type { MachineType } from '@/lib/worker/protocol'
 import { notFound } from 'next/navigation'
 import { Workbench } from '@/components/workbench'
-import type { MachineType } from '@/lib/worker/protocol'
 
-export default async function MachineCanvasPage({ params }: { params: Promise<{ machine: string }> }) {
+export default async function MachineCanvasPage({ params }: PageProps<'/[machine]/canvas'>) {
   const { machine } = await params
   if (machine !== 'nfa') {
     notFound()

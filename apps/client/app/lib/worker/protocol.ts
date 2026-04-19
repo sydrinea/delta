@@ -45,12 +45,6 @@ export interface CompileErrorDetail {
   errors: ExecutionError[]
 }
 
-export interface WorkerRequest {
-  id: string
-  method: WorkerMethod
-  params: CompileParams
-}
-
 export interface WorkerSuccessResponse<TData = unknown> {
   id: string
   status: 'success'
@@ -89,6 +83,8 @@ const WorkerRequestSchema = z.object({
     machineType: MachineTypeSchema,
   }),
 })
+
+export type WorkerRequest = z.infer<typeof WorkerRequestSchema>
 
 export function isWorkerRequest(value: unknown): value is WorkerRequest {
   return WorkerRequestSchema.safeParse(value).success

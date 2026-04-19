@@ -33,9 +33,7 @@ export async function generateStaticParams() {
 
 export default async function DocsPage({
   params,
-}: {
-  params: Promise<{ slug?: string[] }>
-}) {
+}: PageProps<'/guide/[[...slug]]'>) {
   const { slug } = await params
   const pageId = slug?.[0] ?? 'quick-start'
   const docsFilePath = `apps/client/public/docs/${pageId}.md`
