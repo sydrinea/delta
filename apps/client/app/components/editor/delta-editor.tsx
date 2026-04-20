@@ -1,3 +1,4 @@
+/* eslint-disable node/prefer-global/process */
 'use client'
 
 import type { BeforeMount, OnChange, OnMount } from '@monaco-editor/react'
@@ -6,13 +7,23 @@ import type { MachineType } from '@/lib/worker/protocol'
 import Editor, { useMonaco } from '@monaco-editor/react'
 import { AlertTriangle } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { useEffect, useRef, useState } from 'react'
+import { use, useEffect, useRef, useState } from 'react'
 import { Spinner } from '@/components/ui/feedback/spinner'
 import { useCompile } from '@/hooks/use-compile'
 import { useEditorState } from '@/hooks/use-editor-state'
 import { themeNames } from '@/lib/theme'
 import { MachineTypes } from '@/lib/worker/protocol'
 import defineThemes from './define-theme'
+
+function getBaseUrl() {
+  if (typeof window !== 'undefined')
+    return ''
+  if (process.env.VERCEL_URL)
+    return `https://${process.env.VERCEL_URL}`
+  return 'http://localhost:3000'
+}
+
+const deltaTypesPromise = fetch(`${getBaseUrl()}/api/delta-types`).then(r => r.text())
 
 interface DeltaEditorProps {
   scope?: MachineType
@@ -23,6 +34,7 @@ const EDITOR_PATH = Object.fromEntries(
 ) as Record<MachineType, string>
 
 export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
+  const deltaTypes = use(deltaTypesPromise)
   const editorRef = useRef<MonacoEditor.editor.IStandaloneCodeEditor | null>(
     null,
   )
@@ -56,15 +68,13 @@ export function DeltaEditor({ scope = 'nfa' }: DeltaEditorProps) {
     })
 
     monaco.typescript.typescriptDefaults.addExtraLib(
-      // eslint-disable-next-line node/prefer-global/process
-      process.env.DELTA_TYPES!,
+      deltaTypes,
       'ts:delta/lib.d.ts',
     )
 
     if (!monaco.editor.getModel(monaco.Uri.parse('ts:delta/lib.d.ts'))) {
       monaco.editor.createModel(
-        // eslint-disable-next-line node/prefer-global/process
-        process.env.DELTA_TYPES!,
+        deltaTypes,
         'typescript',
         monaco.Uri.parse('ts:delta/lib.d.ts'),
       )

@@ -3,7 +3,8 @@
 import type { TabId } from './types'
 import type { MachineType } from '@/lib/worker/protocol'
 import { useTheme } from 'next-themes'
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useMemo, useState } from 'react'
+import { Spinner } from '@/components/ui/feedback/spinner'
 import { useCompile } from '@/hooks/use-compile'
 import { useCompiledMachine } from '@/hooks/use-compiled-machine'
 import { useUrlSync } from '@/hooks/use-url-sync'
@@ -118,7 +119,7 @@ function WorkbenchLayout({
     )
 
     const tabs = [
-      { id: 'code' as TabId, content: <DeltaEditor scope={scope} /> },
+      { id: 'code' as TabId, content: <Suspense fallback={<div className="absolute inset-0 flex items-center justify-center"><Spinner className="size-6" /></div>}><DeltaEditor scope={scope} /></Suspense> },
       { id: 'canvas' as TabId, content: config.canvasContent ?? defaultCanvasContent },
       { id: 'debug' as TabId, content: <Trace scope={scope} /> },
     ]

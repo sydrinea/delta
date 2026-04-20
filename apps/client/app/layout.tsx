@@ -25,7 +25,6 @@ const lora = Lora({
 })
 
 export const metadata: Metadata = {
-  //  this is a Next.js pattern
   applicationName: 'Delta — theory of computation tools',
   title: 'Delta — theory of computation tools',
   description: 'Create, test, and visualize DFAs and NFAs, with more to come!',
