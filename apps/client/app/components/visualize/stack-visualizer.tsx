@@ -1,6 +1,7 @@
 'use client'
 
-import { LabelText, Surface } from '../ui'
+import { Surface } from '../ui'
+import { SurfaceHeader } from '../ui/surfaces/surface-header'
 
 interface StackVisualizerProps {
   stack: string[]
@@ -9,11 +10,7 @@ interface StackVisualizerProps {
 export function StackVisualizer({ stack }: StackVisualizerProps) {
   return (
     <Surface className="w-full min-w-0 max-w-full rounded-2xl flex flex-col">
-      <div className="px-3 py-2 border-b border-panel-border flex items-center justify-between gap-2">
-        <LabelText>
-          Stack
-        </LabelText>
-      </div>
+      <SurfaceHeader title="Stack" />
 
       <div className="px-4 py-3 flex flex-col gap-1.5">
         <div className="flex items-center gap-1 overflow-x-auto">

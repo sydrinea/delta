@@ -9,7 +9,7 @@ import {
 } from '@/lib/navigation-loader-config'
 import { version } from '../../../package.json'
 import deltaLogo from '../../../public/android-chrome-192x192.png'
-import { Badge } from '../ui/badge'
+import { Badge } from '../ui/data-display/badge'
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -17,7 +17,7 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from '../ui/navigation-menu'
+} from '../ui/navigation/navigation-menu'
 import {
   Sidebar,
   SidebarContent,
@@ -28,7 +28,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
   useSidebar,
-} from '../ui/sidebar'
+} from '../ui/navigation/sidebar'
 import { NAVBAR_GROUPS, NAVBAR_MOBILE_ITEMS } from './navbar-config'
 
 function NavbarContent() {

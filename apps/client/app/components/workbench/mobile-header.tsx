@@ -1,9 +1,10 @@
 'use client'
 
 import { Check, Share2 } from 'lucide-react'
-import { Button } from '../ui/button'
+import { Button } from '../ui/primitives/button'
 import { LabelText } from '../ui'
-import { WithTooltip } from '../ui/tooltip'
+import { StatusBadge } from '../ui/feedback/status-badge'
+import { WithTooltip } from '../ui/overlays/tooltip'
 import { RecipeDropdown } from './recipe-dropdown'
 import { useEditorState } from '@/hooks/use-editor-state'
 import { useCompile } from '@/hooks/use-compile'
@@ -57,13 +58,12 @@ export function MobileHeader({ scope }: MobileHeaderProps) {
       </div>
 
       <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
-        <span
-          className={`text-xs font-bold shrink-0 ${
-            editorErrors && editorErrors.length > 0 ? 'text-destructive' : 'text-success'
-          }`}
+        <StatusBadge
+          status={editorErrors && editorErrors.length > 0 ? 'destructive' : 'success'}
+          className="shrink-0"
         >
           {editorErrors && editorErrors.length > 0 ? '✗' : '✓'}
-        </span>
+        </StatusBadge>
 
         <WithTooltip shortcut={['cmd', 's']}>
           <Button

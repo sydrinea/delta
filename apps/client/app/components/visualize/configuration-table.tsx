@@ -11,8 +11,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '../ui/table'
-import { Surface, LabelText } from '../ui'
+} from '../ui/data-display/table'
+import { Surface } from '../ui'
+import { StatusBadge } from '../ui/feedback/status-badge'
+import { SurfaceHeader } from '../ui/surfaces/surface-header'
 import { useScrollableTable } from './hooks/use-scrollable-table'
 
 interface ExtraColumn {
@@ -62,20 +64,13 @@ export function ConfigurationTable({
 
   return (
     <Surface className="w-full min-w-0 max-w-full overflow-hidden rounded-2xl flex flex-col">
-      <div className="px-3 py-2 min-h-10.5 border-b border-panel-border flex items-center justify-between gap-2">
-        <LabelText>
-          Configurations
-        </LabelText>
+      <SurfaceHeader title="Configurations">
         {isLast && (
-          <span
-            className={`px-2 py-0.5 rounded text-xs font-bold ${
-              accepted ? 'text-success' : 'text-destructive'
-            }`}
-          >
+          <StatusBadge status={accepted ? 'success' : 'destructive'} className="px-2 py-0.5 rounded">
             {accepted ? '✓ accepted' : '✗ rejected'}
-          </span>
+          </StatusBadge>
         )}
-      </div>
+      </SurfaceHeader>
 
       <div
         ref={scrollContainerRef}

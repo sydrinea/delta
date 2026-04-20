@@ -2,7 +2,7 @@ import type { VariantProps } from 'class-variance-authority'
 import { ExternalLink } from 'lucide-react'
 
 import { cn } from '@/app/lib/utils'
-import { badgeVariants } from '@/components/ui/badge'
+import { badgeVariants } from '@/components/ui/data-display/badge'
 
 interface AnnouncementBadgeProps {
   label: string

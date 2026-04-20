@@ -1,3 +1,5 @@
+'use client'
+
 import { CaretDownIcon, CaretUpIcon } from '@phosphor-icons/react'
 import { Select as SelectPrimitive } from 'radix-ui'
 
@@ -7,7 +9,7 @@ import {
   navigationMenuSharedItemClasses,
   navigationMenuSharedPanelClasses,
   navigationMenuSharedTriggerClasses,
-} from './navigation-menu'
+} from '../navigation/navigation-menu'
 
 interface ControlledSelectProps extends Omit<React.ComponentProps<typeof SelectPrimitive.Root>, 'defaultValue'> {
   value: string

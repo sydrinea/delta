@@ -1,8 +1,10 @@
+'use client'
+
 import { XIcon } from '@phosphor-icons/react'
 import { Dialog as SheetPrimitive } from 'radix-ui'
 
 import * as React from 'react'
-import { Button } from '@/app/components/ui/button'
+import { Button } from '@/app/components/ui/primitives/button'
 import { cn } from '@/app/lib/utils'
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {

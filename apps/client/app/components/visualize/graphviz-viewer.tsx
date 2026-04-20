@@ -13,10 +13,10 @@ import {
 } from 'lucide-react'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Button } from '../ui/button'
-import { ButtonGroup } from '../ui/button-group'
+import { Button } from '../ui/primitives/button'
+import { ButtonGroup } from '../ui/primitives/button-group'
 import { Surface } from '../ui'
-import { WithTooltip } from '../ui/tooltip'
+import { WithTooltip } from '../ui/overlays/tooltip'
 import { flavors } from '@catppuccin/palette'
 
 export function toSvg(svg: SVGSVGElement): string {

@@ -8,7 +8,7 @@ import {
   TransitionChild,
 } from '@headlessui/react'
 import { Fragment } from 'react'
-import { Button } from './button'
+import { Button } from '../primitives/button'
 
 interface AlertProps {
   isOpen: boolean

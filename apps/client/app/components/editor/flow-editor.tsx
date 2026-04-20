@@ -32,8 +32,8 @@ import { useSyncFromFlow } from '@/hooks/use-sync-from-flow'
 import { nfaDotConfig, toDot } from '@/lib/dot'
 import { themeNames } from '@/lib/theme'
 import { useNfaStore } from '@/store/nfa-store'
-import { Button } from '../ui/button'
-import { Input } from '../ui/input'
+import { Button } from '../ui/primitives/button'
+import { Input } from '../ui/inputs/input'
 import { getFlowElementsFromDot } from './layout-nfa'
 
 function AutomataEdge({

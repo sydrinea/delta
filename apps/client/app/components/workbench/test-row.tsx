@@ -3,8 +3,8 @@
 import type { TestCase } from '@delta/examples'
 import type { TestResult } from '@/hooks/use-test-runner'
 import { Trash2 } from 'lucide-react'
-import { Badge } from './badge'
-import { Button } from './button'
+import { Badge } from '@/components/ui/data-display/badge'
+import { Button } from '@/components/ui/primitives/button'
 
 const ROW_HEIGHT = 42
 

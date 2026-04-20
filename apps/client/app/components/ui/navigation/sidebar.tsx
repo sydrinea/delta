@@ -9,21 +9,21 @@ import { cva } from 'class-variance-authority'
 import { Slot } from 'radix-ui'
 
 import * as React from 'react'
-import { Button } from '@/app/components/ui/button'
-import { Input } from '@/app/components/ui/input'
-import { Separator } from '@/app/components/ui/separator'
+import { Input } from '@/app/components/ui/inputs/input'
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/app/components/ui/sheet'
+} from '@/app/components/ui/overlays/sheet'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/app/components/ui/tooltip'
+} from '@/app/components/ui/overlays/tooltip'
+import { Button } from '@/app/components/ui/primitives/button'
+import { Separator } from '@/app/components/ui/primitives/separator'
 import { useIsMobile } from '@/app/hooks/use-mobile'
 import { cn } from '@/app/lib/utils'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { useToast } from '../providers'
+import { useToast } from '../../providers'
 
 export function OfflineReadyToast() {
   const { setToast } = useToast()

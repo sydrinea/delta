@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select'
+} from '../ui/inputs/select'
 import { ConfigurationTable } from './configuration-table'
 import { StackVisualizer } from './stack-visualizer'
 

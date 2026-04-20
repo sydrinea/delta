@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '../ui/select'
+} from '../ui/inputs/select'
 
 interface RecipeDropdownProps {
   scope: MachineType

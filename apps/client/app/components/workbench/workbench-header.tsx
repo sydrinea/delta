@@ -1,9 +1,10 @@
 'use client'
 
 import { Check, Share2 } from 'lucide-react'
-import { Button } from '../ui/button'
+import { Button } from '../ui/primitives/button'
 import { LabelText } from '../ui'
-import { WithTooltip } from '../ui/tooltip'
+import { StatusBadge } from '../ui/feedback/status-badge'
+import { WithTooltip } from '../ui/overlays/tooltip'
 import { RecipeDropdown } from './recipe-dropdown'
 import { useEditorState } from '@/hooks/use-editor-state'
 import { useCompile } from '@/hooks/use-compile'
@@ -51,13 +52,12 @@ export function WorkbenchHeader({ scope }: WorkbenchHeaderProps) {
             compile
           </Button>
         </WithTooltip>
-        <p
-          className={`font-bold text-xs px-3 py-1 rounded-lg ${editorErrors && editorErrors.length > 0 ? 'text-destructive' : 'text-success'} transition-colors whitespace-nowrap`}
+        <StatusBadge
+          status={editorErrors && editorErrors.length > 0 ? 'destructive' : 'success'}
+          className="px-3 py-1 rounded-lg transition-colors whitespace-nowrap"
         >
-          {editorErrors && editorErrors.length > 0
-            ? '✗ check errors'
-            : '✓ valid'}
-        </p>
+          {editorErrors && editorErrors.length > 0 ? '✗ check errors' : '✓ valid'}
+        </StatusBadge>
       </div>
 
       <div className="flex items-center justify-between w-full lg:w-auto gap-4">

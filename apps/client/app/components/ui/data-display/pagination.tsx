@@ -1,7 +1,9 @@
+'use client'
+
 import { CaretLeftIcon, CaretRightIcon, DotsThreeIcon } from '@phosphor-icons/react'
 import * as React from 'react'
 
-import { Button } from '@/app/components/ui/button'
+import { Button } from '@/app/components/ui/primitives/button'
 import { cn } from '@/app/lib/utils'
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {

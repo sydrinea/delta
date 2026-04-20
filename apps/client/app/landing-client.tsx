@@ -1,26 +1,26 @@
 'use client'
 
-import type { WindowMockTab } from '@/components/ui/window-mock'
+import type { WindowMockTab } from '@/components/ui/surfaces/window-mock'
+import { endsInAb } from '@delta/examples'
 import { ArrowRight, ChevronDown } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 import { GitHub, ScrollFadeIn } from '@/components'
 import Footer from '@/components/layout/footer'
-import { AnnouncementBadge } from '@/components/ui/announcement-badge'
-import { Button } from '@/components/ui/button'
-import { FeatureCard } from '@/components/ui/feature-card'
-import { TestSuitePreview } from '@/components/ui/test-suite'
-import { WindowMock } from '@/components/ui/window-mock'
-import { Heading, Text, LabelText, Badge } from '@/components/ui'
+import { Badge, Heading, LabelText, Text } from '@/components/ui'
+import { AnnouncementBadge } from '@/components/ui/data-display/announcement-badge'
+import { FeatureCard } from '@/components/ui/data-display/feature-card'
+import { Button } from '@/components/ui/primitives/button'
+import { WindowMock } from '@/components/ui/surfaces/window-mock'
 import { Trace } from '@/components/visualize'
-import { useSimulatorStore } from '@/store/simulator-store'
-import { useAutomataStore } from '@/store/automata-store'
-import { endsInAb } from '@delta/examples'
+import { TestSuitePreview } from '@/components/workbench/test-suite'
 import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
 } from '@/lib/navigation-loader-config'
-import { useEffect } from 'react'
+import { useAutomataStore } from '@/store/automata-store'
+import { useSimulatorStore } from '@/store/simulator-store'
 
 interface LandingClientProps {
   children?: React.ReactNode
@@ -99,13 +99,15 @@ export default function LandingClient({ children }: LandingClientProps) {
   useEffect(() => {
     useSimulatorStore.getState().setInput('aabab')
     useAutomataStore.getState().patch('nfa', { machine: endsInAb })
-    
+
     const interval = setInterval(() => {
       const { step, trace, setStep } = useSimulatorStore.getState()
-      if (!trace || trace.length === 0) return
+      if (!trace || trace.length === 0)
+        return
       if (step >= trace.length - 1) {
         setStep(0)
-      } else {
+      }
+      else {
         setStep(step + 1)
       }
     }, 500)

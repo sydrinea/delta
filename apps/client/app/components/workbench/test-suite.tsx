@@ -8,16 +8,14 @@ import { cn } from '@/app/lib/utils'
 import { testImportExport } from '@/hooks/test-import-export'
 import { useCompiledMachine } from '@/hooks/use-compiled-machine'
 import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
-
 import { useTestRunner } from '@/hooks/use-test-runner'
 import { useTestSuite } from '@/hooks/use-test-suite'
 import { useWorkbenchStore } from '@/store/workbench-store'
 import { useAlert } from '../providers'
-import { WORKBENCH_CONFIGS } from '../workbench/workbench-configs'
-import { Badge } from './badge'
-import { Button, buttonVariants } from './button'
-import { Input } from './input'
-import { LabelText } from './label-text'
+import { Badge } from '@/components/ui/data-display/badge'
+import { Button, buttonVariants } from '@/components/ui/primitives/button'
+import { Input } from '@/components/ui/inputs/input'
+import { LabelText } from '@/components/ui/typography/label-text'
 import {
   Pagination,
   PaginationContent,
@@ -26,9 +24,11 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from './pagination'
+} from '@/components/ui/data-display/pagination'
+import { StatusBadge } from '@/components/ui/feedback/status-badge'
+import { WithTooltip } from '@/components/ui/overlays/tooltip'
 import { ROW_HEIGHT, TestRow } from './test-row'
-import { WithTooltip } from './tooltip'
+import { WORKBENCH_CONFIGS } from './workbench-configs'
 
 const TESTS_PER_PAGE = 6
 const ROW_GAP = 6
@@ -78,7 +78,7 @@ export function TestSuite({
             Test Suite
           </LabelText>
           {hasResults && (
-            <span className={`text-xs font-bold ${allPassed ? 'text-success' : 'text-destructive'}`}>
+            <StatusBadge status={allPassed ? 'success' : 'destructive'}>
               (
               {passCount}
               {' '}
@@ -86,7 +86,7 @@ export function TestSuite({
               {' '}
               {tests.length}
               )
-            </span>
+            </StatusBadge>
           )}
         </div>
 
@@ -183,7 +183,7 @@ export function TestSuitePreview({ rows, className }: TestSuitePreviewProps) {
     <div className={cn('flex flex-col gap-3', className)}>
       <div className="flex items-center gap-2">
         <LabelText>test suite</LabelText>
-        <span className={`text-xs font-bold ${passCount === rows.length ? 'text-success' : 'text-destructive'}`}>
+        <StatusBadge status={passCount === rows.length ? 'success' : 'destructive'}>
           (
           {passCount}
           {' '}
@@ -191,7 +191,7 @@ export function TestSuitePreview({ rows, className }: TestSuitePreviewProps) {
           {' '}
           {rows.length}
           )
-        </span>
+        </StatusBadge>
       </div>
 
       <div className="flex flex-col gap-1.5">

@@ -1,12 +1,15 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { Check, Copy } from 'lucide-react'
 import { isValidElement, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { Button } from './button'
-import { ButtonGroup } from './button-group'
+import { Button } from '../primitives/button'
+import { ButtonGroup } from '../primitives/button-group'
 
-type CodeProps = React.ComponentPropsWithoutRef<'pre'>
+type CodeProps = React.ComponentPropsWithoutRef<'pre'> & {
+  variant?: 'default' | 'guide'
+}
 const TRAILING_NEWLINES_RE = /\n+$/
 
 function getNodeText(node: React.ReactNode): string {
@@ -29,7 +32,7 @@ function getNodeText(node: React.ReactNode): string {
   return ''
 }
 
-export function Code({ children, className, ...props }: CodeProps) {
+export function Code({ children, className, variant = 'default', ...props }: CodeProps): ReactNode {
   const [copied, setCopied] = useState(false)
   const timeoutRef = useRef<number | null>(null)
   const preRef = useRef<HTMLPreElement | null>(null)
@@ -70,8 +73,10 @@ export function Code({ children, className, ...props }: CodeProps) {
     }
   }, [])
 
+  const isGuide = variant === 'guide'
+
   return (
-    <div className="relative p-4">
+    <div className={cn('relative', isGuide ? 'my-6' : 'p-4')}>
       <ButtonGroup
         className={cn(
           'absolute right-2 z-raised',
@@ -91,7 +96,8 @@ export function Code({ children, className, ...props }: CodeProps) {
       <pre
         ref={preRef}
         className={cn(
-          'rounded-lg bg-panel pr-12 overflow-x-auto tracking-wide',
+          'rounded-lg bg-panel pr-12',
+          isGuide ? 'border border-panel-border' : 'overflow-x-auto tracking-wide',
           className,
           isSingleLine && 'py-2',
         )}
@@ -101,4 +107,8 @@ export function Code({ children, className, ...props }: CodeProps) {
       </pre>
     </div>
   )
+}
+
+export function GuideCode(props: Omit<CodeProps, 'variant'>): ReactNode {
+  return <Code variant="guide" {...props} />
 }

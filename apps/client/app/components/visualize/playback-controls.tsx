@@ -4,9 +4,9 @@ import { ArrowLeft, ArrowRight, FastForward, Pause, Play, RotateCcw } from 'luci
 import { useEffect } from 'react'
 import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
 import { useSimulatorStore } from '@/store/simulator-store'
-import { Button } from '../ui/button'
-import { ButtonGroup, ButtonGroupSeparator } from '../ui/button-group'
-import { WithTooltip } from '../ui/tooltip'
+import { Button } from '../ui/primitives/button'
+import { ButtonGroup, ButtonGroupSeparator } from '../ui/primitives/button-group'
+import { WithTooltip } from '../ui/overlays/tooltip'
 
 interface PlaybackControlsProps {
   focused?: boolean

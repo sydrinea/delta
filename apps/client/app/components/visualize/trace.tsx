@@ -15,7 +15,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '../ui/combobox'
+} from '../ui/inputs/combobox'
 import { WORKBENCH_CONFIGS } from '../workbench/workbench-configs'
 import { InputTape } from './input-tape'
 import { PlaybackControls } from './playback-controls'

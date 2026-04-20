@@ -2,7 +2,7 @@ import { Globe } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { GitHub } from '@/components'
-import { Button } from '@/components/ui/button'
+import { Button } from '@/components/ui/primitives/button'
 import deltaLogo from '../../../public/android-chrome-192x192.png'
 
 const footerLinks = [

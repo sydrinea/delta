@@ -7,7 +7,7 @@ import { notFound } from 'next/navigation'
 import {
   Guide,
 } from '@/components'
-import { GuideCode } from '@/components/ui/guide-code'
+import { GuideCode } from '@/components/ui/typography/code'
 import parseMarkdown from '@/lib/parse-markdown'
 import { NAV } from '../nav'
 

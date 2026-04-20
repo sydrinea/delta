@@ -4,12 +4,12 @@ import { Combobox as ComboboxPrimitive } from '@base-ui/react'
 import { CaretDownIcon, CheckIcon, XIcon } from '@phosphor-icons/react'
 
 import * as React from 'react'
-import { Button } from '@/app/components/ui/button'
+import { Button } from '@/app/components/ui/primitives/button'
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from '@/app/components/ui/input-group'
+} from '@/app/components/ui/inputs/input-group'
 import { cn } from '@/app/lib/utils'
 
 function Combobox<TValue = string, TMultiple extends boolean = false>({
