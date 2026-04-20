@@ -104,7 +104,7 @@ describe('toDot — NFA', () => {
     expect(dot).toMatch(/"q1" \[shape=doublecircle class="state default"/)
   })
 
-  it('merges parallel edges into one with comma-separated labels', () => {
+  it('merges parallel edges into one with newline-separated labels', () => {
     const nfa = makeNFA({
       transitions: new Map([
         ['q0', new Map([
@@ -114,7 +114,7 @@ describe('toDot — NFA', () => {
       ]),
     })
     const dot = toDot(nfa, nfaDotConfig, null)
-    expect(dot).toMatch(/"q0" -> "q1" \[label="[ab],[ab]"\]/)
+    expect(dot).toMatch(/"q0" -> "q1" \[label="[ab]\\n[ab]"\]/)
   })
 })
 
