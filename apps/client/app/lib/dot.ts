@@ -80,7 +80,7 @@ function buildEdgeLines(edges: Iterable<DotEdge>, sortLabels = false): string {
   return Array.from(edgeMap.values(), ({ from, to, edgeId, labels }) => {
     const ordered = sortLabels ? [...labels].sort() : labels
     const idAttr = edgeId ? `id="${edgeId}" ` : ''
-    return `  "${from}" -> "${to}" [${idAttr}label="${ordered.join(',')}"]`
+    return `  "${from}" -> "${to}" [${idAttr}label="${ordered.join('\\n')}"]`
   }).join('\n')
 }
 

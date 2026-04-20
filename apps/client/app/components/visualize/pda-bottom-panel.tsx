@@ -3,13 +3,6 @@
 import type { TraceStep } from '@/store/simulator-store'
 import { useEffect, useState } from 'react'
 import { useSimulatorStore } from '@/store/simulator-store'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/inputs/select'
 import { ConfigurationTable } from './configuration-table'
 import { StackVisualizer } from './stack-visualizer'
 
@@ -63,38 +56,6 @@ export function PDABottomPanel() {
       <ConfigurationTable
         extraColumns={[makeStackColumn(safeIndex)]}
       />
-      {configurations.length > 1 && (
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Configuration</span>
-          <Select
-            value={safeIndex.toString()}
-            onValueChange={v => setSelectedIndex(Number(v))}
-          >
-            <SelectTrigger size="sm" className="font-mono text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent position="popper">
-              {configurations.map((cfg, i) => {
-                const preview = cfg.stack.length === 0
-                  ? 'ε'
-                  : cfg.stack.slice(0, 3).join(' ') + (cfg.stack.length > 3 ? ' …' : '')
-                return (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <SelectItem key={i} value={i.toString()} className="font-mono text-xs">
-                    {cfg.state}
-                    {'  '}
-                    <span className="text-muted-foreground">
-                      [
-                      {preview}
-                      ]
-                    </span>
-                  </SelectItem>
-                )
-              })}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
     </div>
   )
 }

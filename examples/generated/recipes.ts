@@ -40,6 +40,11 @@ recipes.nfa.thompson = {
   path: '/examples/nfa/thompson.ts',
   tests: [{ id: 'thomp-empty', input: '', expected: true }, { id: 'thomp-only-ones', input: '1111', expected: true }, { id: 'thomp-three-zeros', input: '000', expected: true }, { id: 'thomp-mixed-three', input: '101101011', expected: true }, { id: 'thomp-six-zeros', input: '000000', expected: true }, { id: 'thomp-one-zero', input: '0', expected: false }, { id: 'thomp-mixed-one', input: '11011', expected: false }, { id: 'thomp-two-zeros', input: '00', expected: false }, { id: 'thomp-mixed-two', input: '10101', expected: false }, { id: 'thomp-four-zeros', input: '0000', expected: false }],
 }
+recipes.pda.anBn = {
+  label: 'Equal number of a\'s and b\'s (aⁿbⁿ)',
+  path: '/examples/pda/an-bn.ts',
+  tests: [{ id: 'empty', input: '', expected: true }, { id: 'ab', input: 'ab', expected: true }, { id: 'aabb', input: 'aabb', expected: true }, { id: 'aaabbb', input: 'aaabbb', expected: true }, { id: 'aaaabbbb', input: 'aaaabbbb', expected: true }, { id: 'a-only', input: 'a', expected: false }, { id: 'b-only', input: 'b', expected: false }, { id: 'aab', input: 'aab', expected: false }, { id: 'abb', input: 'abb', expected: false }, { id: 'ba', input: 'ba', expected: false }, { id: 'abab', input: 'abab', expected: false }, { id: 'aabbb', input: 'aabbb', expected: false }],
+}
 recipes.tm.binaryAddition = {
   label: 'Binary Addition',
   path: '/examples/tm/binary-addition.ts',

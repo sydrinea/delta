@@ -1,7 +1,7 @@
 'use client'
 
 import { ArrowLeft, ArrowRight, FastForward, Pause, Play, RotateCcw } from 'lucide-react'
-import { useEffect } from 'react'
+import { useRef } from 'react'
 import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
 import { useSimulatorStore } from '@/store/simulator-store'
 import { WithTooltip } from '../ui/overlays/tooltip'
@@ -21,43 +21,62 @@ export function PlaybackControls({ focused = true }: PlaybackControlsProps) {
   const speed = useSimulatorStore(s => s.speed)
   const setSpeed = useSimulatorStore(s => s.setSpeed)
 
-  const maxStep = Math.max(0, trace.length - 1)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const maxStepRef = useRef(0)
+  maxStepRef.current = Math.max(0, trace.length - 1)
+
+  const maxStep = maxStepRef.current
   const isLast = trace.length > 0 && step === maxStep
 
-  const stepBack = () => setStep(s => Math.max(0, s - 1))
-  const stepForward = () => setStep(s => Math.min(maxStep, s + 1))
-  const reset = () => {
-    setIsPlaying(false)
-    setStep(0)
-  }
-  const togglePlay = () => {
-    if (isLast && !isPlaying) {
-      setStep(0)
+  const clearTimer = () => {
+    if (timerRef.current !== null) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
     }
-    setIsPlaying(!isPlaying)
   }
-  const toggleSpeed = () => setSpeed(speed === 500 ? 200 : speed === 200 ? 50 : 500)
 
-  useEffect(() => {
-    if (!isPlaying)
-      return
-    if (isLast) {
-      setIsPlaying(false)
-      return
-    }
-
-    const timer = setInterval(() => {
+  const startTimer = (intervalMs: number) => {
+    clearTimer()
+    timerRef.current = setInterval(() => {
       setStep((s) => {
-        if (s >= maxStep) {
+        if (s >= maxStepRef.current) {
+          clearTimer()
           setIsPlaying(false)
           return s
         }
         return s + 1
       })
-    }, speed)
+    }, intervalMs)
+  }
 
-    return () => clearInterval(timer)
-  }, [isPlaying, isLast, speed, maxStep, setStep, setIsPlaying])
+  const stepBack = () => setStep(s => Math.max(0, s - 1))
+  const stepForward = () => setStep(s => Math.min(maxStep, s + 1))
+
+  const reset = () => {
+    clearTimer()
+    setIsPlaying(false)
+    setStep(0)
+  }
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      clearTimer()
+      setIsPlaying(false)
+    }
+    else {
+      if (isLast)
+        setStep(0)
+      setIsPlaying(true)
+      startTimer(speed)
+    }
+  }
+
+  const toggleSpeed = () => {
+    const next = speed === 500 ? 200 : speed === 200 ? 50 : 500
+    setSpeed(next)
+    if (isPlaying)
+      startTimer(next)
+  }
 
   useKeyboardShortcut([
     { key: 'ArrowRight', handler: () => {
