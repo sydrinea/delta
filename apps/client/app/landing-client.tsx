@@ -192,7 +192,7 @@ export default function LandingClient({ children }: LandingClientProps) {
                       value: 'debug',
                       label: 'debug',
                       content: (
-                        <div className="relative w-full h-[350px] overflow-hidden bg-background rounded-b-lg">
+                        <div className="relative w-full h-87.5 overflow-hidden bg-background rounded-b-lg">
                           <div className="absolute inset-0 origin-top-left w-[125%] h-[125%] scale-80 pointer-events-none">
                             <div className="h-full w-full [&>div]:border-none! [&>div]:bg-transparent! [&>div]:shadow-none!">
                               <Trace scope="nfa" readonly={true} />
