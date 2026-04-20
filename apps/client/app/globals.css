@@ -187,43 +187,43 @@ html.mocha :is(pre, code)[data-theme*=' '] * {
     fill: transparent;
     stroke: transparent;
   }
-  
+
   .graph-machine .state.default ellipse,
   .graph-machine .state.default polygon {
     fill: var(--panel) !important;
     stroke: var(--foreground) !important;
   }
-  
+
   .graph-machine .state.default text {
     fill: var(--foreground) !important;
   }
-  
+
   .graph-machine .state.active ellipse,
   .graph-machine .state.active polygon {
     fill: var(--primary) !important;
     stroke: var(--primary) !important;
   }
-  
+
   .graph-machine .state.active text {
     fill: var(--background) !important;
   }
-  
+
   .graph-machine .start-point ellipse {
     fill: var(--foreground) !important;
     stroke: var(--foreground) !important;
   }
-  
+
   .graph-machine .transition path,
   .graph-machine .start-edge path {
     stroke: var(--foreground) !important;
   }
-  
+
   .graph-machine .transition polygon,
   .graph-machine .start-edge polygon {
     fill: var(--foreground) !important;
     stroke: var(--foreground) !important;
   }
-  
+
   .graph-machine .transition text {
     fill: var(--foreground) !important;
   }

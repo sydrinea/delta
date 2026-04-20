@@ -7,9 +7,9 @@ import {
 } from './client'
 import { WorkerErrorCodes, WorkerMethods } from './protocol'
 
-export type CompileResult =
-  | { ok: true, machine: unknown }
-  | { ok: false, errors: ExecutionError[] }
+export type CompileResult
+  = | { ok: true, machine: unknown }
+    | { ok: false, errors: ExecutionError[] }
 
 export async function compileCode(value: string, machineType: MachineType): Promise<CompileResult> {
   const worker = new Worker(new URL('./index.ts', import.meta.url), { type: 'module' })

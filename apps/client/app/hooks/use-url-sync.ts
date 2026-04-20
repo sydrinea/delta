@@ -1,8 +1,8 @@
 import type { TabId } from '@/components/workbench/types'
 import type { MachineType } from '@/lib/worker/protocol'
 import { useEffect, useRef } from 'react'
-import { useSimulatorStore } from '@/store/simulator-store'
 import { recipeKeyToSlug } from '@/lib/recipe-slug'
+import { useSimulatorStore } from '@/store/simulator-store'
 
 export function useUrlSync({
   machineType,

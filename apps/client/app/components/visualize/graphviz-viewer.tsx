@@ -1,5 +1,6 @@
 'use client'
 
+import { flavors } from '@catppuccin/palette'
 import { Transition, TransitionChild } from '@headlessui/react'
 import { instance } from '@viz-js/viz'
 import {
@@ -13,11 +14,10 @@ import {
 } from 'lucide-react'
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Button } from '../ui/primitives/button'
-import { ButtonGroup } from '../ui/primitives/button-group'
 import { Surface } from '../ui'
 import { WithTooltip } from '../ui/overlays/tooltip'
-import { flavors } from '@catppuccin/palette'
+import { Button } from '../ui/primitives/button'
+import { ButtonGroup } from '../ui/primitives/button-group'
 
 export function toSvg(svg: SVGSVGElement): string {
   return new XMLSerializer().serializeToString(svg)

@@ -1,6 +1,5 @@
 import type { TestCase } from '@delta/examples'
 import type { ReactNode } from 'react'
-import type { ExecutionError } from '@/lib/worker/protocol'
 
 /** Minimal constraint for machines used in workbench components. */
 export interface WorkbenchMachine {
@@ -69,4 +68,3 @@ export interface ConfirmModalConfig {
 export interface TabGuardResult extends Omit<ConfirmModalConfig, 'isOpen' | 'onConfirm' | 'onCancel'> {
   onConfirm?: () => void
 }
-

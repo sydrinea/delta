@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NAV } from '../../guide/nav'
 import { GitHub } from '../icons'
-import { Button } from '../ui/primitives/button'
 import {
   Sidebar,
   SidebarContent,
@@ -21,6 +20,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '../ui/navigation/sidebar'
+import { Button } from '../ui/primitives/button'
 
 interface ToCProps {
   headings: Heading[]

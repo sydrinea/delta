@@ -1,17 +1,17 @@
 'use client'
 
+import type { MachineType } from '@/lib/worker/protocol'
 import { Check, Share2 } from 'lucide-react'
-import { Button } from '../ui/primitives/button'
+import { useCompile } from '@/hooks/use-compile'
+import { useCompiledMachine } from '@/hooks/use-compiled-machine'
+import { useEditorState } from '@/hooks/use-editor-state'
+import { useMachineShare } from '@/hooks/use-machine-share'
+import { useAlert } from '../providers'
 import { LabelText } from '../ui'
 import { StatusBadge } from '../ui/feedback/status-badge'
 import { WithTooltip } from '../ui/overlays/tooltip'
+import { Button } from '../ui/primitives/button'
 import { RecipeDropdown } from './recipe-dropdown'
-import { useEditorState } from '@/hooks/use-editor-state'
-import { useCompile } from '@/hooks/use-compile'
-import { useCompiledMachine } from '@/hooks/use-compiled-machine'
-import { useMachineShare } from '@/hooks/use-machine-share'
-import { useAlert } from '../providers'
-import type { MachineType } from '@/lib/worker/protocol'
 
 interface WorkbenchHeaderProps {
   scope: MachineType

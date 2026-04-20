@@ -26,7 +26,7 @@ interface SimulatorState {
   speed: number
   hoveredEdgeId: string | null
   accepted: boolean
-  
+
   setInput: (input: string) => void
   setTrace: (trace: TraceStep[]) => void
   setStep: (step: number | ((prev: number) => number)) => void
@@ -37,7 +37,7 @@ interface SimulatorState {
   reset: () => void
 }
 
-export const useSimulatorStore = create<SimulatorState>((set) => ({
+export const useSimulatorStore = create<SimulatorState>(set => ({
   input: '',
   trace: [],
   step: 0,
@@ -46,15 +46,14 @@ export const useSimulatorStore = create<SimulatorState>((set) => ({
   hoveredEdgeId: null,
   accepted: false,
 
-  setInput: (input) => set({ input }),
-  setTrace: (trace) => set({ trace }),
-  setStep: (step) => set((state) => ({ 
-    step: typeof step === 'function' ? step(state.step) : step 
+  setInput: input => set({ input }),
+  setTrace: trace => set({ trace }),
+  setStep: step => set(state => ({
+    step: typeof step === 'function' ? step(state.step) : step,
   })),
-  setIsPlaying: (isPlaying) => set({ isPlaying }),
-  setSpeed: (speed) => set({ speed }),
-  setHoveredEdgeId: (id) => set({ hoveredEdgeId: id }),
-  setAccepted: (accepted) => set({ accepted }),
+  setIsPlaying: isPlaying => set({ isPlaying }),
+  setSpeed: speed => set({ speed }),
+  setHoveredEdgeId: id => set({ hoveredEdgeId: id }),
+  setAccepted: accepted => set({ accepted }),
   reset: () => set({ input: '', trace: [], step: 0, isPlaying: false, hoveredEdgeId: null, accepted: false }),
 }))
-

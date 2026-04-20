@@ -4,6 +4,7 @@ import type { ReactNode } from 'react'
 import type { TraceStep } from '@/store/simulator-store'
 import { useEffect, useMemo } from 'react'
 import { useSimulatorStore } from '@/store/simulator-store'
+import { Surface } from '../ui'
 import {
   Table,
   TableBody,
@@ -12,7 +13,6 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/data-display/table'
-import { Surface } from '../ui'
 import { StatusBadge } from '../ui/feedback/status-badge'
 import { SurfaceHeader } from '../ui/surfaces/surface-header'
 import { useScrollableTable } from './hooks/use-scrollable-table'
@@ -37,7 +37,6 @@ export function ConfigurationTable({
 
   const { scrollContainerRef, rowRef, scrollRowToCenter }
     = useScrollableTable()
-
 
   const configurations = useMemo(() => {
     const currentTrace = trace.slice(0, step + 1)

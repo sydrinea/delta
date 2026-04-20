@@ -32,7 +32,7 @@ function SingleStreamTape() {
 
             return (
               <span
-                key={i}
+                key={char}
                 className={`flex items-center justify-center w-8 h-8 font-mono text-lg rounded-sm shrink-0 ${className}`}
               >
                 {char || '\u00A0'}
@@ -80,7 +80,7 @@ function TMTapeRow({ tape, rowIndex }: TMTapeRowProps) {
 
             return (
               <span
-                key={i}
+                key={symbol}
                 className={`flex items-center justify-center w-8 h-8 font-mono text-lg rounded-sm shrink-0 ${className}`}
               >
                 {symbol || '\u00A0'}
@@ -111,7 +111,7 @@ export function InputTape({ scope }: InputTapeProps) {
     return (
       <div className="flex flex-col gap-1 text-lg tracking-widest w-full min-w-0 px-4 box-border">
         {tapes.map((tape, i) => (
-          <TMTapeRow key={i} tape={tape} rowIndex={i} isLast={isLast} />
+          <TMTapeRow key={tape.toString()} tape={tape} rowIndex={i} isLast={isLast} />
         ))}
       </div>
     )

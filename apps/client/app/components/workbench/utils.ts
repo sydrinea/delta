@@ -5,7 +5,6 @@ import type {
   VisibleTab,
 } from './types'
 
-
 export const TAB_ORDER: TabId[] = ['code', 'canvas', 'debug']
 export const TRACE_WINDOW_SIZE = 81
 
@@ -36,5 +35,3 @@ export function buildTabs({
           : debugContent,
   }))
 }
-
-

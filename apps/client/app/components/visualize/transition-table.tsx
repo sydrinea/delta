@@ -2,13 +2,14 @@
 
 import type { TuringMachine } from '@delta/build'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useSimulatorStore } from '@/store/simulator-store'
 import { useCompiledMachine } from '@/hooks/use-compiled-machine'
 import {
   activeTupleFromTapes,
   buildTMTransitionRows,
   formatReadTuple,
 } from '@/lib/tm-metadata'
+import { useSimulatorStore } from '@/store/simulator-store'
+import { Surface } from '../ui'
 import {
   Table,
   TableBody,
@@ -17,9 +18,8 @@ import {
   TableHeader,
   TableRow,
 } from '../ui/data-display/table'
-import { Tabs, TabsList, TabsTrigger } from '../ui/navigation/tabs'
-import { Surface } from '../ui'
 import { StatusBadge } from '../ui/feedback/status-badge'
+import { Tabs, TabsList, TabsTrigger } from '../ui/navigation/tabs'
 import { SurfaceHeader } from '../ui/surfaces/surface-header'
 import { useScrollableTable } from './hooks/use-scrollable-table'
 
@@ -29,7 +29,7 @@ export function TransitionTable() {
   const machine = useCompiledMachine('tm') as TuringMachine<number> | null
   const trace = useSimulatorStore(s => s.trace)
   const step = useSimulatorStore(s => s.step)
-  const current = trace[step] ?? { states: new Set<string>() }
+  const current = useMemo(() => trace[step] ?? { states: new Set<string>() }, [step, trace])
   const hoveredEdgeId = useSimulatorStore(s => s.hoveredEdgeId)
   const accepted = useSimulatorStore(s => s.accepted)
   const isLast = trace.length > 0 && step === trace.length - 1
@@ -40,7 +40,8 @@ export function TransitionTable() {
     = useScrollableTable()
 
   const transitionRows = useMemo(() => {
-    if (!machine) return []
+    if (!machine)
+      return []
     return buildTMTransitionRows(machine)
   }, [machine])
 

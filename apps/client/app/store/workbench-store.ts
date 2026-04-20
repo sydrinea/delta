@@ -1,5 +1,5 @@
+import type { ConfirmModalConfig, TabId } from '../components/workbench/types'
 import { create } from 'zustand'
-import type { TabId, ConfirmModalConfig } from '../components/workbench/types'
 
 interface WorkbenchState {
   activeTab: TabId
@@ -10,11 +10,11 @@ interface WorkbenchState {
   setConfirmModal: (modal: ConfirmModalConfig | null) => void
 }
 
-export const useWorkbenchStore = create<WorkbenchState>((set) => ({
+export const useWorkbenchStore = create<WorkbenchState>(set => ({
   activeTab: 'code',
   selectedRecipeKey: '',
   confirmModal: null,
-  setActiveTab: (tab) => set({ activeTab: tab }),
-  setSelectedRecipeKey: (key) => set({ selectedRecipeKey: key }),
-  setConfirmModal: (modal) => set({ confirmModal: modal }),
+  setActiveTab: tab => set({ activeTab: tab }),
+  setSelectedRecipeKey: key => set({ selectedRecipeKey: key }),
+  setConfirmModal: modal => set({ confirmModal: modal }),
 }))
