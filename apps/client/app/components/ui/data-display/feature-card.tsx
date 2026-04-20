@@ -11,12 +11,12 @@ export interface FeatureCardProps {
 
 const variantStyles: Record<FeatureCardVariant, { container: string, text: string }> = {
   sapphire: {
-    container: 'bg-primary/10 hover:bg-primary/20 border-primary/25 shadow-primary/10',
-    text: 'text-primary',
+    container: 'bg-ctp-sapphire/10 hover:bg-ctp-sapphire/20 border-ctp-sapphire/25 shadow-ctp-sapphire/10',
+    text: 'text-ctp-sapphire',
   },
   blue: {
-    container: 'bg-primary/10 hover:bg-primary/20 border-primary/25 shadow-primary/10',
-    text: 'text-primary',
+    container: 'bg-ctp-blue/10 hover:bg-ctp-blue/20 border-ctp-blue/25 shadow-ctp-blue/10',
+    text: 'text-ctp-blue',
   },
   green: {
     container: 'bg-success/10 hover:bg-success/20 border-success/25 shadow-success/10',
@@ -27,8 +27,8 @@ const variantStyles: Record<FeatureCardVariant, { container: string, text: strin
     text: 'text-destructive',
   },
   mauve: {
-    container: 'bg-primary/10 hover:bg-primary/20 border-primary/25 shadow-primary/10',
-    text: 'text-primary',
+    container: 'bg-ctp-mauve/10 hover:bg-ctp-mauve/20 border-ctp-mauve/25 shadow-ctp-mauve/10',
+    text: 'text-ctp-mauve',
   },
   peach: {
     container: 'bg-warning/10 hover:bg-warning/20 border-warning/25 shadow-warning/10',

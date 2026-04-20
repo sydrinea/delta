@@ -12,6 +12,7 @@ const headingVariants = cva(
         h2: 'text-4xl leading-tight tracking-tight mb-6',
         h3: 'text-[clamp(1.1rem,2.5vw,1.25rem)] mb-3',
         h4: 'text-xl md:text-2xl leading-snug',
+        label: 'text-lg font-bold font-sans lowercase tracking-normal',
       },
     },
     defaultVariants: {
@@ -27,7 +28,7 @@ export interface HeadingProps
 }
 
 export function Heading({ ref, className, variant, as, ...props }: HeadingProps & { ref?: React.RefObject<HTMLHeadingElement | null> }) {
-  const Comp = as || (variant ? (variant as 'h1' | 'h2' | 'h3' | 'h4') : 'h1')
+  const Comp = as || (variant && variant !== 'label' ? (variant as 'h1' | 'h2' | 'h3' | 'h4') : 'h2')
   return (
     <Comp
       ref={ref}

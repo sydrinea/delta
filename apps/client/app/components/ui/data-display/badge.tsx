@@ -22,6 +22,7 @@ const badgeVariants = cva(
         pink: 'border-pink-500/65 text-pink-500 bg-pink-500/10',
         teal: 'border-teal-500/65 text-teal-500 bg-teal-500/10',
         lavender: 'border-primary/65 text-primary bg-primary/10',
+        borderless: 'border-transparent',
       },
     },
     defaultVariants: {

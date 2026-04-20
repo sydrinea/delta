@@ -8,7 +8,7 @@ import { usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { GitHub, ScrollFadeIn } from '@/components'
 import Footer from '@/components/layout/footer'
-import { Badge, Heading, LabelText, Text } from '@/components/ui'
+import { Badge, Heading, SectionLabel, Text } from '@/components/ui'
 import { AnnouncementBadge } from '@/components/ui/data-display/announcement-badge'
 import { FeatureCard } from '@/components/ui/data-display/feature-card'
 import { Button } from '@/components/ui/primitives/button'
@@ -19,6 +19,7 @@ import {
   shouldAnimateLoader,
   shouldTriggerNavigationLoader,
 } from '@/lib/navigation-loader-config'
+import { cn } from '@/lib/utils'
 import { useAutomataStore } from '@/store/automata-store'
 import { useSimulatorStore } from '@/store/simulator-store'
 
@@ -62,27 +63,27 @@ const features = [
 const machines = [
   {
     tag: 'regular',
-    variant: 'pink' as const,
+    tagClass: 'text-ctp-pink bg-ctp-pink/10',
     name: 'NFA & DFA',
     description: 'Nondeterministic and deterministic finite automata. Build with the TypeScript API or a visual canvas editor.',
     href: '/nfa',
-    linkClass: 'text-pink-500 hover:text-pink-500/80',
+    linkClass: 'text-ctp-pink hover:text-ctp-pink/80',
   },
   {
     tag: 'context-free',
-    variant: 'lavender' as const,
+    tagClass: 'text-ctp-lavender bg-ctp-lavender/10',
     name: 'PDA',
     description: 'Pushdown automata with full stack visualization. Model context-free languages and watch each push and pop in real time.',
     href: '/pda',
-    linkClass: 'text-primary hover:text-primary/80',
+    linkClass: 'text-ctp-lavender hover:text-ctp-lavender/80',
   },
   {
     tag: 'recursively enumerable',
-    variant: 'teal' as const,
+    tagClass: 'text-ctp-teal bg-ctp-teal/10',
     name: 'Turing Machine',
     description: 'Single and multitape Turing machines. The transition table highlights the active rule at every step.',
     href: '/tm',
-    linkClass: 'text-teal-500 hover:text-teal-500/80',
+    linkClass: 'text-ctp-teal hover:text-ctp-teal/80',
   },
 ]
 
@@ -145,15 +146,15 @@ export default function LandingClient({ children }: LandingClientProps) {
         <div className={`${CONTAINER} flex-1 flex items-center py-16 sm:py-20`}>
           <div className="w-full pt-6 sm:pt-0 grid grid-cols-1 min-[860px]:grid-cols-2 gap-10 items-center animate-in fade-in slide-in-from-bottom-15 duration-1000">
             <div className="flex flex-col gap-6">
-              <Heading as="h1" variant="h1">
+              <Heading variant="h1" className="text-ctp-text">
                 design automata as
                 <br />
-                <span className="text-primary">software</span>
+                <span className="text-ctp-sky">software</span>
               </Heading>
 
-              <Text variant="lead">
+              <p className="font-sans text-sm md:text-md leading-relaxed text-ctp-subtext1 max-w-md">
                 Delta is a code-first environment for building and testing finite automata and Turing machines in TypeScript.
-              </Text>
+              </p>
 
               <div className="flex items-center gap-3 flex-wrap">
                 <Button asChild variant="accent" size="lg">
@@ -222,10 +223,10 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section id="features" className="py-20">
         <ScrollFadeIn className={CONTAINER}>
-          <LabelText className="mb-3 block text-primary">
+          <SectionLabel className="mb-3 text-ctp-sky">
             features
-          </LabelText>
-          <Heading as="h2" variant="h2">
+          </SectionLabel>
+          <Heading as="h2" variant="h2" className="text-ctp-text mb-12">
             Modeled after an IDE
           </Heading>
           <div className="grid grid-cols-1 sm:grid-cols-2 min-[900px]:grid-cols-3 gap-3">
@@ -241,10 +242,10 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section className="bg-panel border-y border-panel-border py-20">
         <ScrollFadeIn className={CONTAINER}>
-          <LabelText className="mb-3 block text-primary">
+          <SectionLabel className="mb-3 text-ctp-sky">
             machine types
-          </LabelText>
-          <Heading as="h2" variant="h2">
+          </SectionLabel>
+          <Heading as="h2" variant="h2" className="text-ctp-text mb-12">
             Chomsky's hierarchy
           </Heading>
           <div className="grid grid-cols-1 min-[700px]:grid-cols-3 gap-5">
@@ -253,7 +254,7 @@ export default function LandingClient({ children }: LandingClientProps) {
                 key={m.name}
                 className="border border-muted rounded-lg p-6 bg-background hover:border-panel-border transition-colors flex flex-col"
               >
-                <Badge variant={m.variant} className="mb-4">
+                <Badge variant="borderless" className={cn('mb-4', m.tagClass)}>
                   {m.tag}
                 </Badge>
                 <Heading as="h3" variant="h3">{m.name}</Heading>
@@ -277,10 +278,10 @@ export default function LandingClient({ children }: LandingClientProps) {
       <section className="py-20">
         <ScrollFadeIn className={`${CONTAINER} grid grid-cols-1 min-[860px]:grid-cols-2 gap-12 items-center`}>
           <div>
-            <LabelText className="mb-3 block text-primary">
+            <SectionLabel className="mb-3 text-ctp-sky">
               correctness
-            </LabelText>
-            <Heading as="h2" variant="h2">
+            </SectionLabel>
+            <Heading as="h2" variant="h2" className="text-ctp-text mb-6">
               Test your machines
             </Heading>
             <ul className="space-y-4 text-sm text-muted-foreground font-sans leading-relaxed">
@@ -311,10 +312,10 @@ export default function LandingClient({ children }: LandingClientProps) {
 
       <section className="bg-primary/15 border-y border-primary/25 py-20 text-center">
         <ScrollFadeIn className={CONTAINER}>
-          <Heading as="h2" variant="h3">
+          <Heading as="h2" variant="h2" className="text-ctp-text mb-3">
             Ready to dive in?
           </Heading>
-          <Text variant="code" className="mb-5 text-muted-foreground">Write your first automaton in minutes.</Text>
+          <p className="text-sm text-ctp-subtext0 font-mono mb-5">Write your first automaton in minutes.</p>
           <Button asChild variant="accent" size="lg">
             <Link href="/nfa" onClick={() => handleNavigationStart('/nfa')}>
               Launch Delta
