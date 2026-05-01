@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, FastForward, Pause, Play, RotateCcw } from 'luci
 import { useRef } from 'react'
 import { useKeyboardShortcut } from '@/hooks/use-keyboard-shortcut'
 import { useSimulatorStore } from '@/store/simulator-store'
+import { useWorkbenchStore } from '@/store/workbench-store'
 import { WithTooltip } from '../ui/overlays/tooltip'
 import { Button } from '../ui/primitives/button'
 import { ButtonGroup, ButtonGroupSeparator } from '../ui/primitives/button-group'
@@ -99,7 +100,7 @@ export function PlaybackControls({ focused = true }: PlaybackControlsProps) {
       if (focused)
         toggleSpeed()
     } },
-  ])
+  ], useWorkbenchStore(s => s.activeTab) === 'debug')
 
   return (
     <div className="sticky bottom-6 mt-auto flex flex-col items-center gap-3 z-50">

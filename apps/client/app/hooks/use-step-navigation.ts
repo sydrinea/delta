@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useWorkbenchStore } from '@/store/workbench-store'
 import { useKeyboardShortcut } from './use-keyboard-shortcut'
 
 interface UseStepNavigationOptions {
@@ -48,7 +49,7 @@ export function useStepNavigation({
       preventDefault: true,
       handler: goPrev,
     },
-  ])
+  ], useWorkbenchStore(s => s.activeTab) === 'debug')
 
   const onTouchStart = (e: React.TouchEvent) => {
     if (!enableSwipe)

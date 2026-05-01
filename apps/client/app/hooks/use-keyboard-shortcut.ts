@@ -10,9 +10,21 @@ interface Shortcut {
   handler: () => void
 }
 
-export function useKeyboardShortcut(shortcuts: Shortcut | Shortcut[]) {
+export function useKeyboardShortcut(shortcuts: Shortcut | Shortcut[], isActive: boolean = true) {
   const handle = useCallback(
     (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement
+
+      const isInput
+        = target.tagName === 'INPUT'
+          || target.tagName === 'TEXTAREA'
+          || target.tagName === 'SELECT'
+          || target.isContentEditable
+          || target.closest?.('[contenteditable="true"]')
+
+      if (isInput)
+        return
+
       const list = Array.isArray(shortcuts) ? shortcuts : [shortcuts]
       for (const shortcut of list) {
         const metaMatch = shortcut.meta
@@ -34,7 +46,9 @@ export function useKeyboardShortcut(shortcuts: Shortcut | Shortcut[]) {
   )
 
   useEffect(() => {
-    window.addEventListener('keydown', handle)
+    if (isActive) {
+      window.addEventListener('keydown', handle)
+    }
     return () => window.removeEventListener('keydown', handle)
-  }, [handle])
+  }, [isActive, handle])
 }
