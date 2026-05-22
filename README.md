@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://delta.sydneyn.dev/android-chrome-512x512.png" width="64" alt="Delta logo" />
+  <img src="apps/client/public/android-chrome-512x512.png" width="64" alt="Delta logo" />
   <h1>Delta</h1>
   <p>A code-first environment for building and testing finite automata and Turing machines in TypeScript</p>
 
